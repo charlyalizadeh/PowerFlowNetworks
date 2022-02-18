@@ -6,7 +6,7 @@ Code base to generate decompositions (chordal extensions) of power flow networks
 
 This module accepts the following data inputs for the networks:
 
-* [ ] [MATPOWER](https://matpower.org/) ([MATPOWER docuumentation])(https://matpower.org/docs/MATPOWER-manual.pdf)
+* [ ] [MATPOWER](https://matpower.org/) ([MATPOWER documentation](https://matpower.org/docs/MATPOWER-manual.pdf))
     * [ ] MATLAB M-files
     * [ ] MATLAB MAT-files
 * [ ] [RAW](https://www.powsybl.org/pages/documentation/grid/formats/psse.html)
