@@ -8,7 +8,9 @@ struct PowerFlowNetwork
 end
 
 include("core.jl")
+include("io/read_matpower.jl")
 
 export nbus, nbranch, ngen
+export read_matpower
 
 end
