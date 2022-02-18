@@ -26,7 +26,7 @@ function _read_matpower_mat(lines, start)
     return matrix
 end
 
-function get_matpower_data(path::AbstractString)
+function get_matpower_m_data(path::AbstractString)
     file_string = read(open(path, "r"), String)
     lines = split(file_string, '\n')
     bus, gen, branch, gencost = nothing, nothing, nothing, nothing
@@ -44,7 +44,6 @@ function get_matpower_data(path::AbstractString)
     return bus, gen, branch, gencost
 end
 
-function read_matpower(path::AbstractString)
-    bus, gen, branch, gencost = get_matpower_data(path)
-    return PowerFlowNetwork(bus, gen, branch, gencost)
+function get_matpower_mat_data(path::AbstractString)
+    error("Not Implemented")
 end
