@@ -30,18 +30,20 @@ function get_matpower_m_data(path::AbstractString)
     file_string = read(open(path, "r"), String)
     lines = split(file_string, '\n')
     bus, gen, branch, gencost = nothing, nothing, nothing, nothing
+    data = Dict()
+    occursin_pattern = ["mpc.bus", "mpc.gen ", "mpc.branch", "mpc.gencost"]
+    occursin_key = ["bus", "gen", "branch", "gencost"]
+    pattern_idx = 1
     for (i, f) in enumerate(lines)
-        if occursin("mpc.bus", f)
-            bus = _read_matpower_mat(lines, i + 1)
-        elseif occursin("mpc.gen ", f)
-            gen = _read_matpower_mat(lines, i + 1)
-        elseif occursin("mpc.branch", f)
-            branch = _read_matpower_mat(lines, i + 1)
-        elseif occursin("mpc.gencost", f)
-            gencost = _read_matpower_mat(lines, i + 1)
+        if occursin(occursin_pattern[pattern_idx], f)
+            data[occursin_key[pattern_idx]] = _read_matpower_mat(lines, i + 1)
+            pattern_idx += 1
+            if pattern_idx > length(occursin_pattern)
+                break
+            end
         end
     end
-    return bus, gen, branch, gencost
+    return data["bus"], data["gen"], data["branch"], data["gencost"]
 end
 
 function get_matpower_mat_data(path::AbstractString)
