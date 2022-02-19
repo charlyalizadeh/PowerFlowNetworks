@@ -26,7 +26,7 @@ function _parse_matpower_mat(lines, start)
     return matrix
 end
 
-function get_matpower_m_data(path::AbstractString)
+function get_data_matpower_m(path::AbstractString)
     file_string = read(open(path, "r"), String)
     lines = split(file_string, '\n')
     bus, gen, branch, gencost, baseMVA = nothing, nothing, nothing, nothing, nothing
