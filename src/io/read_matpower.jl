@@ -5,13 +5,13 @@ get_matpower_cols() = Dict(
     "gencost" => ["model", "startup", "shutdown", "ncost", "cost"]
 )
 
-function _matpower_row_to_array(row)
+function _row_to_array_matpower_mat(row)
     values = split(strip(row, [';', '\r']), '\t')[2:end]
     array = map(x -> parse(Float64, x), values) 
     return array
 end
 
-function _read_matpower_mat(lines, start)
+function _parse_matpower_mat(lines, start)
     nb_cols = length(split(lines[start], '\t')) - 1
     current_line = start
     matrix = nothing
@@ -48,6 +48,6 @@ function get_matpower_m_data(path::AbstractString)
     return data["bus"], data["gen"], data["branch"], data["gencost"], data["baseMVA"]
 end
 
-function get_matpower_mat_data(path::AbstractString)
+function get_data_matpower_mat(path::AbstractString)
     error("Not Implemented")
 end
