@@ -2,12 +2,15 @@ include("../src/PowerFlowNetworks.jl")
 
 using .PowerFlowNetworks
 using Test
+using Graphs: ne, nv, SimpleGraph, has_edge
+
 
 const testdir = dirname(@__FILE__)
 
 tests = [
+   "core",
    "io/read_matpower",
-   "core"
+   "graphs/graphs"
 ]
 
 @testset "PowerFlowNetwork" begin
