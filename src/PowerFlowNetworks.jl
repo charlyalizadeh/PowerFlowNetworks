@@ -7,6 +7,7 @@ struct PowerFlowNetwork
     gen::Matrix{Float64}
     branch::Matrix{Float64}
     gencost::Matrix{Float64}
+    baseMVA::Float64
 end
 
 include("core.jl")

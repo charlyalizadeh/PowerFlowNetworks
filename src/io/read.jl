@@ -11,6 +11,6 @@ const read_functions = Dict(
 )
 
 function read_network(path::AbstractString; format::AbstractString)
-    bus, gen, branch, gencost = read_functions[format](path)
-    return PowerFlowNetwork(bus, gen, branch, gencost)
+    bus, gen, branch, gencost, baseMVA = read_functions[format](path)
+    return PowerFlowNetwork(bus, gen, branch, gencost, baseMVA)
 end
