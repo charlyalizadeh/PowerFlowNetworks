@@ -11,15 +11,15 @@ function _row_to_array_matpower_mat(row)
     return array
 end
 
-function _parse_matpower_mat(lines, start)
+function _parse_matrix_matpower_mat(lines, start)
     nb_cols = length(split(lines[start], '\t')) - 1
     current_line = start
     matrix = nothing
     while !occursin("];", lines[current_line])
         if isnothing(matrix)
-            matrix = transpose(_matpower_row_to_array(lines[current_line]))
+            matrix = transpose(_row_to_array_matpower_mat(lines[current_line]))
         else
-            matrix = [matrix; transpose(_matpower_row_to_array(lines[current_line]))]
+            matrix = [matrix; transpose(_row_to_array_matpower_mat(lines[current_line]))]
         end
         current_line += 1
     end
@@ -38,7 +38,7 @@ function get_data_matpower_m(path::AbstractString)
         if occursin("mpc.baseMVA", f)
             data["baseMVA"] = parse(Float64, f[15:end - 2])
         elseif occursin(occursin_pattern[pattern_idx], f)
-            data[occursin_key[pattern_idx]] = _read_matpower_mat(lines, i + 1)
+            data[occursin_key[pattern_idx]] = _parse_matrix_matpower_mat(lines, i + 1)
             pattern_idx += 1
             if pattern_idx > length(occursin_pattern)
                 break
