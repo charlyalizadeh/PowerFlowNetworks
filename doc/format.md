@@ -199,7 +199,7 @@ Here's a small example: ([source](https://www.powsybl.org/pages/documentation/gr
 
 ## [GOCOMPETITION](https://gocompetition.energy.gov/)
 
-### RAW_GO
+### RAW-GO
 
 The RAW format of the Grid Optimization (GO) Competition is similar to the PSS®E RAW format but with more fields. A more in-depth description of this format 
 can be found [here](https://gocompetition.energy.gov/sites/default/files/Challenge2_Problem_Formulation_20210531.pdf)
@@ -303,3 +303,97 @@ INPUT DATA FILES ARE RAW JSON CON
 0 / END OF INDUCTION MACHINE DATA
 Q
 ```
+
+
+# Columns connection
+
+
+## ROW-GO
+
+* `mpc.bus`
+
+| **MATPOWER-M** | **DATA BLOCK** | **COLUMN** | **COLUMN_ID** |
+|----------------|----------------|------------|---------------|
+| BUS_I          | _Bus_          | I          | 1             |
+| BUS_TYPE       |                |            |               |
+| PD             | _Load_         | PL         | 5             |
+| QD             | _Load_         | QL         | 7             |
+| GS             | _FixedShunts_  | GL         | 4             |
+| BS             | _FixedShunts_  | BL         | 5             |
+| BUS_AREA       | _Bus_          | AREA       | 5             |
+| VM             | _Bus_          | VM         | 8             |
+| VA             | _Bus_          | VA         | 9             |
+| BASE_KV        | _Bus_          | BASEKV     | 3             |
+| ZONE           | _Bus_          | ZONE       | 6             |
+| VMAX           | _Bus_          | NVHI       | 10            |
+| VMIN           | _Bus_          | NVLO       | 11            |
+| LAM_P          |                |            |               |
+| LAM_Q          |                |            |               |
+| MU_VMAX        |                |            |               |
+| MU_VMIN        |                |            |               |
+
+* `mpc.gen`
+
+| **MATPOWER-M** | **DATA BLOCK** | **COLUMN** | **COLUMN_ID** |
+|----------------|----------------|------------|---------------|
+| GEN_BUS        | _Generator_    | I          | 1             |
+| PG             | _Generator_    | PG         | 3             |
+| QG             | _Generator_    | QG         | 4             |
+| QMAX           | _Generator_    | QT         | 5             |
+| QMIN           | _Generator_    | QB         | 6             |
+| VG             |                |            |               |
+| MBASE          | _Generator_    | MBASE      | 9             |
+| GEN_STATUS     | _Generator_    | STAT       | 10            |
+| PMAX           | _Generator_    | PT         | 12            |
+| PMIN           | _Generator_    | PB         | 13            |
+| PC1            |                |            |               |
+| PC2            |                |            |               |
+| QC1MIN         |                |            |               |
+| QC1MAX         |                |            |               |
+| QC2MIN         |                |            |               |
+| QC2MAX         |                |            |               |
+| RAMP_AGC       |                |            |               |
+| RAMP_10        |                |            |               |
+| RAMP_30        |                |            |               |
+| RAMP_Q         |                |            |               |
+| APF            |                |            |               |
+| MU_PMAX        |                |            |               |
+| MU_PMIN        |                |            |               |
+| MU_QMAX        |                |            |               |
+| MU_QMIN        |                |            |               |
+
+* `mpc.branch`
+
+| **MATPOWER-M** | **DATA BLOCK** | **COLUMN** | **COLUMN_ID** |
+|----------------|----------------|------------|---------------|
+| F_BUS          | _Branch_       | I          | 1             |
+| T_BUS          | _Branch_       | J          | 2             |
+| BR_R           | _Branch_       | R          | 4             |
+| BR_X           | _Branch_       | X          | 5             |
+| BR_B           | _Branch_       | B          | 6             |
+| RATE_A         | _Branch_       | RATEA      | 7             |
+| RATE_B         | _Branch_       | RATEB      | 8             |
+| RATE_C         | _Branch_       | RATEC      | 9             |
+| TAP            |                |            |               |
+| SHIFT          |                |            |               |
+| BR_STATUS      | _Branch_       | ST         | 14            |
+| ANGMIN         |                |            |               |
+| ANGMAX         |                |            |               |
+| PF             |                |            |               |
+| QF             |                |            |               |
+| PT             |                |            |               |
+| QT             |                |            |               |
+| MU_SF          |                |            |               |
+| MU_ST          |                |            |               |
+| MU_ANGMIN      |                |            |               |
+| MU_ANGMAX      |                |            |               |
+
+* `mpc.gencost`
+
+| **MATPOWER-M** | **DATA BLOCK** | **COLUMN** | **COLUMN_ID** |
+|----------------|----------------|------------|---------------|
+| MODEL          |                |            |               |
+| STARTUP        |                |            |               |
+| SHUTDOWN       |                |            |               |
+| NCOST          |                |            |               |
+| COST           |                |            |               |
