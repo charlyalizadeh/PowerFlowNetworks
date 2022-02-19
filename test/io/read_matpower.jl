@@ -1,6 +1,7 @@
 @testset "Read MATPOWER" begin
         path = "./test/data/case6ww.m"
         network = PowerFlowNetwork(path; format="MATPOWER-M")
+        @test network.baseMVA == 100
         @test network.bus == [
             1  3  0   0   0  0  1  1.05  0  230  1  1.05  1.05;
             2  2  0   0   0  0  1  1.05  0  230  1  1.05  1.05;
