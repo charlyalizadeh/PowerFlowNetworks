@@ -308,7 +308,7 @@ Q
 # Columns connection
 
 
-## ROW-GO
+## RAW-GO
 
 * `mpc.bus`
 
