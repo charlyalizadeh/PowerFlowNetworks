@@ -10,6 +10,7 @@ const testdir = dirname(@__FILE__)
 tests = [
    "core",
    "io/read_matpower",
+   "io/read_go",
    "graphs/graphs"
 ]
 
