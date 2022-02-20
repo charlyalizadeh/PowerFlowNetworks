@@ -316,7 +316,7 @@ Q
 |----------------|----------------|------------|---------------|
 | BUS_I          | _Bus_          | I          | 1             |
 | BUS_TYPE       |                |            |               |
-| PD             | _Load_         | PL         | 5             |
+| PD             | _Load_         | PL         | 6             |
 | QD             | _Load_         | QL         | 7             |
 | GS             | _FixedShunts_  | GL         | 4             |
 | BS             | _FixedShunts_  | BL         | 5             |
