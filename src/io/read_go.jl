@@ -13,6 +13,10 @@ function _parse_rawgo_mat(block; startat=1, eol='\n', delim=',')
 end
 
 function _parse_rawgo_bus(data)
+    if isnothing(data["BUS"])
+        return zeros(0, 17)
+    end
+
     nbus = size(data["BUS"], 1)
     bus = zeros(nbus, 17)
 
@@ -25,17 +29,26 @@ function _parse_rawgo_bus(data)
     bus[:, 12] = data["BUS"][:, 10]
     bus[:, 13] = data["BUS"][:, 11]
 
-    idx = trunc.(Int, data["LOAD"][:, 1])
-    bus[idx, 3] = data["LOAD"][:, 6]
-    bus[idx, 4] = data["LOAD"][:, 7]
+    if !isnothing(data["LOAD"])
+        idx = findall(x -> x in data["LOAD"][:, 1], bus[:, 1])
+        bus[idx, 3] = data["LOAD"][:, 6]
+        bus[idx, 4] = data["LOAD"][:, 7]
+    end
 
-    idx = trunc.(Int, data["FIXED SHUNT"][:, 1])
-    bus[idx, 5] = data["FIXED SHUNT"][:, 4]
-    bus[idx, 6] = data["FIXED SHUNT"][:, 5]
+    if !isnothing(data["FIXED SHUNT"])
+        idx = findall(x -> x in data["FIXED SHUNT"][:, 1], bus[:, 1])
+        bus[idx, 5] = data["FIXED SHUNT"][:, 4]
+        bus[idx, 6] = data["FIXED SHUNT"][:, 5]
+    end
+
     return bus
 end
 
 function _parse_rawgo_gen(data)
+    if isnothing(data["GENERATOR"])
+        return zeros(0, 25)
+    end
+
     ngen = size(data["GENERATOR"], 1)
     gen = zeros(ngen, 25)
 
@@ -53,6 +66,10 @@ function _parse_rawgo_gen(data)
 end
 
 function _parse_rawgo_branch(data)
+    if isnothing(data["BRANCH"])
+        return zeros(0, 21)
+    end
+
     nbranch = size(data["BRANCH"], 1)
     branch = zeros(nbranch, 21)
 
@@ -71,7 +88,32 @@ end
 
 function _parse_rawgo_gencost(data)
     # No information on the generators costs
-    return zeros(0, 0)
+    return zeros(0, 5)
+end
+
+function _clean_data_block_rawgo(block, col)
+    old_size = size(block, 1)
+    block = unique_rows(block, col=col)
+    nb_rm_rows = old_size - size(block, 1)
+    return block, nb_rm_rows
+end
+
+function _clean_data_rawgo(data)
+    # Remove multiple loads
+    data["LOAD"], nb_rm_rows = _clean_data_block_rawgo(data["LOAD"], 1)
+    (nb_rm_rows != 0) && @warn "Some buses have multiple loads, \
+                                the first load has been selected by default ($nb_rm_rows bus(es) concerned)"
+
+    data["GENERATOR"], nb_rm_rows = _clean_data_block_rawgo(data["GENERATOR"], 1)
+    (nb_rm_rows != 0) && @warn "Some generators have multiple configuration, \
+                                the first configuration has been selected by default ($nb_rm_rows generator(s) concerned)"
+
+    # Remove multiple branch between two nodes
+    data["BRANCH"], nb_rm_rows = _clean_data_block_rawgo(data["BRANCH"], [1, 2])
+    (nb_rm_rows != 0) && @warn "Some buses have multiple branch connecting them to the same buses, \
+                                the first branch has been selected by default ($nb_rm_rows branche(s) concerned)"
+
+    return data
 end
 
 function get_data_rawgo(path::AbstractString)
@@ -92,6 +134,7 @@ function get_data_rawgo(path::AbstractString)
         startat = i == 1 ? 4 : 2
         data[blocks_name[i]] = _parse_rawgo_mat(block; startat=startat)
     end
+    data = _clean_data_rawgo(data)
     bus = _parse_rawgo_bus(data)
     gen = _parse_rawgo_gen(data)
     branch = _parse_rawgo_branch(data)
