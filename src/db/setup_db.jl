@@ -86,7 +86,7 @@ function create_mergers_table(db)
         merge_criterion TEXT NOT NULL,
         merge_treshold TEXT NOT NULL,
 
-        PRIMARY KEY(in_id, out_id, merge_type, merge_criterion, merge_treshold),
+        PRIMARY KEY(in_id, merge_type, merge_criterion, merge_treshold),
         FOREIGN KEY(in_id) REFERENCES decompositions(id),
         FOREIGN KEY(out_id) REFERENCES decompositions(id)
     )
