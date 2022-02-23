@@ -1,7 +1,8 @@
 module PowerFlowNetworks
 
 using Graphs: SimpleGraph, add_edge!
-using SQLite
+using SQLite, DataFrames
+using Dates
 
 mutable struct PowerFlowNetwork
     bus::Matrix{Float64}
@@ -16,6 +17,7 @@ include("core.jl")
 include("io/read.jl")
 include("graphs/graphs.jl")
 include("db/setup_db.jl")
+include("db/inserts.jl")
 
 
 PowerFlowNetwork(path::AbstractString; format::AbstractString) = read_network(path; format=format)
@@ -26,5 +28,6 @@ export nbus, nbranch, ngen, is_disjoint, has_bus, has_branch, has_gen,
 export PowerFlowNetwork
 export Graph
 export setup_db
+export load_instance!
 
 end
