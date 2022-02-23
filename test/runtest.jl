@@ -3,22 +3,29 @@ include("../src/PowerFlowNetworks.jl")
 using .PowerFlowNetworks
 using Test
 using Graphs: ne, nv, SimpleGraph, has_edge
-using Tables, SQLite
+using SQLite, DataFrames
+using Dates
 
 
 const testdir = dirname(@__FILE__)
 
 tests = [
-   "core",
-   "io/read_matpower",
-   "io/read_go",
-   "graphs/graphs",
+   #"core",
+   #"io/read_matpower",
+   #"io/read_go",
+   #"graphs/graphs",
    "db/setup_db"
+   "db/inserts"
 ]
 
-@testset "PowerFlowNetwork" begin
-    for t in tests
-        tp = joinpath(testdir, "$(t).jl")
-        include(tp)
+
+try
+    @testset "PowerFlowNetwork" begin
+        for t in tests
+            tp = joinpath(testdir, "$(t).jl")
+            include(tp)
+        end
     end
+finally
+    rm("test/data/TEST_PowerFlowNetworks_SQLite.sqlite")
 end
