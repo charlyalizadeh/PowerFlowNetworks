@@ -1,6 +1,12 @@
 nbus(network::PowerFlowNetwork) = size(network.bus, 1)
 
-nbranch(network::PowerFlowNetwork) = size(network.branch, 1)
+function nbranch(network::PowerFlowNetwork; distinct_pair=false)
+    if distinct_pair
+        return size(unique(network.branch[:, 1:2], dims=1), 1)
+    else
+        return size(network.branch, 1)
+    end
+end
 
 ngen(network::PowerFlowNetwork) = size(network.gen, 1)
 
