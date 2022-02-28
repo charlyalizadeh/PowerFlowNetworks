@@ -10,11 +10,11 @@ using Dates
 const testdir = dirname(@__FILE__)
 
 tests = [
-   #"core",
-   #"io/read_matpower",
-   #"io/read_go",
-   #"graphs/graphs",
-   "db/setup_db"
+   "core",
+   "io/read_matpower",
+   "io/read_go",
+   "graphs/graphs",
+   "db/setup_db",
    "db/inserts"
 ]
 
@@ -27,5 +27,7 @@ try
         end
     end
 finally
-    rm("test/data/TEST_PowerFlowNetworks_SQLite.sqlite")
+    if any(x -> occursin("db", x), tests)
+        rm("test/data/TEST_PowerFlowNetworks_SQLite.sqlite")
+    end
 end

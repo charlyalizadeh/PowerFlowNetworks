@@ -16,5 +16,5 @@
     network = PowerFlowNetwork(path; format="RAW-GO")
     g = SimpleGraph(network)
     @test nv(g) == nbus(network)
-    @test ne(g) == nbranch(network)
+    @test ne(g) == nbranch(network; distinct_pair=true)
 end
