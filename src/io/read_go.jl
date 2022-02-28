@@ -1,6 +1,23 @@
+# Hard coded data about RAWGO format
+_get_rawgo_colnames() = Dict(
+    "BUS" => ["I", "NAME", "BASEKV", "IDE", "AREA", "ZONE", "OWNER", "VM", "VA", "NVHI", "NVLO", "EVHI", "EVLO"],
+    "LOAD" => ["I", "ID", "STATUS", "AREA", "ZONE", "PL", "QL", "IP", "IQ", "YP", "YQ", "OWNER", "SCALE", "INTRPT"],
+    "FIXED SHUNT" => ["I", "ID", "STATUS", "GL", "BL"],
+    "GENERATOR" => ["I", "ID", "PG", "QG", "QT", "QB", "VS", "IREG", "MBASE", "ZR", "ZX", "RT", "XT", "GTAP",
+                   "STAT", "RMPCT", "PT", "PB", "O1", "F1", "O2", "F2", "O3", "F3", "O4", "F4", "WMOD", "WPF"],
+    "BRANCH" => ["I", "J", "CKT", "R", "X", "B", "RATEA", "RATEB", "RATEC", "GI", "BI", "GJ", "BJ", "ST", "MET",
+                "LEN", "O1", "F1", "O2", "F2", "O3", "F3", "O4", "F4"]
+)
+
+_get_rawgo_apply_colnames() = Dict(
+    "LOAD" => ["PL", "QL"],
+    "GENERATOR" => ["PG", "QG", "QT", "QB", "PT", "PB"],
+)
+
+# Parse .raw file
 function _parse_rawgo_mat(block; startat=1, eol='\n', delim=',')
     lines = split(block, eol)[startat: end - 1]
-    matrix = nothing
+    matrix = zeros(0, 0)
     for (i, l) in enumerate(lines)
         if i == 1
             matrix = permutedims(map(x -> tryparse(Float64, x), split(l, delim)))
@@ -12,108 +29,89 @@ function _parse_rawgo_mat(block; startat=1, eol='\n', delim=',')
     return matrix
 end
 
-function _parse_rawgo_bus(data)
-    if isnothing(data["BUS"])
-        return zeros(0, 17)
-    end
 
-    nbus = size(data["BUS"], 1)
+# Convert raw matrix to dataframes
+function _data_rawgo_to_dfs(data)
+    colnames = _get_rawgo_colnames()
+    return Dict(k => DataFrame(data[k], colnames[k]) for k in keys(data))
+end
+function _clean_rawgo_df(df; index_cols, apply_cols, func)
+    gds = groupby(df, index_cols)
+    return combine(gds, apply_cols .=> func; renamecols=false)
+end
+function _clean_rawgo_dfs(dfs)
+    apply_colnames = _get_rawgo_apply_colnames()
+    dfs["LOAD"] = _clean_rawgo_df(dfs["LOAD"]; index_cols=["I"], apply_cols=apply_colnames["LOAD"], func=sum)
+    dfs["GENERATOR"] = _clean_rawgo_df(dfs["GENERATOR"]; index_cols=["I"], apply_cols=apply_colnames["GENERATOR"], func=sum)
+end
+
+# Extract the PowerFlowNetwork fields
+function _extract_bus(dfs)
+    nbus = size(dfs["BUS"], 1)
     bus = zeros(nbus, 17)
 
-    bus[:, 1] = data["BUS"][:, 1]
-    bus[:, 7] = data["BUS"][:, 5]
-    bus[:, 8] = data["BUS"][:, 8]
-    bus[:, 9] = data["BUS"][:, 9]
-    bus[:, 10] = data["BUS"][:, 3]
-    bus[:, 11] = data["BUS"][:, 6]
-    bus[:, 12] = data["BUS"][:, 10]
-    bus[:, 13] = data["BUS"][:, 11]
+    bus[:, 1] = dfs["BUS"][!, :I]
+    bus[:, 7] = dfs["BUS"][!, :AREA]
+    bus[:, 8] = dfs["BUS"][!, :VM]
+    bus[:, 9] = dfs["BUS"][!, :VA]
+    bus[:, 10] = dfs["BUS"][!, :BASEKV]
+    bus[:, 11] = dfs["BUS"][!, :ZONE]
+    bus[:, 12] = dfs["BUS"][!, :NVHI]
+    bus[:, 13] = dfs["BUS"][!, :NVLO]
 
-    if !isnothing(data["LOAD"])
-        idx = findall(x -> x in data["LOAD"][:, 1], bus[:, 1])
-        bus[idx, 3] = data["LOAD"][:, 6]
-        bus[idx, 4] = data["LOAD"][:, 7]
+    if nrow(dfs["LOAD"]) != 0
+        idx = findall(x -> x in dfs["LOAD"][!, :I], bus[:, 1])
+        bus[idx, 3] = dfs["LOAD"][:, :PL]
+        bus[idx, 4] = dfs["LOAD"][:, :QL]
     end
 
-    if !isnothing(data["FIXED SHUNT"])
-        idx = findall(x -> x in data["FIXED SHUNT"][:, 1], bus[:, 1])
-        bus[idx, 5] = data["FIXED SHUNT"][:, 4]
-        bus[idx, 6] = data["FIXED SHUNT"][:, 5]
+    if nrow(dfs["FIXED SHUNT"]) != 0
+        idx = findall(x -> x in dfs["FIXED SHUNT"][:, :I], bus[:, 1])
+        bus[idx, 5] = dfs["FIXED SHUNT"][:, :GL]
+        bus[idx, 6] = dfs["FIXED SHUNT"][:, :BL]
     end
 
     return bus
 end
-
-function _parse_rawgo_gen(data)
-    if isnothing(data["GENERATOR"])
+function _extract_gen(dfs)
+    ngen =  nrow(dfs["GENERATOR"])
+    if ngen == 0
         return zeros(0, 25)
     end
 
-    ngen = size(data["GENERATOR"], 1)
     gen = zeros(ngen, 25)
 
-    gen[:, 1] = data["GENERATOR"][:, 1]
-    gen[:, 2] = data["GENERATOR"][:, 3]
-    gen[:, 3] = data["GENERATOR"][:, 4]
-    gen[:, 4] = data["GENERATOR"][:, 5]
-    gen[:, 5] = data["GENERATOR"][:, 6]
-    gen[:, 7] = data["GENERATOR"][:, 9]
-    gen[:, 8] = data["GENERATOR"][:, 10]
-    gen[:, 9] = data["GENERATOR"][:, 12]
-    gen[:, 10] = data["GENERATOR"][:, 13]
+    gen[:, 1] = dfs["GENERATOR"][!, :I]
+    gen[:, 2] = dfs["GENERATOR"][!, :PG]
+    gen[:, 3] = dfs["GENERATOR"][!, :QG]
+    gen[:, 4] = dfs["GENERATOR"][!, :QT]
+    gen[:, 5] = dfs["GENERATOR"][!, :QB]
+    #gen[:, 7] = dfs["GENERATOR"][!, :MBASE]
+    #gen[:, 8] = dfs["GENERATOR"][!, :STAT]
+    gen[:, 9] = dfs["GENERATOR"][!, :PT]
+    gen[:, 10] = dfs["GENERATOR"][!, :PB]
 
     return gen
 end
-
-function _parse_rawgo_branch(data)
-    if isnothing(data["BRANCH"])
+function _extract_branch(dfs)
+    nbranch = nrow(dfs["BRANCH"])
+    if nbranch == 0
         return zeros(0, 21)
     end
 
-    nbranch = size(data["BRANCH"], 1)
     branch = zeros(nbranch, 21)
 
-    branch[:, 1] = data["BRANCH"][:, 1]
-    branch[:, 2] = data["BRANCH"][:, 2]
-    branch[:, 3] = data["BRANCH"][:, 4]
-    branch[:, 4] = data["BRANCH"][:, 5]
-    branch[:, 5] = data["BRANCH"][:, 6]
-    branch[:, 6] = data["BRANCH"][:, 7]
-    branch[:, 7] = data["BRANCH"][:, 8]
-    branch[:, 8] = data["BRANCH"][:, 9]
-    branch[:, 11] = data["BRANCH"][:, 14]
+    branch[:, 1] = dfs["BRANCH"][!, :I]
+    branch[:, 2] = dfs["BRANCH"][!, :J]
+    branch[:, 3] = dfs["BRANCH"][!, :R]
+    branch[:, 4] = dfs["BRANCH"][!, :X]
+    branch[:, 5] = dfs["BRANCH"][!, :B]
+    branch[:, 6] = dfs["BRANCH"][!, :RATEA]
+    branch[:, 7] = dfs["BRANCH"][!, :RATEB]
+    branch[:, 8] = dfs["BRANCH"][!, :RATEC]
+    branch[:, 11] = dfs["BRANCH"][!, :ST]
 
     return branch
-end
-
-function _parse_rawgo_gencost(data)
-    # No information on the generators costs
-    return zeros(0, 5)
-end
-
-function _clean_data_block_rawgo(block, col)
-    old_size = size(block, 1)
-    block = unique_rows(block, col=col)
-    nb_rm_rows = old_size - size(block, 1)
-    return block, nb_rm_rows
-end
-
-function _clean_data_rawgo(data)
-    # Remove multiple loads
-    data["LOAD"], nb_rm_rows = _clean_data_block_rawgo(data["LOAD"], 1)
-    (nb_rm_rows != 0) && @warn "Some buses have multiple loads, \
-                                the first load has been selected by default ($nb_rm_rows bus(es) concerned)"
-
-    data["GENERATOR"], nb_rm_rows = _clean_data_block_rawgo(data["GENERATOR"], 1)
-    (nb_rm_rows != 0) && @warn "Some generators have multiple configuration, \
-                                the first configuration has been selected by default ($nb_rm_rows generator(s) concerned)"
-
-    # Remove multiple branch between two nodes
-    data["BRANCH"], nb_rm_rows = _clean_data_block_rawgo(data["BRANCH"], [1, 2])
-    (nb_rm_rows != 0) && @warn "Some buses have multiple branch connecting them to the same buses, \
-                                the first branch has been selected by default ($nb_rm_rows branche(s) concerned)"
-
-    return data
 end
 
 function get_data_rawgo(path::AbstractString)
@@ -134,10 +132,7 @@ function get_data_rawgo(path::AbstractString)
         startat = i == 1 ? 4 : 2
         data[blocks_name[i]] = _parse_rawgo_mat(block; startat=startat)
     end
-    data = _clean_data_rawgo(data)
-    bus = _parse_rawgo_bus(data)
-    gen = _parse_rawgo_gen(data)
-    branch = _parse_rawgo_branch(data)
-    gencost = _parse_rawgo_gencost(data)
-    return bus, gen, branch, gencost, baseMVA
+    dfs = _data_rawgo_to_dfs(data)
+    _clean_rawgo_dfs(dfs)
+    return _extract_bus(dfs), _extract_gen(dfs), _extract_branch(dfs), baseMVA
 end

@@ -8,11 +8,10 @@ mutable struct PowerFlowNetwork
     bus::Matrix{Float64}
     gen::Matrix{Float64}
     branch::Matrix{Float64}
-    gencost::Matrix{Float64}
     baseMVA::Float64
 end
 
-include("utils.jl")
+
 include("core.jl")
 include("io/read.jl")
 include("graphs/graphs.jl")

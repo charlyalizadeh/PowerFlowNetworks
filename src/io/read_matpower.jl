@@ -45,7 +45,7 @@ function get_data_matpower_m(path::AbstractString)
             end
         end
     end
-    return data["bus"], data["gen"], data["branch"], data["gencost"], data["baseMVA"]
+    return data["bus"], data["gen"], data["branch"], data["baseMVA"]
 end
 
 function get_data_matpower_mat(path::AbstractString)
