@@ -60,13 +60,13 @@ function _extract_bus(dfs)
     bus[:, 13] = dfs["BUS"][!, :NVLO]
 
     if nrow(dfs["LOAD"]) != 0
-        idx = findall(x -> x in dfs["LOAD"][!, :I], bus[:, 1])
+        idx = findall(in(dfs["LOAD"][!, :I]), bus[:, 1])
         bus[idx, 3] = dfs["LOAD"][:, :PL]
         bus[idx, 4] = dfs["LOAD"][:, :QL]
     end
 
     if nrow(dfs["FIXED SHUNT"]) != 0
-        idx = findall(x -> x in dfs["FIXED SHUNT"][:, :I], bus[:, 1])
+        idx = findall(in(dfs["FIXED SHUNT"][:, :I]), bus[:, 1])
         bus[idx, 5] = dfs["FIXED SHUNT"][:, :GL]
         bus[idx, 6] = dfs["FIXED SHUNT"][:, :BL]
     end
