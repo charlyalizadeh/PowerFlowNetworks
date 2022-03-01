@@ -4,7 +4,7 @@ function to_simple_graph(network::PowerFlowNetwork)
         normalize_index!(network)
     end
     g = SimpleGraph(nbus(network))
-    for (src, dst) in eachrow(network.branch[begin:end, 1:2])
+    for (src, dst) in eachrow(network.branch[!, [:SRC, :DST]])
         add_edge!(g, src, dst)
     end
     return g

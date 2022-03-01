@@ -12,5 +12,9 @@ const read_functions = Dict(
 
 function read_network(path::AbstractString; format::AbstractString)
     bus, gen, branch, baseMVA = read_functions[format](path)
+    colnames = get_matpower_cols()
+    bus = DataFrame(bus, colnames["bus"])
+    gen = DataFrame(gen, colnames["gen"])
+    branch = DataFrame(branch, colnames["branch"])
     return PowerFlowNetwork(bus, gen, branch, baseMVA)
 end

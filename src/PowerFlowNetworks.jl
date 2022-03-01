@@ -5,9 +5,9 @@ using SQLite, DataFrames
 using Dates
 
 mutable struct PowerFlowNetwork
-    bus::Matrix{Float64}
-    gen::Matrix{Float64}
-    branch::Matrix{Float64}
+    bus::DataFrame
+    gen::DataFrame
+    branch::DataFrame
     baseMVA::Float64
 end
 

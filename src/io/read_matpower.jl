@@ -1,8 +1,12 @@
 get_matpower_cols() = Dict(
-    "bus" => ["bus_i", "type", "Pd", "Qd", "Gs", "Bs", "area", "Vm", "Va", "baseKV", "zone", "Vmax", "Vmin"],
-    "gen" => ["bus", "Pg", "Qg", "Qmax", "Qmin", "Vg", "mBase", "status", "Pmax", "Pmin", "Pc1", "Pc2", "Qc1min", "Qc1max", "Qc2min", "Qc2max", "ramp_agc", "ramp_10", "ramp_30", "ramp_q", "apf"],
-    "branch" => ["fbus", "tbus", "r", "x", "b", "rateA", "rateB", "rateC", "ratio", "angle", "status", "angmin", "angmax"],
-    "gencost" => ["model", "startup", "shutdown", "ncost", "cost"]
+    "bus" => ["ID", "TYPE", "PD", "QD", "GS", "BS", "BUS_AREA", "VM", "VA", "BASE_KV", "ZONE", "VMAX", "VMIN", "LAM_P",
+              "LAM_Q", "MU_VMAX", "MU_VMIN"],
+    "gen" => ["ID", "PG", "QG", "QMAX", "QMIN", "VG", "MBASE", "GEN_STATUS", "PMAX", "PMIN", "PC1", "PC2", "QC1MIN",
+              "QC1MAX", "QC2MIN", "QC2MAX", "RAMP_AGC", "RAMP_10", "RAMP_30", "RAMP_Q", "APF", "MU_PMAX", "MU_PMIN",
+              "MU_QMAX", "MU_QMIN"],
+    "branch" => ["SRC", "DST", "BR_R", "BR_X", "BR_B", "RATE_A", "RATE_B", "RATE_C", "TAP", "SHIFT", "BR_STATUS",
+                 "ANGMIN", "ANGMAX", "PF", "QF", "PT", "QT", "MU_SF", "MU_ST", "MU_ANGMIN", "MU_ANGMAX"],
+    "gencost" => ["MODEL", "STARTUP", "SHUTDOWN", "NCOST", "COST"]
 )
 
 function _row_to_array_matpower_mat(row)
@@ -29,16 +33,20 @@ end
 function get_data_matpower_m(path::AbstractString)
     file_string = read(open(path, "r"), String)
     lines = split(file_string, '\n')
-    bus, gen, branch, gencost, baseMVA = nothing, nothing, nothing, nothing, nothing
     data = Dict()
-    occursin_pattern = ["mpc.bus", "mpc.gen ", "mpc.branch", "mpc.gencost"]
-    occursin_key = ["bus", "gen", "branch", "gencost"]
+    occursin_pattern = ["mpc.bus", "mpc.gen ", "mpc.branch"]
+    occursin_key = ["bus", "gen", "branch"]
+    dims = [17, 25, 21]
     pattern_idx = 1
     for (i, f) in enumerate(lines)
         if occursin("mpc.baseMVA", f)
             data["baseMVA"] = parse(Float64, f[15:end - 2])
         elseif occursin(occursin_pattern[pattern_idx], f)
-            data[occursin_key[pattern_idx]] = _parse_matrix_matpower_mat(lines, i + 1)
+            key = occursin_key[pattern_idx]
+            mat = _parse_matrix_matpower_mat(lines, i + 1)
+            sizes = size(mat)
+            data[key] = zeros(sizes[1], dims[pattern_idx])
+            data[key][1:sizes[1], 1:sizes[2]] = mat
             pattern_idx += 1
             if pattern_idx > length(occursin_pattern)
                 break
