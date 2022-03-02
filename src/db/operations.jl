@@ -1,5 +1,6 @@
 function save_features_instance!(db::SQLite.DB, name, scenario, source_type, source_path;
-                                 serialize_network, serialize_path)
+                                 serialize_network, serialize_path,
+                                 min_nv=-Inf, max_nv=Inf)
     println("Saving features: $name scenario $scenario")
     network = PowerFlowNetwork(source_path; format=source_type)
     features = get_features_instance(network)
@@ -25,16 +26,18 @@ function save_features_instance!(db::SQLite.DB, name, scenario, source_type, sou
     query *= " WHERE name = '$name' AND scenario = $scenario"
     DBInterface.execute(db, query)
 end
-function save_features_instance_dfrow!(db::SQLite.DB, row; serialize_network, serialize_path) 
+function save_features_instance_dfrow!(db::SQLite.DB, row; serialize_network, serialize_path, min_nv=-Inf, max_nv=Inf) 
     save_features_instance!(db, row[:name], row[:scenario], row[:source_type], row[:source_path];
-                            serialize_network=serialize_network, serialize_path=serialize_path)
+                            serialize_network=serialize_network, serialize_path=serialize_path,
+                            min_nv=min_nv, max_nv=max_nv)
 end
-function save_features_instances!(db::SQLite.DB; serialize_network, serialize_path, min_nv, max_nv)
+function save_features_instances!(db::SQLite.DB; serialize_network, serialize_path, min_nv=-Inf, max_nv=Inf)
     serialize_network && mkpath(serialize_path)
     query = "SELECT name, scenario, source_type, source_path FROM instances"
     results = DBInterface.execute(db, query) |> DataFrame
     save_func!(row) = save_features_instance_dfrow!(db, row;
-                                                    serialize_network=serialize_network, serialize_path=serialize_path)
+                                                    serialize_network=serialize_network, serialize_path=serialize_path,
+                                                    min_nv=min_nv, max_nv=max_nv)
     save_func!.(eachrow(results[!, [:name, :scenario, :source_type, :source_path]]))
 end
 
@@ -43,7 +46,7 @@ function save_basic_features_instance!(db::SQLite.DB, name, scenario, source_typ
     _nbus = nbus(source_path; format=source_type)
     _nbranch_unique = nbranch(source_path; format=source_type, distinct_pair=true)
     _nbranch = nbranch(source_path; format=source_type)
-    _ngen = ngen(source_path; format=source_type)
+    _ngen = ngen(source_path; format=soure_type)
     query = """
     UPDATE instances
     SET nbus = $_nbus, nbranch_unique = $_nbranch_unique, nbranch = $_nbranch, ngen = $_ngen
