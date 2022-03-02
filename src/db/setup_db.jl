@@ -10,7 +10,7 @@ function create_instances_table(db)
         ctr_path TEXT,
         date TEXT NOT NULL,
 
-        nbus INTEGER, nbranch, nbranch_unique INTEGER, ngen INTEGER
+        nbus INTEGER, nbranch, nbranch_unique INTEGER, ngen INTEGER,
 
         nb_edge INTEGER,
         nb_vertex INTEGER,
