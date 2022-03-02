@@ -199,7 +199,7 @@ Here's a small example: ([source](https://www.powsybl.org/pages/documentation/gr
 
 ## [GOCOMPETITION](https://gocompetition.energy.gov/)
 
-### RAW-GO
+### RAWGO
 
 The RAW format of the Grid Optimization (GO) Competition is similar to the PSS®E RAW format but with more fields. A more in-depth description of this format 
 can be found [here](https://gocompetition.energy.gov/sites/default/files/Challenge2_Problem_Formulation_20210531.pdf)
@@ -308,7 +308,7 @@ Q
 # Columns connection
 
 
-## RAW-GO
+## RAWGO
 
 * `mpc.bus`
 

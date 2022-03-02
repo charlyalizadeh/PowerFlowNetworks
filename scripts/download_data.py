@@ -6,7 +6,7 @@ import subprocess
 from raw_go_const import urls_archives, archives_ndirs, archives_dir
 
 
-# RAW-GO
+# RAWGO
 pathlib.Path("data/RAWGO").mkdir(parents=True, exist_ok=True)
 archives_path = pathlib.Path("data/archives")
 archives_path.mkdir(parents=True, exist_ok=True)

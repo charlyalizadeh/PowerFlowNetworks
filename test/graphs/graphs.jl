@@ -11,9 +11,9 @@
         @test has_edge(g, src, dst)
     end
 
-    # From RAW-GO files (with non continuous index)
+    # From RAWGO files (with non continuous index)
     path = "./test/data/C2S6N02045_1.raw"
-    network = PowerFlowNetwork(path; format="RAW-GO")
+    network = PowerFlowNetwork(path; format="RAWGO")
     g = SimpleGraph(network)
     @test nv(g) == nbus(network)
     @test ne(g) == nbranch(network; distinct_pair=true)

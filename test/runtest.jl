@@ -15,7 +15,8 @@ tests = [
    "io/read_go",
    "graphs/graphs",
    "db/setup_db",
-   "db/inserts"
+   "db/inserts",
+   "db/operations"
 ]
 
 
