@@ -18,7 +18,7 @@ function parse_commandline()
             arg_type = Vector{String}
             default = readdir("data/RAWGO"; join=true)
         "--indirs_matpowermat"
-            help = "Directory/ies containing the MATPOWER-MAT networks."
+            help = "Directory/ies containing the MATPOWER-M networks."
             arg_type = Vector{String}
             default = ["data/MATPOWER"]
     end
@@ -69,7 +69,7 @@ function load_matpower_mat_instance!(db::SQLite.DB, path::AbstractString)
     name = splitext(basename(path))[end - 1]
     scenario_nb = 0
     source_path = abspath(path)
-    source_type = "MATPOWER-MAT"
+    source_type = "MATPOWER-M"
     @info "Loading $(name)"
     try
         load_instance!(db, name, scenario_nb, source_path, source_type, date)
@@ -86,6 +86,7 @@ function load_matpower_mat_instances!(db::SQLite.DB, dirs)
     for dir in dirs
         files = readdir(dir; join=true)
         for f in files
+            !startswith(basename(f), "case") && continue
             load_matpower_mat_instance!(db, f)
         end
     end

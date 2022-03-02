@@ -10,7 +10,8 @@ get_matpower_cols() = Dict(
 )
 
 function _row_to_array_matpower_mat(row)
-    values = split(strip(row, [';', '\r']), '\t')[2:end]
+    row = split(row, ';')[1]
+    values = split(row, '\t')[2:end]
     array = map(x -> parse(Float64, x), values) 
     return array
 end
@@ -33,6 +34,7 @@ end
 function get_data_matpower_m(path::AbstractString)
     file_string = read(open(path, "r"), String)
     lines = split(file_string, '\n')
+    lines = [l for l in lines if !startswith(lstrip(l), "%")]
     data = Dict()
     occursin_pattern = ["mpc.bus", "mpc.gen ", "mpc.branch"]
     occursin_key = ["bus", "gen", "branch"]
@@ -40,7 +42,7 @@ function get_data_matpower_m(path::AbstractString)
     pattern_idx = 1
     for (i, f) in enumerate(lines)
         if occursin("mpc.baseMVA", f)
-            data["baseMVA"] = parse(Float64, f[15:end - 2])
+            data["baseMVA"] = parse(Float64, split(f[15:end], ';')[end - 1])
         elseif occursin(occursin_pattern[pattern_idx], f)
             key = occursin_key[pattern_idx]
             mat = _parse_matrix_matpower_mat(lines, i + 1)
@@ -58,4 +60,46 @@ end
 
 function get_data_matpower_mat(path::AbstractString)
     error("Not Implemented")
+end
+
+
+nbus_matpower_mat(path::AbstractString) = error("Not Implemented")
+nbranch_matpower_mat(path::AbstractString; distinct_pair=false) = error("Not Implemented")
+ngen_matpower_mat(path::AbstractString; distinct_pair=false) = error("Not Implemented")
+
+function nbus_matpower_m(path::AbstractString)
+    file_string = read(open(path, "r"), String)
+    buses = split(file_string, "mpc.bus")[2]
+    buses = split(buses, "];")[1]
+    return length(split(buses, '\n')) - 2
+end
+
+function nbranch_matpower_m(path::AbstractString; distinct_pair=false) 
+    nbranch = nothing
+    file_string = read(open(path, "r"), String)
+    branches = split(file_string, "mpc.branch")[2]
+    branches = split(branches, "];")[1]
+    if distinct_pair
+        branches = split(branches, '\n')[2:end - 1]
+        branches = [Set(parse.(Int, split(b, '\t')[2:3])) for b in branches]
+        nbranch = length(unique(branches))
+    else
+        nbranch = length(split(branches, '\n')) - 2
+    end
+    return nbranch
+end
+
+function ngen_matpower_m(path::AbstractString; distinct_pair=false)
+    nbranch = nothing
+    file_string = read(open(path, "r"), String)
+    branches = split(file_string, "mpc.gen")[2]
+    branches = split(branches, "];")[1]
+    if distinct_pair
+        branches = split(branches, '\n')[2:end - 1]
+        branches = [parse(Int, split(b, '\t')[2]) for b in branches]
+        nbranch = length(unique(branches))
+    else
+        nbranch = length(split(branches, '\n')) - 2
+    end
+    return nbranch
 end
