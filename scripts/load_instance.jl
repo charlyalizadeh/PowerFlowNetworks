@@ -17,7 +17,7 @@ function parse_commandline()
             help = "Directory/ies containing the RAWGO networks."
             arg_type = Vector{String}
             default = readdir("data/RAWGO"; join=true)
-        "--indirs_matpowermat"
+        "--indirs_matpowerm"
             help = "Directory/ies containing the MATPOWER-M networks."
             arg_type = Vector{String}
             default = ["data/MATPOWER"]
@@ -95,7 +95,7 @@ end
 function main()
     parsed_args = parse_commandline()
     indirs_rawgo = clean_dirs(parsed_args["indirs_rawgo"])
-    indirs_matpowermat = clean_dirs(parsed_args["indirs_matpowermat"])
+    indirs_matpowerm = clean_dirs(parsed_args["indirs_matpowerm"])
     dbpath = parsed_args["dbpath"]
     isdb = isfile(dbpath)
     db = SQLite.DB(dbpath)
@@ -103,7 +103,7 @@ function main()
     if !isdb || any(map(x -> !(x in SQLite.tables(db)), tables))
         db = setup_db(dbpath)
     end
-    load_matpower_mat_instances!(db, indirs_matpowermat)
+    load_matpower_mat_instances!(db, indirs_matpowerm)
     load_rawgo_instances!(db, indirs_rawgo)
 end
 

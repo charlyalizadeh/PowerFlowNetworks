@@ -9,7 +9,7 @@ function parse_commandline()
     @add_arg_table s begin
         "--dbpath", "-p"
             help = "Path of the sqlite database file."
-            default = "data/PowerFlowNetwork.sqlite"
+            default = "data/PowerFlowNetworks.sqlite"
         "--recompute"
             help = "Wether to recompute the basic features if they're already not NULL in the database."
             default = false

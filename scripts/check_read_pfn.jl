@@ -12,7 +12,7 @@ function parse_commandline()
     @add_arg_table s begin
         "--dbpath", "-p"
             help = "Path of the sqlite database file."
-            default = "data/PowerFlowNetwork.sqlite"
+            default = "data/PowerFlowNetworks.sqlite"
         "--source_type"
             help = "The source types to check."
             default = ["RAWGO", "MATPOWER-M"]
