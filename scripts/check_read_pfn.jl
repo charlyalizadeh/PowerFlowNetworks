@@ -37,7 +37,7 @@ end
 
 function check_network(name, scenario, source_path, source_type; rethrow_error)
     try
-        network = PowerFlowNetwork(source_path; format=source_type)
+        network = PowerFlowNetwork(source_path, source_type)
     catch e
         println("$name scenario $scenario throwed: $e \n  source_path: $source_path\n  source_type: $source_type")
         rethrow_error && rethrow()
