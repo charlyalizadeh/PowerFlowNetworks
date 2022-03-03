@@ -1,7 +1,7 @@
 @testset "Graphs" begin
     # From MATPOWER-M files
     path = "./test/data/case6ww.m"
-    network = PowerFlowNetwork(path; format="MATPOWER-M")
+    network = PowerFlowNetwork(path, "MATPOWER-M")
     g = SimpleGraph(network)
     @test nv(g) == nbus(network)
     @test ne(g) == nbranch(network)
@@ -13,7 +13,7 @@
 
     # From RAWGO files (with non continuous index)
     path = "./test/data/C2S6N02045_1.raw"
-    network = PowerFlowNetwork(path; format="RAWGO")
+    network = PowerFlowNetwork(path, "RAWGO")
     g = SimpleGraph(network)
     @test nv(g) == nbus(network)
     @test ne(g) == nbranch(network; distinct_pair=true)
