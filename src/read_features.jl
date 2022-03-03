@@ -1,5 +1,87 @@
 get_population_stats(population) = maximum(population), minimum(population), mean(population)
+const _single_features_func_graph = Dict(
+    "nb_edge" => (ne, false),
+    "nb_vertex" => (nv, false),
+    "global_clustering_coefficient" => (global_clustering_coefficient, false),
+    "density" => (density, false),
+    "diameter" => (diameter, false),
+    "radius" => (radius, false),
+    "degree" => (degree, true)
+)
+const _single_features_func_network = Dict(
+    "PD" => (:bus, :PD),
+    "QD" => (:bus, :QD),
+    "GS" => (:bus, :GS),
+    "BS" => (:bus, :BS),
+    "VM" => (:bus, :VM),
+    "VA" => (:bus, :VA),
+    "VMAX" => (:bus, :VMAX),
+    "VMIN" => (:bus, :VMIN),
+    "PG" => (:gen, :PG),
+    "QG" => (:gen, :QG),
+    "QMAX" => (:gen, :QMAX),
+    "QMIN" => (:gen, :QMIN),
+    "PMAX" => (:gen, :PMAX),
+    "PMIN" => (:gen, :PMIN),
+    "BR_R" => (:branch, :BR_R),
+    "BR_X" => (:branch, :BR_X),
+    "BR_B" => (:branch, :BR_B)
+)
+const _single_features_func_source_path = Dict(
+    "nbus" => nbus,
+    "nbranch" => nbranch,
+    "nbranch_unique" => nbranch_unique,
+    "ngen" => ngen_unique
+)
+const _feature_info_dict = Dict(
+    "nb_edge" => (:graph, false),
+    "nb_vertex" => (:graph, false),
+    "global_clustering_coefficient" => (:graph, false),
+    "density" => (:graph, false),
+    "diameter" => (:graph, false),
+    "radius" => (:graph, false),
+    "degree" => (:graph, true),
+    "PD" => (:network, true),
+    "QD" => (:network, true),
+    "GS" => (:network, true),
+    "BS" => (:network, true),
+    "VM" => (:network, true),
+    "VA" => (:network, true),
+    "VMAX" => (:network, true),
+    "VMIN" => (:network, true),
+    "PG" => (:network, true),
+    "QG" => (:network, true),
+    "QMAX" => (:network, true),
+    "QMIN" => (:network, true),
+    "PMAX" => (:network, true),
+    "PMIN" => (:network, true),
+    "BR_R" => (:network, true),
+    "BR_X" => (:network, true),
+    "BR_B" => (:network, true),
+    "nbus" => (:source_path, false),
+    "nbranch" => (:source_path, false),
+    "nbranch_unique" => (:source_path, false),
+    "ngen" => (:source_path, false)
+)
 
+# Single features
+function get_single_feature_graph(feature_name::AbstractString, g::SimpleGraph)
+    feature_tuple = _single_features_func_graph[feature_name]
+    feature = feature_tuple[1](g)
+    return !feature_tuple[2] ? feature : get_population_stats(feature)
+end
+function get_single_feature_network(feature_name::AbstractString, network::PowerFlowNetwork)
+    feature_tuple = _single_features_func_network[feature_name]
+    feature = getfield(network, feature_tuple[1])[!, feature_tuple[2]]
+    return get_population_stats(feature)
+end
+function get_single_feature_source_path(feature_name::AbstractString, source_path::AbstractString)
+    feature_func = _single_features_func_source_path[feature_name]
+    feature = feature_func(source_path)
+    return feature
+end
+
+# All features
 function get_features_graph(g::SimpleGraph)
     degree_max, degree_min, degree_mean = get_population_stats(degree(g))
     features = Dict(
@@ -15,7 +97,6 @@ function get_features_graph(g::SimpleGraph)
     )
     return features
 end
-
 function get_features_opf(network::PowerFlowNetwork)
     # Thanks VIM
     features = Dict()
@@ -44,7 +125,6 @@ function get_features_opf(network::PowerFlowNetwork)
 
     return features
 end
-
 function get_features_instance(network::PowerFlowNetwork)
     g = SimpleGraph(network)
     graph_features = get_features_graph(g)
