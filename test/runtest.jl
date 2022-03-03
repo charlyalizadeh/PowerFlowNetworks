@@ -1,8 +1,9 @@
 include("../src/PowerFlowNetworks.jl")
 
 using .PowerFlowNetworks
+using .PowerFlowNetworks: get_features_graph, get_features_opf
 using Test
-using Graphs: ne, nv, SimpleGraph, has_edge
+using Graphs
 using SQLite, DataFrames
 using Dates
 
@@ -10,13 +11,14 @@ using Dates
 const testdir = dirname(@__FILE__)
 
 tests = [
-   "core",
-   "io/read_matpower",
-   "io/read_go",
-   "graphs/graphs",
-   "db/setup_db",
-   "db/inserts",
-   "db/operations"
+   #"core",
+   "read_features",
+   #"io/read_matpower",
+   #"io/read_go",
+   #"graphs/graphs",
+   #"db/setup_db",
+   #"db/inserts",
+   #"db/operations"
 ]
 
 
