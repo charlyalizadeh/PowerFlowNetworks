@@ -79,12 +79,13 @@ function nbranch_matpower_m(path::AbstractString; distinct_pair=false)
     file_string = read(open(path, "r"), String)
     branches = split(file_string, "mpc.branch")[2]
     branches = split(branches, "];")[1]
+    branches = split(branches, '\n')[2:end - 1]
+    filter!(b -> !startswith(b, "%"), branches)
     if distinct_pair
-        branches = split(branches, '\n')[2:end - 1]
         branches = [Set(parse.(Int, split(b, '\t')[2:3])) for b in branches]
         nbranch = length(unique(branches))
     else
-        nbranch = length(split(branches, '\n')) - 2
+        nbranch = length(branches)
     end
     return nbranch
 end
