@@ -123,20 +123,21 @@ end
 function serialize_instance!(db::SQLite.DB, serialize_path, name, scenario, source_type, source_path)
     println("Serializing: $name scenario $scenario")
     serialize_path = abspath(joinpath(serialize_path, "$(name)_$(scenario)"))
+    network = PowerFlowNetwork(source_path, source_type)
     serialize(serialize_path, network)
     query = "UPDATE instances SET source_pfn = '$serialize_path' WHERE name = '$name' AND scenario = $scenario"
     DBInterface.execute(db, query)
 end
 function serialize_instance_dfrow!(db::SQLite.DB, serialize_path, row)
-    save_single_features_instance!(db, serialize_path, row[:name], row[:scenario], row[:source_type], row[:source_path])
+    serialize_instance!(db, serialize_path, row[:name], row[:scenario], row[:source_type], row[:source_path])
 end
-function serialize_instance_instances!(db::SQLite.DB, serialize_path;
+function serialize_instances!(db::SQLite.DB, serialize_path;
                                        min_nv=typemin(Int), max_nv=typemax(Int), recompute=false)
     query = "SELECT name, scenario, source_type, source_path FROM instances WHERE nbus >= $min_nv AND nbus <= $max_nv"
     if !recompute
-        query *= " AND $source_pfn IS NULL"
+        query *= " AND source_pfn IS NULL"
     end
     results = DBInterface.execute(db, query) |> DataFrame
-    save_func!(row) = save_single_features_instance_dfrow!(db, serialize_path, row)
+    save_func!(row) = serialize_instance_dfrow!(db, serialize_path, row)
     save_func!.(eachrow(results[!, [:name, :scenario, :source_type, :source_path]]))
 end
