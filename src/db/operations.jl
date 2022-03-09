@@ -3,6 +3,7 @@ function save_features_instance!(db::SQLite.DB, name, scenario, source_type, sou
                                  serialize_network, serialize_path)
     println("Saving features: $name scenario $scenario")
     network = PowerFlowNetwork(source_path, source_type)
+    merge_duplicate_branch!(network)
     features = get_features_instance(network)
     query = "UPDATE instances SET "
     for (feature_name, feature_value) in features
@@ -124,6 +125,7 @@ function serialize_instance!(db::SQLite.DB, serialize_path, name, scenario, sour
     println("Serializing: $name scenario $scenario")
     serialize_path = abspath(joinpath(serialize_path, "$(name)_$(scenario)"))
     network = PowerFlowNetwork(source_path, source_type)
+    normalize_index!()
     serialize(serialize_path, network)
     query = "UPDATE instances SET source_pfn = '$serialize_path' WHERE name = '$name' AND scenario = $scenario"
     DBInterface.execute(db, query)
@@ -140,4 +142,8 @@ function serialize_instances!(db::SQLite.DB, serialize_path;
     results = DBInterface.execute(db, query) |> DataFrame
     save_func!(row) = serialize_instance_dfrow!(db, serialize_path, row)
     save_func!.(eachrow(results[!, [:name, :scenario, :source_type, :source_path]]))
+end
+
+# Generate decomspotions
+function generate_decomposition!(db::SQLite.DB, name, scenario)
 end
