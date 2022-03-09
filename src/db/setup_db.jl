@@ -50,17 +50,16 @@ function create_decompositions_table(db)
     createtable_query = """
     CREATE TABLE IF NOT EXISTS decompositions(
         id INTEGER NOT NULL,
-        name TEXT NOT NULL,
         origin_name TEXT NOT NULL,
         origin_scenario INTEGER NOT NULL,
 
         pre_process_path TEXT,
-        nb_added_edge_dec INTEGER,
         date TEXT,
 
         clique_path TEXT,
         cliquetree_path TEXT,
 
+        nb_added_edge_dec INTEGER,
         nb_edge INTEGER,
         nb_vertex INTEGER,
         degree_max INTEGER, degree_min INTEGER, degree_mean REAL,
