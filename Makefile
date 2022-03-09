@@ -6,6 +6,7 @@ _SOURCE_TYPE = RAWGO MATPOWER-M
 _INDIRS_MATPOWERM = data/MATPOWER
 space = $(eval) $(eval)
 comma := ,
+SERIALIZE_PATH = data/networks_serialize
 
 SOURCE_TYPE = $(subst $(space),$(comma),$(_SOURCE_TYPE))
 INDIRS_RAWGO = $(subst $(space),$(comma),$(_INDIRS_RAWGO))
@@ -29,8 +30,12 @@ read_basic_features:
 read_features:	
 	julia --project=./ scripts/read_features.jl --min_nv $(MIN_NV) --max_nv $(MAX_NV)
 
+serialize:
+	julia --project=./ scripts/serialize_instances.jl --dbpath $(DBPATH) --min_nv $(MIN_NV) --max_nv $(MAX_NV) --serialize_path $(SERIALIZE_PATH)
+
 runtest:
 	julia --project=./ test/runtest.jl
 
 process_data: read_basic_features read_features
 
+load_and_process: load_instance read_basic_features read_features serialize
