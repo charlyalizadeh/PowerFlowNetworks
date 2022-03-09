@@ -1,5 +1,5 @@
 @testset "Core" begin
-        path = "./test/data/case6ww.m"
+        path = "test/data/case6ww.m"
         network = PowerFlowNetwork(path, "MATPOWER-M")
         @test nbus(network) == 6
         @test nbranch(network) == 11
@@ -14,4 +14,12 @@
                                                   "TAP", "SHIFT", "BR_STATUS", "ANGMIN", "ANGMAX", "PF", "QF", "PT",
                                                   "QT", "MU_SF", "MU_ST", "MU_ANGMIN", "MU_ANGMAX"])
         @test is_disjoint(network) == true
+
+
+        path = "test/data/C2FEN02312_3.raw"
+        network = PowerFlowNetwork(path, "RAWGO")
+        @test nbranch_unique(network) == nbranch_unique(path)
+        merge_duplicate_branch!(network)
+        @test nbranch_unique(network) == nbranch_unique(path)
+        @test nbranch(network) == nbranch_unique(network)
 end
