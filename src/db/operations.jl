@@ -151,9 +151,10 @@ end
 _save_cliques(cliques::Vector{Vector{Int}}, path::AbstractString) = writedlm(path, cliques)
 _save_cliquetree(cliquetree::Vector{Vector{Int}}, path::AbstractString) = writedlm(path, cliquetree)
 
-function generate_decomposition!(db::SQLite.DB, cliques_path::AbstractString, cliquetrees_path::AbstractString,
-                                 extension_alg::AbstractString, option::AbstractDict, preprocess_path::AbstractString,
-                                 name::AbstractString, scenario::Union{Int, AbstractString}, graph_path::AbstractString;
+function generate_decomposition!(db::SQLite.DB, name::AbstractString, scenario::Union{Int, AbstractString},
+                                 cliques_path::AbstractString, cliquetrees_path::AbstractString,
+                                 extension_alg::AbstractString, option::AbstractDict,
+                                 preprocess_path::AbstractString, graph_path::AbstractString;
                                  seed, rng, kwargs...)
     println("Generating decomposition: $name scenario $scenario. ($extension_alg)")
     g = loadgraph(graph_path)
@@ -176,7 +177,7 @@ function generate_decomposition!(db::SQLite.DB, cliques_path::AbstractString, cl
     uuid = uuid1(rng)
     clique_path = joinpath(cliques_path, "$(name)_$(scenario)_$(uuid)_cliques.csv")
     cliquetree_path = joinpath(cliquetrees_path, "$(name)_$(scenario)_$(uuid)_cliquetree.csv")
-    _save_cliques(cliques, cliquetree_path) 
+    _save_cliques(cliques, clique_path) 
     _save_cliquetree(cliquetree, cliquetree_path)
 
     # Other columns
@@ -186,11 +187,12 @@ function generate_decomposition!(db::SQLite.DB, cliques_path::AbstractString, cl
     insert_decomposition!(db, uuid, name, scenario, extension_alg, preprocess_path, date, clique_path, cliquetree_path; features...)
 end
 
-function generate_decomposition_dfrow!(db::SQLite.DB, cliques_path::AbstractString, cliquetrees_path::AbstractString,
-                                       extension_alg::AbstractString, option::AbstractDict, preprocess_path::AbstractString,
-                                       row; seed, rng, kwargs...)
-    generate_decomposition!(db, cliques_path, cliquetrees_path, extension_alg, option, preprocess_path,
-                            row[:name], row[:scenario], row[:graph_path];
+function generate_decomposition_dfrow!(db::SQLite.DB, row, cliques_path::AbstractString, cliquetrees_path::AbstractString,
+                                       extension_alg::AbstractString, option::AbstractDict, preprocess_path::AbstractString;
+                                       seed, rng, kwargs...)
+    generate_decomposition!(db, row[:name], row[:scenario], cliques_path, cliquetrees_path,
+                            extension_alg, option,
+                            preprocess_path, row[:graph_path];
                             seed=seed, rng=rng, kwargs...)
 end
 
@@ -205,8 +207,8 @@ function generate_decompositions!(db::SQLite.DB,
     option = JSON.parse(read(open(preprocess_path, "r"), String))
     option = Dict(Symbol(k) => v for (k, v) in option)
     results = DBInterface.execute(db, query) |> DataFrame
-    generate_func!(row) = generate_decomposition_dfrow!(db, cliques_path, cliquetrees_path,
-                                                        extension_alg, option, preprocess_path,
-                                                        row; seed=seed, rng=rng, kwargs...)
+    generate_func!(row) = generate_decomposition_dfrow!(db, row, cliques_path, cliquetrees_path,
+                                                        extension_alg, option, preprocess_path;
+                                                        seed=seed, rng=rng, kwargs...)
     generate_func!.(eachrow(results[!, [:name, :scenario, :graph_path]]))
 end
