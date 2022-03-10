@@ -50,5 +50,5 @@ function merge_duplicate_branch!(network::PowerFlowNetwork)
                              :MU_SF => mean,
                              :MU_ST => mean,
                              :MU_ANGMIN => minimum,
-                             :MU_ANGMAX => maximum)
+                             :MU_ANGMAX => maximum; renamecols=false)
 end
