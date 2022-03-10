@@ -1,12 +1,18 @@
 module PowerFlowNetworks
 
-using Graphs
+using Graphs, MetaGraphs
 using SQLite, DataFrames
 using Dates
-using Statistics: mean
+using Statistics: mean, median, var
 using Serialization
 using DataStructures
 using Random
+using DelimitedFiles
+using UUIDs
+using SparseArrays
+using LinearAlgebra
+using Combinatorics
+import JSON
 
 mutable struct PowerFlowNetwork
     bus::DataFrame
@@ -17,13 +23,17 @@ end
 
 
 include("core.jl")
+include("utils/graphs/lbfs.jl")
 include("utils/graphs/ischordal.jl")
+include("utils/graphs/build_graph.jl")
 include("io/read.jl")
 include("read_features.jl")
 include("graphs/graphs.jl")
 include("graphs/operations.jl")
 include("db/setup_db.jl")
 include("db/inserts.jl")
+include("utils/graphs/operators.jl")
+include("decompositions/chordal_extension/chordal_extension.jl")
 include("db/operations.jl")
 
 
@@ -34,11 +44,13 @@ export nbus, nbranch, ngen, is_disjoint, has_bus, has_branch, has_gen,
        has_continuous_index, normalize_index, merge_duplicate_branch!
 export ischordal
 export nbranch_unique, ngen_unique
-export save_features_instances!, save_basic_features_instances!, save_single_features_instances!, serialize_instances!
 export PowerFlowNetwork
 export Graph
-export add_edges_distance!, add_edge_random!
+export add_edges_distance!, add_edges_random!, add_edges!
 export setup_db
 export load_instance!
+export chordal_extension
+export save_features_instances!, save_basic_features_instances!, save_single_features_instances!,
+       serialize_instances!, generate_decompositions!
 
 end

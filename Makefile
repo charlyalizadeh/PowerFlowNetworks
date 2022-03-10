@@ -1,5 +1,5 @@
-MIN_NV = 1000
-MAX_NV = 15000
+MIN_NV = 0
+MAX_NV = 500
 DBPATH = data/PowerFlowNetworks.sqlite
 _INDIRS_RAWGO = $(wildcard data/RAWGO/*)
 _SOURCE_TYPE = RAWGO MATPOWER-M

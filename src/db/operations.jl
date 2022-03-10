@@ -123,27 +123,90 @@ end
 # Serialize
 function serialize_instance!(db::SQLite.DB, serialize_path, name, scenario, source_type, source_path)
     println("Serializing: $name scenario $scenario")
-    serialize_path = abspath(joinpath(serialize_path, "$(name)_$(scenario)"))
+    source_pfn = abspath(joinpath(serialize_path, "$(name)_$(scenario)_network.bin"))
+    source_graph = abspath(joinpath(serialize_path, "$(name)_$(scenario)_graph.lgz"))
     network = PowerFlowNetwork(source_path, source_type)
-    normalize_index!()
-    serialize(serialize_path, network)
-    query = "UPDATE instances SET source_pfn = '$serialize_path' WHERE name = '$name' AND scenario = $scenario"
+    g = SimpleGraph(network)
+    serialize(source_pfn, network)
+    savegraph(source_graph, g)
+    query = "UPDATE instances SET source_pfn = '$serialize_path', source_graph = '$source_graph' WHERE name = '$name' AND scenario = $scenario"
     DBInterface.execute(db, query)
 end
 function serialize_instance_dfrow!(db::SQLite.DB, serialize_path, row)
     serialize_instance!(db, serialize_path, row[:name], row[:scenario], row[:source_type], row[:source_path])
 end
 function serialize_instances!(db::SQLite.DB, serialize_path;
-                                       min_nv=typemin(Int), max_nv=typemax(Int), recompute=false)
+                              min_nv=typemin(Int), max_nv=typemax(Int), recompute=false)
+    !isdir(serialize_path) && mkpath(serialize_path)
     query = "SELECT name, scenario, source_type, source_path FROM instances WHERE nbus >= $min_nv AND nbus <= $max_nv"
     if !recompute
         query *= " AND source_pfn IS NULL"
     end
     results = DBInterface.execute(db, query) |> DataFrame
-    save_func!(row) = serialize_instance_dfrow!(db, serialize_path, row)
-    save_func!.(eachrow(results[!, [:name, :scenario, :source_type, :source_path]]))
+    serialize_func!(row) = serialize_instance_dfrow!(db, serialize_path, row)
+    serialize_func!.(eachrow(results[!, [:name, :scenario, :source_type, :source_path]]))
 end
 
-# Generate decomspotions
-function generate_decomposition!(db::SQLite.DB, name, scenario)
+# Generate decompositions
+_save_cliques(cliques::Vector{Vector{Int}}, path::AbstractString) = writedlm(path, cliques)
+_save_cliquetree(cliquetree::Vector{Vector{Int}}, path::AbstractString) = writedlm(path, cliquetree)
+
+function generate_decomposition!(db::SQLite.DB, cliques_path::AbstractString, cliquetrees_path::AbstractString,
+                                 extension_alg::AbstractString, option::AbstractDict, preprocess_path::AbstractString,
+                                 name::AbstractString, scenario::Union{Int, AbstractString}, source_graph::AbstractString;
+                                 seed, rng, kwargs...)
+    println("Generating decomposition: $name scenario $scenario. ($extension_alg)")
+    g = loadgraph(source_graph)
+
+    # Preprocessing
+    option = deepcopy(option)
+    option[:nb_added_edge] != 0 && add_edges!(g, pop!(option, :nb_added_edge), pop!(option, :how); option...)
+
+    # Chordal extension
+    chordal_g, data = chordal_extension(g, extension_alg; kwargs...)
+
+    # Features extraction
+    features = get_features_graph(chordal_g)
+    features["nb_added_edge_dec"] = ne(chordal_g) - ne(g)
+    cliques = maximal_cliques(chordal_g)
+    cliquetree, nb_lc = get_cliquetree_array(cliques)
+    merge!(features, get_cliques_features(cliques))
+
+    # Save cliques and cliquetree
+    uuid = uuid1(rng)
+    clique_path = joinpath(cliques_path, "$(name)_$(scenario)_$(uuid)_cliques.csv")
+    cliquetree_path = joinpath(cliquetrees_path, "$(name)_$(scenario)_$(uuid)_cliquetree.csv")
+    _save_cliques(cliques, cliquetree_path) 
+    _save_cliquetree(cliquetree, cliquetree_path)
+
+    # Other columns
+    date = Dates.now()
+
+    features = Dict(Symbol(k) => v for (k, v) in features)
+    insert_decomposition!(db, uuid, name, scenario, extension_alg, preprocess_path, date, clique_path, cliquetree_path; features...)
+end
+
+function generate_decomposition_dfrow!(db::SQLite.DB, cliques_path::AbstractString, cliquetrees_path::AbstractString,
+                                       extension_alg::AbstractString, option::AbstractDict, preprocess_path::AbstractString,
+                                       row; seed, rng, kwargs...)
+    generate_decomposition!(db, cliques_path, cliquetrees_path, extension_alg, option, preprocess_path,
+                            row[:name], row[:scenario], row[:source_graph];
+                            seed=seed, rng=rng, kwargs...)
+end
+
+function generate_decompositions!(db::SQLite.DB,
+                                  cliques_path, cliquetrees_path,
+                                  extension_alg::AbstractString, preprocess_path::AbstractString;
+                                  seed=MersenneTwister(42), rng=MersenneTwister(42),
+                                  min_nv=typemin(Int), max_nv=typemax(Int), kwargs...)
+    !isdir(cliques_path) && mkpath(cliques_path)
+    !isdir(cliquetrees_path) && mkpath(cliquetrees_path)
+    query = "SELECT name, scenario, source_graph FROM instances WHERE nbus >= $min_nv AND nbus <= $max_nv"
+    option = JSON.parse(read(open(preprocess_path, "r"), String))
+    option = Dict(Symbol(k) => v for (k, v) in option)
+    results = DBInterface.execute(db, query) |> DataFrame
+    generate_func!(row) = generate_decomposition_dfrow!(db, cliques_path, cliquetrees_path,
+                                                        extension_alg, option, preprocess_path,
+                                                        row; seed=seed, rng=rng, kwargs...)
+    generate_func!.(eachrow(results[!, [:name, :scenario, :source_graph]]))
 end
