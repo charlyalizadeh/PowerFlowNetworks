@@ -6,7 +6,7 @@ function buildmeta(g::AbstractGraph)
     return mg
 end
 
-function build_graph_cliquetree(cliques::AbstractVector, cliquetree::AbstractVector)
+function build_graph_from_cliquetree(cliques::AbstractVector, cliquetree::AbstractVector)
     mg = MetaGraph(length(cliques))
     set_indexing_prop!(mg, :clique)
     for (i, c) in enumerate(cliques)
