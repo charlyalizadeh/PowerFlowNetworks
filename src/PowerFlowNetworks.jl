@@ -31,6 +31,7 @@ include("read_features.jl")
 include("graphs/graphs.jl")
 include("graphs/operations.jl")
 include("db/setup_db.jl")
+include("db/infos.jl")
 include("db/inserts.jl")
 include("utils/graphs/operators.jl")
 include("decompositions/chordal_extension/chordal_extension.jl")
@@ -48,6 +49,7 @@ export PowerFlowNetwork
 export Graph
 export add_edges_distance!, add_edges_random!, add_edges!
 export setup_db
+export has_opf_tables, state_columns
 export load_instance!
 export chordal_extension
 export save_features_instances!, save_basic_features_instances!, save_single_features_instances!,
