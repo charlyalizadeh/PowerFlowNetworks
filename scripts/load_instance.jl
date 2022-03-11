@@ -100,7 +100,7 @@ function main()
     isdb = isfile(dbpath)
     db = SQLite.DB(dbpath)
     tables = ["instances", "decompositions", "mergers", "combinations", "solve_results"]
-    if !isdb || any(map(x -> !(x in SQLite.tables(db)), tables))
+    if !isdb || any(map(x -> !(x in SQLite.tables(db)[:name]), tables))
         db = setup_db(dbpath)
     end
     load_matpower_mat_instances!(db, indirs_matpowerm)
