@@ -12,15 +12,16 @@ const testdir = dirname(@__FILE__)
 
 tests = [
    "core",
-   #"read_features",
-   #"io/read_matpower",
-   #"io/read_go",
-   #"graphs/graphs",
-   #"graphs/operations",
-   #"db/setup_db",
-   #"db/inserts",
-   #"db/operations",
-   #"utils/ischordal"
+   "read_features",
+   "io/read_matpower",
+   "io/read_go",
+   "graphs/graphs",
+   "graphs/operations",
+   "db/setup_db",
+   "db/inserts",
+   "db/operations",
+   "db/infos",
+   "utils/ischordal"
 ]
 
 
