@@ -1,7 +1,7 @@
 include("../src/PowerFlowNetworks.jl")
 
 using .PowerFlowNetworks
-using .PowerFlowNetworks: get_features_graph, get_features_opf, _get_edges_distance
+using .PowerFlowNetworks: get_features_graph, get_features_opf, _get_edges_distance, get_nv, get_ne
 using Test
 using Graphs
 using SQLite, DataFrames
@@ -21,7 +21,8 @@ tests = [
    "db/inserts",
    "db/operations",
    "db/infos",
-   "utils/ischordal"
+   "utils/ischordal",
+   "utils/clique_cliquetree"
 ]
 
 
