@@ -21,6 +21,9 @@ function parse_commandline()
         "--cliquetrees_path"
             help = "Directory where to store the cliquetrees."
             default = "data/cliquetrees"
+        "--graphs_path"
+            help = "Where to store the graphs."
+            default = "data/graphs/"
         "--preprocess_path"
             help = "JSON file containing the preprocess option."
             default = "configs/preprocess_default.json"
@@ -42,6 +45,7 @@ function main()
     generate_decompositions!(db,
                              parsed_args["cliques_path"],
                              parsed_args["cliquetrees_path"],
+                             parsed_args["graphs_path"],
                              parsed_args["extension_alg"],
                              parsed_args["preprocess_path"];
                              min_nv=parsed_args["min_nv"],
