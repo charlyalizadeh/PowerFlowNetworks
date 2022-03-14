@@ -1,4 +1,4 @@
-MIN_NV = 0
+MIN_NV = 100
 MAX_NV = 500
 DBPATH = data/PowerFlowNetworks.sqlite
 _INDIRS_RAWGO = $(wildcard data/RAWGO/*)
@@ -7,6 +7,7 @@ _INDIRS_MATPOWERM = data/MATPOWER
 space = $(eval) $(eval)
 comma := ,
 SERIALIZE_PATH = data/networks_serialize
+GRAPHS_PATH = data/graphs
 
 SOURCE_TYPE = $(subst $(space),$(comma),$(_SOURCE_TYPE))
 INDIRS_RAWGO = $(subst $(space),$(comma),$(_INDIRS_RAWGO))
@@ -31,7 +32,7 @@ read_features:
 	julia --project=./ scripts/read_features.jl --min_nv $(MIN_NV) --max_nv $(MAX_NV)
 
 serialize:
-	julia --project=./ scripts/serialize_instances.jl --dbpath $(DBPATH) --min_nv $(MIN_NV) --max_nv $(MAX_NV) --serialize_path $(SERIALIZE_PATH)
+	julia --project=./ scripts/serialize_instances.jl --dbpath $(DBPATH) --min_nv $(MIN_NV) --max_nv $(MAX_NV) --serialize_path $(SERIALIZE_PATH) --graphs_path $(GRAPHS_PATH)
 
 runtest:
 	julia --project=./ test/runtest.jl
@@ -39,3 +40,9 @@ runtest:
 process_data: read_basic_features read_features
 
 load_and_process: load_instance read_basic_features read_features serialize
+
+delete_db:
+	rm -rf data/cliquestrees/*
+	rm -rf data/cliques/
+	rm -rf data/networks_serialize/*
+	rm -rf data/PowerFlowNetworks.sqlite
