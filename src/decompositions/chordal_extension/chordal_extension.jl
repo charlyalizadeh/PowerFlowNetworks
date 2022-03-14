@@ -14,5 +14,9 @@ const chordal_extension_func = Dict(
 
 
 function chordal_extension(g::AbstractGraph, extension_alg::AbstractString; kwargs...)
-    return chordal_extension_func[extension_alg](g; kwargs...)
+    chordal_g, data = chordal_extension_func[extension_alg](g; kwargs...)
+    for v in vertices(chordal_g)
+        rem_edge!(chordal_g, v, v)
+    end
+    return chordal_g, data
 end
