@@ -1,5 +1,5 @@
 function has_opf_tables(db::SQLite.DB)
-    tables = ["instances", "decompositions", "mergers", "combinations", "solve_results"]
+    tables = ["instances", "decompositions", "merges", "combinations"]
     return all(map(in(SQLite.tables(db)[:name]), tables))
 end
 

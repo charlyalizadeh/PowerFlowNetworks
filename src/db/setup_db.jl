@@ -61,6 +61,7 @@ function create_decompositions_table(db)
 
         clique_path TEXT,
         cliquetree_path TEXT,
+        graph_path TEXT,
 
         nb_added_edge_dec INTEGER,
         nb_edge INTEGER,
@@ -75,6 +76,10 @@ function create_decompositions_table(db)
         cliques_size_max INTEGER, cliques_size_min INTEGER, cliques_size_mean REAL, cliques_size_median REAL, cliques_size_var REAL,
         nb_lc INTEGER,
 
+        solve_config_path TEXT,
+        date_solving TEXT,
+        solve_log_path TEXT,
+
         PRIMARY KEY(id),
         FOREIGN KEY(origin_name, origin_scenario) REFERENCES instances(name, scenario)
     )
@@ -82,16 +87,18 @@ function create_decompositions_table(db)
     SQLite.execute(db, createtable_query)
 end
 
-function create_mergers_table(db)
+function create_merges_table(db)
     createtable_query = """
-    CREATE TABLE IF NOT EXISTS mergers(
+    CREATE TABLE IF NOT EXISTS merges(
         in_id INTEGER NOT NULL,
         out_id INTEGER NOT NULL,
-        merge_type TEXT NOT NULL,
-        merge_criterion TEXT NOT NULL,
-        merge_treshold TEXT NOT NULL,
+        heuristics TEXT NOT NULL,
+        treshold_name TEXT NOT NULL,
+        treshold_percent REAL NOT NULL,
 
-        PRIMARY KEY(in_id, merge_type, merge_criterion, merge_treshold),
+        nb_edge_added INT NOT NULL,
+
+        PRIMARY KEY(in_id, out_id),
         FOREIGN KEY(in_id) REFERENCES decompositions(id),
         FOREIGN KEY(out_id) REFERENCES decompositions(id)
     )
@@ -116,28 +123,11 @@ function create_combinations_table(db)
     SQLite.execute(db, createtable_query)
 end
 
-function create_solve_results_table(db)
-    createtable_query = """
-    CREATE TABLE IF NOT EXISTS solve_results(
-        id INTEGER NOT NULL,
-        solve_config_path TEXT,
-        date TEXT NOT NULL,
-        solve_log_path TEXT,
-        decomposition_id INTEGER NOT NULL,
-
-        PRIMARY KEY(id),
-        FOREIGN KEY(decomposition_id) REFERENCES decompositions(id)
-    )
-    """
-    SQLite.execute(db, createtable_query)
-end
-
 function setup_db(name)
     db = SQLite.DB(name)
     create_instances_table(db)
     create_decompositions_table(db)
-    create_mergers_table(db)
+    create_merges_table(db)
     create_combinations_table(db)
-    create_solve_results_table(db)
     return db
 end
