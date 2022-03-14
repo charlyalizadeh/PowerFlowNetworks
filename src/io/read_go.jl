@@ -6,7 +6,9 @@ _get_rawgo_colnames() = Dict(
     "GENERATOR" => ["I", "ID", "PG", "QG", "QT", "QB", "VS", "IREG", "MBASE", "ZR", "ZX", "RT", "XT", "GTAP",
                    "STAT", "RMPCT", "PT", "PB", "O1", "F1", "O2", "F2", "O3", "F3", "O4", "F4", "WMOD", "WPF"],
     "BRANCH" => ["I", "J", "CKT", "R", "X", "B", "RATEA", "RATEB", "RATEC", "GI", "BI", "GJ", "BJ", "ST", "MET",
-                "LEN", "O1", "F1", "O2", "F2", "O3", "F3", "O4", "F4"]
+                "LEN", "O1", "F1", "O2", "F2", "O3", "F3", "O4", "F4"],
+    "TRANSFORMER" => ["I", "J", "K", "CKT", "CW", "CZ", "CM", "MAG1", "MAG2", "NMETR", "NAME", "STAT", "O1", "F1",
+                      "O2", "F2", "O3", "F3", "O4", "F4", "VECGRP"]
 )
 
 _get_rawgo_apply_colnames() = Dict(
@@ -15,9 +17,11 @@ _get_rawgo_apply_colnames() = Dict(
     "FIXED SHUNT" => ["GL", "BL"]
 )
 
+
 # Parse .raw file
-function _parse_rawgo_mat(block; startat=1, eol='\n', delim=',')
+function _parse_rawgo_mat(block; startat=1, eol='\n', delim=',', modulo=1)
     lines = split(block, eol)[startat:end]
+    lines = [l for (i, l) in enumerate(lines) if (i - 1) % modulo == 0]
     matrix = zeros(0, 0)
     for (i, l) in enumerate(lines)
         if i == 1
@@ -29,7 +33,6 @@ function _parse_rawgo_mat(block; startat=1, eol='\n', delim=',')
     end
     return matrix
 end
-
 
 # Convert raw matrix to dataframes
 function _data_rawgo_to_dfs(data)
@@ -81,12 +84,13 @@ function _extract_gen(dfs)
     return gen
 end
 function _extract_branch(dfs)
-    nbranch = nrow(dfs["BRANCH"])
+    nbranch = nrow(dfs["BRANCH"]) + nrow(dfs["TRANSFORMER"])
     if nbranch == 0
         return zeros(0, 21)
     end
     branch = zeros(nbranch, 21)
-    branch[:, [1, 2, 3, 4, 5, 6, 7, 8, 11]] .= dfs["BRANCH"][!, [:I, :J, :R, :X, :B, :RATEA, :RATEB, :RATEC, :ST]]
+    branch[begin:nrow(dfs["BRANCH"]), [1, 2, 3, 4, 5, 6, 7, 8, 11]] .= dfs["BRANCH"][!, [:I, :J, :R, :X, :B, :RATEA, :RATEB, :RATEC, :ST]]
+    branch[nrow(dfs["BRANCH"]) + 1:end, [1, 2]] .= dfs["TRANSFORMER"][!, [:I, :J]]
     return branch
 end
 
@@ -100,14 +104,16 @@ function get_data_rawgo(path::AbstractString)
         2 => "LOAD",
         3 => "FIXED SHUNT",
         4 => "GENERATOR",
-        5 => "BRANCH"
+        5 => "BRANCH",
+        6 => "TRANSFORMER"
     )
     data = Dict()
-    stop_pattern = ["TRANSFORMER", "end non-transformer"]
+    stop_pattern = ["END OF TRANSFORMER", "end transformer"]
     for (i, block) in enumerate(blocks)
         any(map(x -> occursin(x, block), stop_pattern)) && break
         startat = i == 1 ? 4 : 2
-        data[blocks_name[i]] = _parse_rawgo_mat(block; startat=startat)
+        modulo = i == 6 ? 4 : 1
+        data[blocks_name[i]] = _parse_rawgo_mat(block; startat=startat, modulo=modulo)
     end
     dfs = _data_rawgo_to_dfs(data)
     _clean_rawgo_dfs(dfs)
@@ -134,6 +140,23 @@ function nbranch_rawgo(path::AbstractString; distinct_pair=false)
         nbranch = length(split(blocks[5], '\n')) - 1
     end
     return nbranch
+end
+
+function ntransformer_rawgo(path::AbstractString; distinct_pair=false)
+    ntransformer = nothing
+    file_string = read(open(path, "r"), String)
+    blocks = split(file_string, r"\n0 \/")
+    if distinct_pair
+        lines = split(blocks[6], '\n')[2:end]
+        lines = [l for (i, l) in enumerate(lines) if (i - 1) % 4 == 0]
+        transformers = [Set(parse.(Int, split(l, ',')[1:2])) for l in lines]
+        ntransformer = length(unique(transformers))
+    else
+        lines = split(blocks[6], '\n')[2:end]
+        lines = [l for (i, l) in enumerate(lines) if (i - 1) % 4 == 0]
+        ntransformer = length(lines)
+    end
+    return ntransformer
 end
 
 function ngen_rawgo(path::AbstractString; distinct_pair=false)

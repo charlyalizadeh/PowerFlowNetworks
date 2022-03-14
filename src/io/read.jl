@@ -30,6 +30,14 @@ const ngen_functions = Dict(
     "RAWX" => ngen_rawx,
     "RAWGO" => ngen_rawgo
 )
+const ntransformer_functions = Dict(
+    "MATPOWER-M" => ntransformer_matpower_m,
+    "MATPOWER-MAT" => ntransformer_matpower_mat,
+    "RAW" => ntransformer_raw,
+    "RAWX" => ntransformer_rawx,
+    "RAWGO" => ntransformer_rawgo
+)
+
 
 function read_network(path::AbstractString, format::AbstractString)
     bus, gen, branch, baseMVA = get_data_functions[format](path)
@@ -41,7 +49,8 @@ function read_network(path::AbstractString, format::AbstractString)
 end
 
 nbus(path::AbstractString, format::AbstractString) = nbus_functions[format](path)
-nbranch(path::AbstractString, format::AbstractString; distinct_pair=false) = nbranch_functions[format](path; distinct_pair)
+nbranch(path::AbstractString, format::AbstractString; distinct_pair=false) = nbranch_functions[format](path; distinct_pair) +
+                                                                             ntransformer_functions[format](path; distinct_pair)
 ngen(path::AbstractString, format::AbstractString; distinct_pair=false) = ngen_functions[format](path; distinct_pair)
 
 function nbus(path::AbstractString)

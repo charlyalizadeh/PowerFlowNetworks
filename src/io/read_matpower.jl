@@ -66,6 +66,7 @@ end
 nbus_matpower_mat(path::AbstractString) = error("Not Implemented")
 nbranch_matpower_mat(path::AbstractString; distinct_pair=false) = error("Not Implemented")
 ngen_matpower_mat(path::AbstractString; distinct_pair=false) = error("Not Implemented")
+ntransformer_matpower_mat(path::AbstractString; distinct_pair=false) = error("Not Implemented")
 
 function nbus_matpower_m(path::AbstractString)
     file_string = read(open(path, "r"), String)
@@ -88,6 +89,10 @@ function nbranch_matpower_m(path::AbstractString; distinct_pair=false)
         nbranch = length(branches)
     end
     return nbranch
+end
+
+function ntransformer_matpower_m(path::AbstractString; distinct_pair=false)
+    return 0
 end
 
 function ngen_matpower_m(path::AbstractString; distinct_pair=false)
