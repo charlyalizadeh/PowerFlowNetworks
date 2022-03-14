@@ -23,6 +23,9 @@ function parse_commandline()
         "--serialize_path"
             help = "Where to store the serialize networks."
             default = "data/networks_serialize/"
+        "--graphs_path"
+            help = "Where to store the graphs."
+            default = "data/graphs/"
         "--recompute"
             help = "Wether to restore the serialize `PowerFlowNetwork` object if the path already exists in the database."
             default = false
@@ -34,7 +37,7 @@ end
 function main()
     parsed_args = parse_commandline()
     db = SQLite.DB(parsed_args["dbpath"])
-    serialize_instances!(db, parsed_args["serialize_path"];
+    serialize_instances!(db, parsed_args["serialize_path"], parsed_args["graphs_path"];
                          min_nv=parsed_args["min_nv"], max_nv=parsed_args["max_nv"],
                          recompute=parsed_args["recompute"])
 end
