@@ -15,12 +15,17 @@ function serialize_instance_dfrow!(db::SQLite.DB, serialize_path, graphs_path, r
 end
 
 function serialize_instances!(db::SQLite.DB, serialize_path, graphs_path;
-                              min_nv=typemin(Int), max_nv=typemax(Int), recompute=false)
+                              min_nv=typemin(Int), max_nv=typemax(Int), recompute=false,
+                              subset=nothing)
     !isdir(serialize_path) && mkpath(serialize_path)
     !isdir(graphs_path) && mkpath(graphs_path)
     query = "SELECT name, scenario, source_type, source_path FROM instances WHERE nbus >= $min_nv AND nbus <= $max_nv"
     if !recompute
         query *= " AND pfn_path IS NULL"
+    end
+    if !isnothing(subset)
+        subset = ["('$(s[1])', $(s[2]))" for s in subset]
+        query *= " AND (name, scenario) IN ($(join(subset, ',')))"
     end
     results = DBInterface.execute(db, query) |> DataFrame
     serialize_func!(row) = serialize_instance_dfrow!(db, serialize_path, graphs_path, row)

@@ -53,10 +53,15 @@ function generate_decompositions!(db::SQLite.DB,
                                   cliques_path, cliquetrees_path, graphs_path,
                                   extension_alg::AbstractString, preprocess_path::AbstractString;
                                   seed=MersenneTwister(42), rng=MersenneTwister(42),
-                                  min_nv=typemin(Int), max_nv=typemax(Int), kwargs...)
+                                  min_nv=typemin(Int), max_nv=typemax(Int), subset=nothing,
+                                  kwargs...)
     !isdir(cliques_path) && mkpath(cliques_path)
     !isdir(cliquetrees_path) && mkpath(cliquetrees_path)
     query = "SELECT name, scenario, graph_path FROM instances WHERE nbus >= $min_nv AND nbus <= $max_nv"
+    if !isnothing(subset)
+        subset = ["('$(s[1])', $(s[2]))" for s in subset]
+        query *= " AND (name, scenario) IN ($(join(subset, ',')))"
+    end
     option = JSON.parse(read(open(preprocess_path, "r"), String))
     option = Dict(Symbol(k) => v for (k, v) in option)
     results = DBInterface.execute(db, query) |> DataFrame

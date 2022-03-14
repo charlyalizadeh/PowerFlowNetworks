@@ -16,10 +16,14 @@ function save_basic_features_instance_dfrow!(db::SQLite.DB, row)
     save_basic_features_instance!(db, row[:name], row[:scenario], row[:source_type], row[:source_path])
 end
 
-function save_basic_features_instances!(db::SQLite.DB; recompute=false)
+function save_basic_features_instances!(db::SQLite.DB; recompute=false, subset=nothing)
     query = "SELECT name, scenario, source_type, source_path FROM instances"
     if !recompute
         query *= " WHERE nbus IS NULL OR nbranch_unique IS NULL OR nbranch IS NULL OR ngen IS NULL"
+    end
+    if !isnothing(subset)
+        subset = ["('$(s[1])', $(s[2]))" for s in subset]
+        query *= " AND (name, scenario) IN ($(join(subset, ',')))"
     end
     results = DBInterface.execute(db, query) |> DataFrame
     save_func!(row) = save_basic_features_instance_dfrow!(db, row)
