@@ -1,3 +1,9 @@
+function make_complete!(graph, edges)
+    for edge in combinations(edges, 2)
+        add_edge!(graph, edge...)
+    end
+end
+
 function buildmeta(g::AbstractGraph)
     mg = MetaGraph(g)
     for v in vertices(mg)
@@ -6,21 +12,13 @@ function buildmeta(g::AbstractGraph)
     return mg
 end
 
-function build_graph_from_cliquetree(cliques::AbstractVector, cliquetree::AbstractVector)
-    mg = MetaGraph(length(cliques))
-    set_indexing_prop!(mg, :clique)
-    for (i, c) in enumerate(cliques)
-        set_indexing_prop!(mg, i, :clique, c)
+function build_graph_from_cliques(cliques::AbstractVector)
+    nb_vertex = maximum([maximum(c) for c in cliques])
+    g = SimpleGraph(nb_vertex)
+    for clique in cliques
+        make_complete!(g, clique)
     end
-    for edge in cliquetree
-        c1 = cliques[edge[1]]
-        c2 = cliques[edge[2]]
-        src = mg[src, :clique]
-        dst = mg[dst, :clique]
-        add_edge!(mg, src, dst)
-        set_prop!(mg, src, dst, :weight, length(intersect(c1, c2)))
-    end
-    return mg
+    return g
 end
 
 function build_cliquetree(cliques::Vector{Vector{Int}})
