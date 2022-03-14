@@ -48,7 +48,8 @@ end
 function merge_dec(cliques::AbstractVector, cliquetree::AbstractVector,
                    heuristics=["sliwak", "molzahn"], heuristic_switch=[1];
                    treshold_name::AbstractString="cliques_nv_up",
-                   merge_kwargs)
+                   merge_kwargs::AbstractDict{String, <:Any})
+    merge_kwargs = Dict{String, Any}(merge_kwargs)
     merge_kwargs["cliques"] = cliques
     merge_kwargs["cliquetree"] = cliquetree
     treshold = treshold_functions[treshold_name](merge_kwargs)
