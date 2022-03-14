@@ -123,8 +123,15 @@ function create_combinations_table(db)
     SQLite.execute(db, createtable_query)
 end
 
-function setup_db(name)
+function setup_db(name; delete_if_exists=false)
     db = SQLite.DB(name)
+    if delete_if_exists
+        delete_table(db, table) = DBInterface.execute(db, "DROP TABLE IF EXISTS $table")
+        delete_table(db, "instances")
+        delete_table(db, "decompositions")
+        delete_table(db, "merges")
+        delete_table(db, "combinations")
+    end
     create_instances_table(db)
     create_decompositions_table(db)
     create_merges_table(db)
