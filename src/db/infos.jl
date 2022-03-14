@@ -3,7 +3,7 @@ function has_opf_tables(db::SQLite.DB)
     return all(map(in(SQLite.tables(db)[:name]), tables))
 end
 
-function state_columns(db::SQLite.DB, table, columns)
+function count_missing_columns(db::SQLite.DB, table, columns)
     query = """
     SELECT $(join(columns, ',')) FROM $table 
     WHERE $(join(columns, " IS NULL OR ")) IS NULL
@@ -12,4 +12,10 @@ function state_columns(db::SQLite.DB, table, columns)
     states = Dict(zip(names(results), map(x -> sum(ismissing.(x)), eachcol(results))))
     states["total"] = nrow(results)
     return states
+end
+
+function table_count(db::SQLite.DB, table)
+    query = "SELECT COUNT(*) FROM $table"
+    results = DBInterface.execute(db, query) |> DataFrame
+    return results[1, Symbol("COUNT(*)")][1]
 end
