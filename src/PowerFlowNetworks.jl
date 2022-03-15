@@ -37,6 +37,7 @@ include("db/inserts.jl")
 include("utils/graphs/operators.jl")
 include("decompositions/chordal_extension/chordal_extension.jl")
 include("decompositions/merge/merge.jl")
+include("decompositions/combine/combine.jl")
 include("db/operations.jl")
 
 
@@ -55,8 +56,8 @@ export has_opf_tables, count_missing_columns, table_count
 export load_instance!
 export chordal_extension
 export merge_dec
+export combine_graph
 export save_features_instances!, save_basic_features_instances!, save_single_features_instances!,
-       serialize_instances!, generate_decompositions!, merge_decompositions!, check_chordality_decompositions,
-       check_connectivity_instances, check_selfloops
+       serialize_instances!, generate_decompositions!, merge_decompositions!, combine_decompositions!, check_sanity
 
 end
