@@ -46,3 +46,9 @@ delete_db:
 	rm -rf data/cliques/
 	rm -rf data/networks_serialize/*
 	rm -rf data/PowerFlowNetworks.sqlite
+
+clean_test_data:
+	rm test/data/cliques/*
+	rm test/data/cliquetrees/*
+	rm test/data/graphs/*
+	rm test/data/networks_serialized/*
