@@ -7,31 +7,31 @@ function merge_decomposition!(db::SQLite.DB, id::Int, name::AbstractString, scen
     println("Merging decomposition: $name $scenario $id. ($heuristic, $heuristic_switch)")
     
     # Retrieve the cliques array and the cliquetree
-    cliques = read_cliques(clique_path)
+    clique = read_clique(clique_path)
     cliquetree = read_cliquetree(cliquetree_path)
     
     # Merge
-    merged_cliques, merged_cliquetree = merge_dec(cliques, cliquetree, heuristic, heuristic_switch;
-                                                  treshold_name=treshold_name, merge_kwargs=merge_kwargs)
+    merged_clique, merged_cliquetree = merge_dec(clique, cliquetree, heuristic, heuristic_switch;
+                                                 treshold_name=treshold_name, merge_kwargs=merge_kwargs)
 
     # Extract features
     g = loadgraph(graph_path)
-    merged_g = build_graph_from_cliques(merged_cliques)
+    merged_g = build_graph_from_clique(merged_clique)
     features = get_features_graph(merged_g)
-    nb_edge_added = ne(merged_g) - ne(g)
-    features["nb_lc"] = get_nb_lc(merged_cliques, merged_cliquetree)
-    features["nb_added_edge_dec"] = nb_added_edge_dec + nb_edge_added
-    merge!(features, get_cliques_features(merged_cliques))
+    nb_added_edge = ne(merged_g) - ne(g)
+    features["nb_lc"] = get_nb_lc(merged_clique, merged_cliquetree)
+    features["nb_added_edge_dec"] = nb_added_edge_dec + nb_added_edge
+    merge!(features, get_clique_features(merged_clique))
 
     # Save cliques, cliquetree and graph
     cliques_path = dirname(clique_path)
     cliquetrees_path = dirname(cliquetree_path)
     graphs_path = dirname(graph_path)
     uuid = uuid1(rng)
-    clique_path = joinpath(cliques_path, "$(name)_$(scenario)_$(uuid)_cliques.csv")
+    clique_path = joinpath(cliques_path, "$(name)_$(scenario)_$(uuid)_clique.csv")
     cliquetree_path = joinpath(cliquetrees_path, "$(name)_$(scenario)_$(uuid)_cliquetree.csv")
     graph_path_merge = joinpath(graphs_path, "$(name)_$(scenario)_$(uuid)_graph.lgz")
-    save_cliques(merged_cliques, clique_path) 
+    save_clique(merged_clique, clique_path) 
     save_cliquetree(merged_cliquetree, cliquetree_path)
     savegraph(graph_path_merge, merged_g)
 
@@ -46,7 +46,7 @@ function merge_decomposition!(db::SQLite.DB, id::Int, name::AbstractString, scen
     out_id = out_id[1, :id]
     heuristics_db = join(heuristic, ":")
     treshold_percent = merge_kwargs["treshold_percent"]
-    insert_merge!(db, id, out_id, heuristics_db, treshold_name, treshold_percent, nb_edge_added)
+    insert_merge!(db, id, out_id, heuristics_db, treshold_name, treshold_percent, nb_added_edge)
 end
 
 function merge_decomposition_dfrow!(db::SQLite.DB, row,

@@ -142,9 +142,9 @@ function get_features_instance(network::PowerFlowNetwork)
     return features
 end
 
-function get_cliques_features(cliques::Vector{Vector{Int}})
-    cliques_size = [length(c) for c in cliques]
+function get_clique_features(clique::Vector{Vector{Int}})
+    clique_size = [length(c) for c in clique]
     features = Dict()
-    features["cliques_size_max"], features["cliques_size_min"], features["cliques_size_mean"], features["cliques_size_median"], features["cliques_size_var"] = get_population_stats(cliques_size)
+    features["clique_size_max"], features["clique_size_min"], features["clique_size_mean"], features["clique_size_median"], features["clique_size_var"] = get_population_stats(clique_size)
     return features
 end

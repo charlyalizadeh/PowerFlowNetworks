@@ -1,6 +1,6 @@
-function sliwak_heuristic(cliques::AbstractVector, edge; merge_kwargs)
-    clique1 = cliques[edge[1]]
-    clique2 = cliques[edge[2]]
+function sliwak_heuristic(clique::AbstractVector, edge; merge_kwargs)
+    clique1 = clique[edge[1]]
+    clique2 = clique[edge[2]]
     size_intersect = length(intersect(clique1, clique2))
     size_clique1 = length(clique1)
     size_clique2 = length(clique2)
@@ -12,7 +12,7 @@ function sliwak_heuristic(cliques::AbstractVector, edge; merge_kwargs)
     return cost
 end
 
-function update_sliwak(;cliques, edge, merge_kwargs)
-    size_intersect = length(intersect(cliques[edge[1]], cliques[edge[2]]))
+function update_sliwak(;clique, edge, merge_kwargs)
+    size_intersect = length(intersect(clique[edge[1]], clique[edge[2]]))
     merge_kwargs["nb_lc"] -= size_intersect * (2 * size_intersect + 1)
 end

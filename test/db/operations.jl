@@ -16,7 +16,8 @@
                              "minimum_degree", "test/data/configs/preprocess_add_random_50.json";
                              subset=[("C2S6N02045", 1)])
     @test table_count(db, "decompositions") == 3
-    merge_decompositions!(db, ["molzahn"], [0], "cliques_nv_up", Dict("treshold_percent" => 0.5); subset=[1, 2])
+    merge_decompositions!(db, ["molzahn"], [0], "clique_nv_up", Dict("treshold_percent" => 0.5); subset=[1, 2])
     @test table_count(db, "decompositions") == 5
     @test table_count(db, "merges") == 2
+    combine_decompositions!(db; how="vertices_intersect", extension_alg="cholesky")
 end

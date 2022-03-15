@@ -16,16 +16,16 @@ function generate_decomposition!(db::SQLite.DB, name::AbstractString, scenario::
     # Features extraction
     features = get_features_graph(chordal_g)
     features["nb_added_edge_dec"] = ne(chordal_g) - ne(g)
-    cliques = maximal_cliques(chordal_g)
-    cliquetree, nb_lc = get_cliquetree_array(cliques)
-    merge!(features, get_cliques_features(cliques))
+    clique = maximal_cliques(chordal_g)
+    cliquetree, nb_lc = get_cliquetree_array(clique)
+    merge!(features, get_clique_features(clique))
 
     # Save cliques and cliquetree
     uuid = uuid1(rng)
-    clique_path = joinpath(cliques_path, "$(name)_$(scenario)_$(uuid)_cliques.csv")
+    clique_path = joinpath(cliques_path, "$(name)_$(scenario)_$(uuid)_clique.csv")
     cliquetree_path = joinpath(cliquetrees_path, "$(name)_$(scenario)_$(uuid)_cliquetree.csv")
     graph_path_dec = joinpath(graphs_path, "$(name)_$(scenario)_$(uuid)_graphs.lgz")
-    save_cliques(cliques, clique_path) 
+    save_clique(clique, clique_path) 
     save_cliquetree(cliquetree, cliquetree_path)
     savegraph(graph_path_dec, chordal_g)
 

@@ -13,22 +13,22 @@ function combine_decomposition!(db::SQLite.DB, name::AbstractString, scenario::U
     g3 = combine_graph(g1, g2; how=how, extension_alg=extension_alg)
 
     # Extract features
-    cliques = maximal_cliques(g3)
-    cliquetree, nb_lc = get_cliquetree_array(cliques)
+    clique = maximal_cliques(g3)
+    cliquetree, nb_lc = get_cliquetree_array(clique)
     features = get_features_graph(g3)
     features["nb_lc"] = nb_lc
     features["nb_added_edge_dec"] = nb_added_edge_dec + (ne(g3) - ne(g1))
-    merge!(features, get_cliques_features(cliques))
+    merge!(features, get_clique_features(clique))
 
     # Save cliques, cliquetree and graph
     cliques_path = dirname(clique_path)
     cliquetrees_path = dirname(cliquetree_path)
     graphs_path = dirname(graph_path_1)
     uuid = uuid1(rng)
-    clique_path = joinpath(cliques_path, "$(name)_$(scenario)_$(uuid)_cliques.csv")
+    clique_path = joinpath(cliques_path, "$(name)_$(scenario)_$(uuid)_clique.csv")
     cliquetree_path = joinpath(cliquetrees_path, "$(name)_$(scenario)_$(uuid)_cliquetree.csv")
     graph_path = joinpath(graphs_path, "$(name)_$(scenario)_$(uuid)_graph.lgz")
-    save_cliques(cliques, clique_path) 
+    save_clique(clique, clique_path) 
     save_cliquetree(cliquetree, cliquetree_path)
     savegraph(graph_path, g3)
 

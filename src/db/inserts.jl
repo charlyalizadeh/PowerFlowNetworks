@@ -30,10 +30,10 @@ end
 
 function insert_merge!(db::SQLite.DB, in_id::Int, out_id::Int,
                        heuristics::AbstractString, treshold_name::AbstractString,
-                       treshold_percent::Float64, nb_edge_added::Int)
+                       treshold_percent::Float64, nb_added_edge::Int)
     query = """
-    INSERT INTO merges(in_id, out_id, heuristics, treshold_name, treshold_percent, nb_edge_added)
-    VALUES ($in_id, $out_id, '$heuristics', '$treshold_name', $treshold_percent, $nb_edge_added)
+    INSERT INTO merges(in_id, out_id, heuristics, treshold_name, treshold_percent, nb_added_edge)
+    VALUES ($in_id, $out_id, '$heuristics', '$treshold_name', $treshold_percent, $nb_added_edge)
     """
     DBInterface.execute(db, query)
 end

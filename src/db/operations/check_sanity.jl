@@ -13,12 +13,12 @@ function _check_self_loops(row)
     return !has_self_loops(g)
 end
 
-function _check_index_cliques(row)
-    cliques = read_cliques(row[:clique_path])
+function _check_index_clique(row)
+    clique = read_clique(row[:clique_path])
     cliquetree = read_cliquetree(row[:cliquetree_path])
     for edge in cliquetree
-        src = cliques[edge[1]]
-        dst = cliques[edge[2]]
+        src = clique[edge[1]]
+        dst = clique[edge[2]]
         if isempty(intersect(src, dst))
             return false
         end
@@ -42,28 +42,28 @@ const check_functions = Dict(
     "chordality" => _check_chordality,
     "connectivity" => _check_connectivity,
     "self_loops" => _check_self_loops,
-    "index_cliques" => _check_index_cliques,
+    "index_clique" => _check_index_clique,
     "source_graph" => _check_source_graph
 )
 const need_db = Dict(
     "chordality" => false,
     "connectivity" => false,
     "self_loops" => false,
-    "index_cliques" => false,
+    "index_clique" => false,
     "source_graph" => true
 )
 const valid_check_instance = Dict(
     "chordality" => true,
     "connectivity" => true,
     "self_loops" => true,
-    "index_cliques" => false,
+    "index_clique" => false,
     "source_graph" => false,
 )
 const valid_check_decomposition = Dict(
     "chordality" => true,
     "connectivity" => true,
     "self_loops" => true,
-    "index_cliques" => true,
+    "index_clique" => true,
     "source_graph" => true,
 )
 

@@ -26,7 +26,7 @@ function parse_commandline()
         "--treshold_name"
             help = "Name of the treshold used to stop the merge"
             arg_type = String
-            default = "cliques_nv_up"
+            default = "clique_nv_up"
         "--merge_kwargs"
             help = "Keyword arguments used in the merge algorithm"
             arg_type = Dict

@@ -73,7 +73,7 @@ function create_decompositions_table(db)
         radius INTEGER,
 
         nb_clique INTEGER,
-        cliques_size_max INTEGER, cliques_size_min INTEGER, cliques_size_mean REAL, cliques_size_median REAL, cliques_size_var REAL,
+        clique_size_max INTEGER, clique_size_min INTEGER, clique_size_mean REAL, clique_size_median REAL, clique_size_var REAL,
         nb_lc INTEGER,
 
         solve_config_path TEXT,
@@ -96,7 +96,7 @@ function create_merges_table(db)
         treshold_name TEXT NOT NULL,
         treshold_percent REAL NOT NULL,
 
-        nb_edge_added INT NOT NULL,
+        nb_added_edge INT NOT NULL,
 
         PRIMARY KEY(in_id, out_id),
         FOREIGN KEY(in_id) REFERENCES decompositions(id),

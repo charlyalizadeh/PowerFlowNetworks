@@ -12,21 +12,21 @@ function buildmeta(g::AbstractGraph)
     return mg
 end
 
-function build_graph_from_cliques(cliques::AbstractVector)
-    nb_vertex = maximum([maximum(c) for c in cliques])
+function build_graph_from_clique(clique::AbstractVector)
+    nb_vertex = maximum([maximum(c) for c in clique])
     g = SimpleGraph(nb_vertex)
-    for clique in cliques
+    for clique in clique
         make_complete!(g, clique)
     end
     return g
 end
 
-function build_cliquetree(cliques::Vector{Vector{Int}})
-    graph = SimpleGraph(length(cliques))
-    dstmx = zeros(Int, length(cliques), length(cliques))
-    for i in 1:length(cliques) - 1
-        for j in i + 1:length(cliques)
-            value = length(intersect(cliques[i], cliques[j]))
+function build_cliquetree(clique::Vector{Vector{Int}})
+    graph = SimpleGraph(length(clique))
+    dstmx = zeros(Int, length(clique), length(clique))
+    for i in 1:length(clique) - 1
+        for j in i + 1:length(clique)
+            value = length(intersect(clique[i], clique[j]))
             dstmx[i, j] = value
             dstmx[j, i] = value
             if value >= 1
@@ -44,7 +44,7 @@ function get_cliquetree_array(cliquetree::Vector{Graphs.SimpleEdge{T}}, dstmx) w
     return cliquetree, nb_lc
 end
 
-function get_cliquetree_array(cliques::Vector{Vector{Int}})
-    cliquetree, dstmx = build_cliquetree(cliques)
+function get_cliquetree_array(clique::Vector{Vector{Int}})
+    cliquetree, dstmx = build_cliquetree(clique)
     return get_cliquetree_array(cliquetree, dstmx)
 end

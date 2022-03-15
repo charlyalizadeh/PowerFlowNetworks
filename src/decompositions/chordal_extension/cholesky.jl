@@ -1,8 +1,8 @@
 function choleskydec(g::AbstractGraph; kwargs...)
-    matrix, permutation, nb_added_edges = choleskyfact(g)
+    matrix, permutation, nb_added_edge = choleskyfact(g)
     data = Dict("matrix" => matrix,
                 "permutation" => permutation,
-                "nb_added_edges" => nb_added_edges)
+                "nb_added_edge" => nb_added_edge)
     return SimpleGraph(matrix), data
 end
 
@@ -22,9 +22,9 @@ function choleskyfact(g::AbstractGraph; kwargs...)
     # computing L + LT
     L = sparse(F.L)
     nb_edges_L = nnz(L) - size(A,1)
-    nb_added_edges = nb_edges_L - nb_edges_A
+    nb_added_edge = nb_edges_L - nb_edges_A
     SP = L + L'
     #inverting permutation to get chordal extension of sparsity_pattern
     H = SP[invperm(F.p), invperm(F.p)]
-    return H, F.p, nb_added_edges
+    return H, F.p, nb_added_edge
 end
