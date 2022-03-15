@@ -26,6 +26,10 @@ function generate_decomposition!(db::SQLite.DB, id::Int, name::AbstractString, s
     cliquetree_path = joinpath(cliquetrees_path, "$(name)_$(scenario)_$(uuid)_cliquetree.csv")
     graph_path_dec = joinpath(graphs_path, "$(name)_$(scenario)_$(uuid)_graphs.lgz")
     save_clique(clique, clique_path) 
+    # Case when the graph is complete (1 clique)
+    if isempty(cliquetree)
+        cliquetree = [[1, 1]]
+    end
     save_cliquetree(cliquetree, cliquetree_path)
     savegraph(graph_path_dec, chordal_g)
 
