@@ -14,7 +14,8 @@ function serialize_instance_dfrow!(db::SQLite.DB, serialize_path, graphs_path, r
     serialize_instance!(db, serialize_path, graphs_path, row[:name], row[:scenario], row[:source_type], row[:source_path])
 end
 
-function serialize_instances!(db::SQLite.DB, serialize_path, graphs_path;
+function serialize_instances!(db::SQLite.DB;
+                              serialize_path, graphs_path,
                               min_nv=typemin(Int), max_nv=typemax(Int), recompute=false,
                               subset=nothing)
     !isdir(serialize_path) && mkpath(serialize_path)
@@ -24,8 +25,7 @@ function serialize_instances!(db::SQLite.DB, serialize_path, graphs_path;
         query *= " AND pfn_path IS NULL"
     end
     if !isnothing(subset)
-        subset = ["('$(s[1])', $(s[2]))" for s in subset]
-        query *= " AND (name, scenario) IN ($(join(subset, ',')))"
+        query *= " AND id IN ($(join(subset, ',')))"
     end
     @info "Serialize instance network and graph config: min_nv=$min_nv, max_nv=$max_nv, recompute=$recompute"
     @info "subset\n$subset\nend subset"

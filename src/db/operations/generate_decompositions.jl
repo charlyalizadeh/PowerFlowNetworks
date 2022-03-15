@@ -1,4 +1,4 @@
-function generate_decomposition!(db::SQLite.DB, name::AbstractString, scenario::Union{Int, AbstractString},
+function generate_decomposition!(db::SQLite.DB, id::Int, name::AbstractString, scenario::Union{Int, AbstractString},
                                  cliques_path::AbstractString, cliquetrees_path::AbstractString, graphs_path::AbstractString,
                                  extension_alg::AbstractString, option::AbstractDict,
                                  preprocess_path::AbstractString, graph_path::AbstractString;
@@ -33,31 +33,30 @@ function generate_decomposition!(db::SQLite.DB, name::AbstractString, scenario::
     date = Dates.now()
 
     features = Dict(Symbol(k) => v for (k, v) in features)
-    insert_decomposition!(db, uuid, name, scenario, extension_alg, preprocess_path, date, clique_path, cliquetree_path, graph_path_dec; features...)
+    insert_decomposition!(db, id, uuid, name, scenario, extension_alg, preprocess_path, date, clique_path, cliquetree_path, graph_path_dec; features...)
 end
 
 function generate_decomposition_dfrow!(db::SQLite.DB, row, cliques_path::AbstractString, cliquetrees_path::AbstractString,
                                        graphs_path::AbstractString,
                                        extension_alg::AbstractString, option::AbstractDict, preprocess_path::AbstractString;
                                        seed, rng, kwargs...)
-    generate_decomposition!(db, row[:name], row[:scenario], cliques_path, cliquetrees_path, graphs_path,
+    generate_decomposition!(db, row[:id], row[:name], row[:scenario], cliques_path, cliquetrees_path, graphs_path,
                             extension_alg, option,
                             preprocess_path, row[:graph_path];
                             seed=seed, rng=rng, kwargs...)
 end
 
-function generate_decompositions!(db::SQLite.DB,
+function generate_decompositions!(db::SQLite.DB;
                                   cliques_path, cliquetrees_path, graphs_path,
-                                  extension_alg::AbstractString, preprocess_path::AbstractString;
+                                  extension_alg::AbstractString, preprocess_path::AbstractString,
                                   min_nv=typemin(Int), max_nv=typemax(Int), subset=nothing,
                                   seed=MersenneTwister(42), rng=MersenneTwister(42),
                                   kwargs...)
     !isdir(cliques_path) && mkpath(cliques_path)
     !isdir(cliquetrees_path) && mkpath(cliquetrees_path)
-    query = "SELECT name, scenario, graph_path FROM instances WHERE nbus >= $min_nv AND nbus <= $max_nv"
+    query = "SELECT id, name, scenario, graph_path FROM instances WHERE nbus >= $min_nv AND nbus <= $max_nv"
     if !isnothing(subset)
-        subset = ["('$(s[1])', $(s[2]))" for s in subset]
-        query *= " AND (name, scenario) IN ($(join(subset, ',')))"
+        query *= " AND id IN ($(join(subset, ',')))"
     end
     option = JSON.parse(read(open(preprocess_path, "r"), String))
     option = Dict(Symbol(k) => v for (k, v) in option)
@@ -67,5 +66,5 @@ function generate_decompositions!(db::SQLite.DB,
     generate_function!(row) = generate_decomposition_dfrow!(db, row, cliques_path, cliquetrees_path, graphs_path,
                                                             extension_alg, option, preprocess_path;
                                                             seed=seed, rng=rng, kwargs...)
-    generate_function!.(eachrow(results[!, [:name, :scenario, :graph_path]]))
+    generate_function!.(eachrow(results[!, [:id, :name, :scenario, :graph_path]]))
 end

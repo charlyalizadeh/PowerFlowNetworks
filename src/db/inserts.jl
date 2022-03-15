@@ -9,17 +9,17 @@ function load_instance_in_db!(db::SQLite.DB,
     DBInterface.execute(db, query)
 end
 
-function insert_decomposition!(db::SQLite.DB, uuid,
+function insert_decomposition!(db::SQLite.DB, origin_id, uuid,
                                origin_name, origin_scenario, extension_alg,
                                preprocess_path, date,
                                clique_path, cliquetree_path, graph_path; kwargs...)
-    query = "INSERT INTO decompositions(uuid, origin_name, origin_scenario, extension_alg, preprocess_path, date, clique_path, cliquetree_path, graph_path"
+    query = "INSERT INTO decompositions(uuid, origin_id, origin_name, origin_scenario, extension_alg, preprocess_path, date, clique_path, cliquetree_path, graph_path"
     features = [(k, v) for (k, v) in kwargs]
     for feature in features
         feature_name = feature[1]
         query *= ", $feature_name"
     end
-    query *= ") VALUES('$uuid', '$origin_name', '$origin_scenario', '$extension_alg', '$preprocess_path', '$date', '$clique_path', '$cliquetree_path', '$graph_path'"
+    query *= ") VALUES('$uuid', $origin_id, '$origin_name', '$origin_scenario', '$extension_alg', '$preprocess_path', '$date', '$clique_path', '$cliquetree_path', '$graph_path'"
     for feature in features
         feature_value = feature[2]
         query *= ", $feature_value"

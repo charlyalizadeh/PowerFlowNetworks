@@ -34,8 +34,9 @@ function save_single_features_instance_dfrow!(db::SQLite.DB, feature_names, use_
     save_single_features_instance!(db, feature_names, use_network, row[:name], row[:scenario], row[:source_type], row[:source_path], row[:pfn_path])
 end
 
-function save_single_features_instances!(db::SQLite.DB, feature_names;
-                                         min_nv=typemin(Int), max_nv=typemax(Int), recompute=false, subset=nothing)
+function save_single_features_instances!(db::SQLite.DB;
+                                         feature_names, min_nv=typemin(Int), max_nv=typemax(Int),
+                                         recompute=false, subset=nothing)
     query = "SELECT name, scenario, source_type, source_path, pfn_path FROM instances WHERE nbus >= $min_nv AND nbus <= $max_nv"
     if !recompute
         for feature_name in feature_names
@@ -43,8 +44,7 @@ function save_single_features_instances!(db::SQLite.DB, feature_names;
         end
     end
     if !isnothing(subset)
-        subset = ["('$(s[1])', $(s[2]))" for s in subset]
-        query *= " AND (name, scenario) IN ($(join(subset, ',')))"
+        query *= " AND id IN ($(join(subset, ',')))"
     end
     use_network = any([_feature_info_dict[f][1] in (:graph, :network) for f in feature_names])
     results = DBInterface.execute(db, query) |> DataFrame

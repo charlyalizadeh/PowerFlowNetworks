@@ -1,4 +1,4 @@
-function merge_decomposition!(db::SQLite.DB, id::Int, name::AbstractString, scenario::Union{Int, AbstractString},
+function merge_decomposition!(db::SQLite.DB, id::Int, origin_id::Int, name::AbstractString, scenario::Union{Int, AbstractString},
                               clique_path::AbstractString, cliquetree_path::AbstractString, graph_path::AbstractString,
                               nb_added_edge_dec::Int,
                               heuristic::Vector{String}, heuristic_switch::Vector{Int},
@@ -39,7 +39,7 @@ function merge_decomposition!(db::SQLite.DB, id::Int, name::AbstractString, scen
     date = Dates.now()
 
     features = Dict(Symbol(k) => v for (k, v) in features)
-    insert_decomposition!(db, uuid, name, scenario, "merge", "", date, clique_path, cliquetree_path, graph_path_merge; features...)
+    insert_decomposition!(db, origin_id, uuid, name, scenario, "merge", "", date, clique_path, cliquetree_path, graph_path_merge; features...)
 
     # Insert in merge table
     out_id = DBInterface.execute(db, "SELECT id FROM decompositions WHERE uuid = '$uuid'") |> DataFrame
@@ -52,16 +52,17 @@ end
 function merge_decomposition_dfrow!(db::SQLite.DB, row,
                                     heuristic::Vector{String}, heuristic_switch::Vector{Int},
                                     treshold_name::AbstractString, merge_kwargs::AbstractDict; rng)
-    merge_decomposition!(db, row[:id], row[:origin_name], row[:origin_scenario], row[:clique_path], row[:cliquetree_path], row[:graph_path], row[:nb_added_edge_dec], 
+    merge_decomposition!(db, row[:id], row[:origin_id], row[:origin_name], row[:origin_scenario], row[:clique_path], row[:cliquetree_path], row[:graph_path], row[:nb_added_edge_dec], 
                          heuristic, heuristic_switch, treshold_name, merge_kwargs, rng=rng)
 end
 
-function merge_decompositions!(db::SQLite.DB, heuristic::Vector{String}, heuristic_switch::Vector{Int},
-                               treshold_name::AbstractString, merge_kwargs::AbstractDict;
+function merge_decompositions!(db::SQLite.DB;
+                               heuristic::Vector{String}, heuristic_switch::Vector{Int},
+                               treshold_name::AbstractString, merge_kwargs::AbstractDict,
                                min_nv=typemin(Int), max_nv=typemax(Int), subset=nothing,
                                rng=MersenneTwister(42))
                               
-    query = "SELECT id, origin_name, origin_scenario, clique_path, cliquetree_path, graph_path, nb_added_edge_dec FROM decompositions WHERE nb_vertex >= $min_nv AND nb_vertex <= $max_nv"
+    query = "SELECT id, origin_id, origin_name, origin_scenario, clique_path, cliquetree_path, graph_path, nb_added_edge_dec FROM decompositions WHERE nb_vertex >= $min_nv AND nb_vertex <= $max_nv"
     if !isnothing(subset)
         query *= " AND id IN ($(join(subset, ',')))"
     end
@@ -72,5 +73,5 @@ function merge_decompositions!(db::SQLite.DB, heuristic::Vector{String}, heurist
     merge_function!(row) = merge_decomposition_dfrow!(db, row,
                                                       heuristic, heuristic_switch, treshold_name, merge_kwargs;
                                                       rng=rng)
-    merge_function!.(eachrow(results[!, [:id, :origin_name, :origin_scenario, :clique_path, :cliquetree_path, :graph_path, :nb_added_edge_dec]]))
+    merge_function!.(eachrow(results[!, [:id, :origin_id, :origin_name, :origin_scenario, :clique_path, :cliquetree_path, :graph_path, :nb_added_edge_dec]]))
 end

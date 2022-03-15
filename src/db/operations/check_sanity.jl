@@ -85,8 +85,7 @@ end
 function check_sanity(db::SQLite.DB, checks; min_nv=typemin(Int), max_nv=typemax(Int), subset_instance=nothing, subset_decomposition=nothing)
     query = "SELECT * FROM instances WHERE nb_vertex >= $min_nv AND nb_vertex <= $max_nv"
     if !isnothing(subset_instance)
-        subset = ["('$(s[1])', $(s[2]))" for s in subset]
-        query *= " AND (name, scenario) IN ($(join(subset, ',')))"
+        query *= " AND id IN ($(join(subset_instance, ',')))"
     end
     results = DBInterface.execute(db, query) |> DataFrame
     printstyled("Checking table: instances\n"; bold=true)
@@ -94,7 +93,7 @@ function check_sanity(db::SQLite.DB, checks; min_nv=typemin(Int), max_nv=typemax
 
     query = "SELECT * FROM decompositions WHERE nb_vertex >= $min_nv AND nb_vertex <= $max_nv"
     if !isnothing(subset_decomposition)
-        query *= " AND id IN ($(join(subset, ',')))"
+        query *= " AND id IN ($(join(subset_decomposition, ',')))"
     end
     results = DBInterface.execute(db, query) |> DataFrame
     printstyled("\nChecking table: decompositions\n"; bold=true)

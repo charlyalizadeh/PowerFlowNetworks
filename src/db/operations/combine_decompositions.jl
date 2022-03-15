@@ -1,4 +1,4 @@
-function combine_decomposition!(db::SQLite.DB, name::AbstractString, scenario::Union{Int, AbstractString},
+function combine_decomposition!(db::SQLite.DB, id::Int, name::AbstractString, scenario::Union{Int, AbstractString},
                                 clique_path::AbstractString, cliquetree_path::AbstractString, nb_added_edge_dec::Int,
                                 id_1::Int, graph_path_1::AbstractString,
                                 id_2::Int, graph_path_2::AbstractString;
@@ -36,7 +36,7 @@ function combine_decomposition!(db::SQLite.DB, name::AbstractString, scenario::U
     date = Dates.now()
 
     features = Dict(Symbol(k) => v for (k, v) in features)
-    insert_decomposition!(db, uuid, name, scenario, "combine", extension_alg, date, clique_path, cliquetree_path, graph_path; features...)
+    insert_decomposition!(db, id, uuid, name, scenario, "combine", extension_alg, date, clique_path, cliquetree_path, graph_path; features...)
 
     # Insert in merge table
     out_id = DBInterface.execute(db, "SELECT id FROM decompositions WHERE uuid = '$uuid'") |> DataFrame
@@ -45,7 +45,7 @@ function combine_decomposition!(db::SQLite.DB, name::AbstractString, scenario::U
 end
 
 function combine_decomposition_dfrow!(db::SQLite.DB, row; how, extension_alg, rng)
-    combine_decomposition!(db, row["origin_name"], row["origin_scenario"],
+    combine_decomposition!(db, row["origin_id"], row["origin_name"], row["origin_scenario"],
                            row["clique_path"], row["cliquetree_path"], row["nb_added_edge_dec"],
                            row["id"], row["graph_path"],
                            row["id_1"], row["graph_path_1"];
@@ -55,14 +55,13 @@ end
 function combine_decompositions!(db::SQLite.DB; how::AbstractString, extension_alg::AbstractString,
                                  min_nv=typemin(Int), max_nv=typemax(Int), subset=nothing, exclude=["combine"], rng=MersenneTwister(42))
     query = """
-    SELECT d1.id, d1.origin_name, d1.origin_scenario, d1.graph_path, d1.clique_path, d1.cliquetree_path, d1.nb_added_edge_dec, d1.extension_alg,
+    SELECT d1.origin_id, d1.id, d1.origin_name, d1.origin_scenario, d1.graph_path, d1.clique_path, d1.cliquetree_path, d1.nb_added_edge_dec, d1.extension_alg,
            d2.id, d2.origin_name, d2.origin_scenario, d2.graph_path, d2.extension_alg
     FROM decompositions AS d1 CROSS JOIN decompositions AS d2
     WHERE d1.origin_name = d2.origin_name AND d1.origin_scenario = d2.origin_scenario AND d1.id > d2.id 
     """
     if !isnothing(subset)
-        subset = ["('$(s[1])', $(s[2]))" for s in subset]
-        query *= " AND (d1.origin_name, d1.origin_scenario) IN ($(join(subset, ',')))"
+        query *= " AND d1.origin_id IN ($(join(subset, ',')))"
     end
     for e in exclude
         query *= " AND d1.extension_alg <> '$e' AND d2.extension_alg <> '$e'"
@@ -71,6 +70,6 @@ function combine_decompositions!(db::SQLite.DB; how::AbstractString, extension_a
     @info "Combine config: how=$how, extension_alg=$extension_alg, min_nv=$min_nv, max_nv=$max_nv, exlucde=$exclude, rng=$rng"
     @info "subset\n$subset\nend subset"
     combine_function!(row) = combine_decomposition_dfrow!(db, row; how=how, extension_alg=extension_alg, rng=rng)
-    combine_function!.(eachrow(results[!, ["origin_name", "origin_scenario", "clique_path", "cliquetree_path", "nb_added_edge_dec",
+    combine_function!.(eachrow(results[!, ["origin_id", "origin_name", "origin_scenario", "clique_path", "cliquetree_path", "nb_added_edge_dec",
                                            "id", "graph_path", "id_1", "graph_path_1"]])) 
 end

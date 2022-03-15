@@ -1,6 +1,7 @@
 function create_instances_table(db)
     createtable_query = """
     CREATE TABLE IF NOT EXISTS instances(
+        id INTEGER NOT NULL,
         name TEXT NOT NULL,
         scenario INTEGER NOT NULL,
         source_path TEXT NOT NULL,
@@ -41,7 +42,8 @@ function create_instances_table(db)
         BR_X_max REAL, BR_X_min REAL, BR_X_mean REAL, BR_X_median REAL, BR_X_var REAL,
         BR_B_max REAL, BR_B_min REAL, BR_B_mean REAL, BR_B_median REAL, BR_B_var REAL,
 
-        PRIMARY KEY(name, scenario)
+        UNIQUE(name, scenario),
+        PRIMARY KEY(id)
     )
     """
     SQLite.execute(db, createtable_query)
@@ -52,6 +54,7 @@ function create_decompositions_table(db)
     CREATE TABLE IF NOT EXISTS decompositions(
         id INTEGER NOT NULL,
         uuid TEXT NOT NULL,
+        origin_id INTEGER NOT NULL,
         origin_name TEXT NOT NULL,
         origin_scenario INTEGER NOT NULL,
 
