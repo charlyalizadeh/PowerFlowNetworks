@@ -5,7 +5,7 @@
     source_path = "./test/data/case6ww.m"
     source_type = "MATPOWER-M"
     date = Dates.now()
-    load_instance!(db, name, scenario, source_path, source_type, date)
+    load_instance_in_db!(db, name, scenario, source_path, source_type, date)
 
     query = "SELECT * FROM instances"
     results = DBInterface.execute(db, query) |> DataFrame
@@ -16,5 +16,5 @@
     @test results[!, :source_type] == [source_type]
     @test results[!, :date] == [string(date)]
 
-    @test_throws SQLiteException load_instance!(db, name, scenario, source_path, source_type, date)
+    @test_throws SQLiteException load_instance_in_db!(db, name, scenario, source_path, source_type, date)
 end

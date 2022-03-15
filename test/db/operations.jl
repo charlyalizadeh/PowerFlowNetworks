@@ -1,8 +1,8 @@
 @testset "DB operations" begin
     db = setup_db("test/data/TEST_PowerFlowNetworks_SQLite.sqlite"; delete_if_exists=true)
-    load_instance!(db, "case6ww", 0, "test/data/case6ww.m", "MATPOWER-M", Dates.now())
-    load_instance!(db, "C2FEN02312", 3, "test/data/C2FEN02312_3.raw", "RAWGO", Dates.now())
-    load_instance!(db, "C2S6N02045", 1, "test/data/C2S6N02045_1.raw", "RAWGO", Dates.now())
+    load_instance_in_db!(db, "case6ww", 0, "test/data/case6ww.m", "MATPOWER-M", Dates.now())
+    load_instance_in_db!(db, "C2FEN02312", 3, "test/data/C2FEN02312_3.raw", "RAWGO", Dates.now())
+    load_instance_in_db!(db, "C2S6N02045", 1, "test/data/C2S6N02045_1.raw", "RAWGO", Dates.now())
     @test table_count(db, "instances") == 3
 
     save_basic_features_instances!(db)

@@ -66,7 +66,6 @@ function combine_decompositions!(db::SQLite.DB; how::AbstractString, extension_a
     end
     results = DBInterface.execute(db, query) |> DataFrame
     combine_function!(row) = combine_decomposition_dfrow!(db, row; how=how, extension_alg=extension_alg, rng=rng)
-    println(names(results))
     combine_function!.(eachrow(results[!, ["origin_name", "origin_scenario", "clique_path", "cliquetree_path", "nb_added_edge_dec",
                                            "id", "graph_path", "id_1", "graph_path_1"]])) 
 end

@@ -17,7 +17,7 @@
     source_path = "./test/data/case6ww.m"
     source_type = "MATPOWER-M"
     date = Dates.now()
-    load_instance!(db, name, scenario, source_path, source_type, date)
+    load_instance_in_db!(db, name, scenario, source_path, source_type, date)
     @test table_count(db, "instances") == 1
     @test table_count(db, "decompositions") == 0
     @test table_count(db, "merges") == 0

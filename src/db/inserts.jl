@@ -1,4 +1,4 @@
-function load_instance!(db::SQLite.DB,
+function load_instance_in_db!(db::SQLite.DB,
                         name::AbstractString, scenario::Int,
                         source_path::AbstractString, source_type::AbstractString,
                         date::DateTime)

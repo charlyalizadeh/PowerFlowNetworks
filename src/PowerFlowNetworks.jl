@@ -53,7 +53,7 @@ export Graph
 export add_edges_distance!, add_edges_random!, add_edges!
 export setup_db
 export has_opf_tables, count_missing_columns, table_count
-export load_instance!
+export load_instance_in_db!
 export chordal_extension
 export merge_dec
 export combine_graph
