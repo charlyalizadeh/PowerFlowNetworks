@@ -14,6 +14,7 @@ using LinearAlgebra
 using Combinatorics
 import JSON
 using MPI
+using Logging
 
 mutable struct PowerFlowNetwork
     bus::DataFrame
@@ -40,6 +41,7 @@ include("decompositions/chordal_extension/chordal_extension.jl")
 include("decompositions/merge/merge.jl")
 include("decompositions/combine/combine.jl")
 include("db/operations.jl")
+include("mpi.jl")
 
 
 PowerFlowNetwork(path::AbstractString, format::AbstractString) = read_network(path, format)
@@ -53,7 +55,7 @@ export PowerFlowNetwork
 export Graph
 export add_edges_distance!, add_edges_random!, add_edges!
 export setup_db
-export has_opf_tables, count_missing_columns, table_count
+export has_opf_tables, count_missing_columns, table_count, nb_instances, nb_decompositions, get_table_ids
 export load_instance_in_db!
 export chordal_extension
 export merge_dec
@@ -61,5 +63,6 @@ export combine_graph
 export save_features_instances!, save_basic_features_instances!, save_single_features_instances!,
        serialize_instances!, generate_decompositions!, merge_decompositions!, combine_decompositions!,
        check_sanity
+export execute_process_mpi
 
 end
