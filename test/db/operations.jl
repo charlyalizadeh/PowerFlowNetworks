@@ -19,5 +19,10 @@
     merge_decompositions!(db, ["molzahn"], [0], "clique_nv_up", Dict("treshold_percent" => 0.5); subset=[1, 2])
     @test table_count(db, "decompositions") == 5
     @test table_count(db, "merges") == 2
-    combine_decompositions!(db; how="vertices_intersect", extension_alg="cholesky")
+    generate_decompositions!(db, "test/data/cliques", "test/data/cliquetrees", "test/data/graphs",
+                             "minimum_degree", "test/data/configs/preprocess_add_random_50.json", subset=[("case6ww", 0)])
+    combine_decompositions!(db; how="vertices_intersect", extension_alg="cholesky", subset=[("case6ww", 0)])
+    combine_decompositions!(db; how="vertices_union", extension_alg="minimum_degree", subset=[("case6ww", 0)])
+    combine_decompositions!(db; how="clique_intersect", extension_alg="cholesky", subset=[("case6ww", 0)])
+    combine_decompositions!(db; how="clique_union", extension_alg="minimum_degree", subset=[("case6ww", 0)])
 end

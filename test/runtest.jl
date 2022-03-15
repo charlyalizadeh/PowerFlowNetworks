@@ -7,7 +7,8 @@ using Graphs
 using SQLite, DataFrames
 using Dates
 
-
+const db_path = "test/data/TEST_PowerFlowNetworks_SQLite.sqlite"
+isfile(db_path) && rm(db_path)
 const testdir = dirname(@__FILE__)
 
 tests = [
@@ -35,6 +36,6 @@ try
     end
 finally
     if any(x -> occursin("db", x), tests)
-        rm("test/data/TEST_PowerFlowNetworks_SQLite.sqlite")
+        rm(db_path)
     end
 end
