@@ -1,6 +1,3 @@
-_save_cliques(cliques::Vector{Vector{Int}}, path::AbstractString) = writedlm(path, cliques)
-_save_cliquetree(cliquetree::Vector{Vector{Int}}, path::AbstractString) = writedlm(path, cliquetree)
-
 function generate_decomposition!(db::SQLite.DB, name::AbstractString, scenario::Union{Int, AbstractString},
                                  cliques_path::AbstractString, cliquetrees_path::AbstractString, graphs_path::AbstractString,
                                  extension_alg::AbstractString, option::AbstractDict,
@@ -28,8 +25,8 @@ function generate_decomposition!(db::SQLite.DB, name::AbstractString, scenario::
     clique_path = joinpath(cliques_path, "$(name)_$(scenario)_$(uuid)_cliques.csv")
     cliquetree_path = joinpath(cliquetrees_path, "$(name)_$(scenario)_$(uuid)_cliquetree.csv")
     graph_path_dec = joinpath(graphs_path, "$(name)_$(scenario)_$(uuid)_graphs.lgz")
-    _save_cliques(cliques, clique_path) 
-    _save_cliquetree(cliquetree, cliquetree_path)
+    save_cliques(cliques, clique_path) 
+    save_cliquetree(cliquetree, cliquetree_path)
     savegraph(graph_path_dec, chordal_g)
 
     # Other columns
