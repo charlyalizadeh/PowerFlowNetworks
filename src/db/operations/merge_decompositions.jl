@@ -65,8 +65,8 @@ function merge_decompositions!(db::SQLite.DB, heuristic::Vector{String}, heurist
         query *= " AND id IN ($(join(subset, ',')))"
     end
     results = DBInterface.execute(db, query) |> DataFrame
-    merge_func!(row) = merge_decomposition_dfrow!(db, row,
-                                                  heuristic, heuristic_switch, treshold_name, merge_kwargs;
-                                                  rng=rng)
-    merge_func!.(eachrow(results[!, [:id, :origin_name, :origin_scenario, :clique_path, :cliquetree_path, :graph_path, :nb_added_edge_dec]]))
+    merge_function!(row) = merge_decomposition_dfrow!(db, row,
+                                                      heuristic, heuristic_switch, treshold_name, merge_kwargs;
+                                                      rng=rng)
+    merge_function!.(eachrow(results[!, [:id, :origin_name, :origin_scenario, :clique_path, :cliquetree_path, :graph_path, :nb_added_edge_dec]]))
 end

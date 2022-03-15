@@ -51,11 +51,11 @@ function add_edges_random!(g::AbstractGraph, nb_edges_to_add::Union{Int, Float64
     return length(edges_array)
 end
 
-const add_edges_func = Dict(
+const add_edges_functions = Dict(
     "distance" => add_edges_distance!,
     "random" => add_edges_random!
 )
 
 function add_edges!(g::AbstractGraph, nb_edges_to_add::Union{Int, Float64}, how::AbstractString; kwargs...)
-    add_edges_func[how](g, nb_edges_to_add; kwargs...)
+    add_edges_functions[how](g, nb_edges_to_add; kwargs...)
 end

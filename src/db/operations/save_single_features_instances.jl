@@ -48,6 +48,6 @@ function save_single_features_instances!(db::SQLite.DB, feature_names;
     end
     use_network = any([_feature_info_dict[f][1] in (:graph, :network) for f in feature_names])
     results = DBInterface.execute(db, query) |> DataFrame
-    save_func!(row) = save_single_features_instance_dfrow!(db, feature_names, use_network, row)
-    save_func!.(eachrow(results[!, [:name, :scenario, :source_type, :source_path, :pfn_path]]))
+    save_function!(row) = save_single_features_instance_dfrow!(db, feature_names, use_network, row)
+    save_function!.(eachrow(results[!, [:name, :scenario, :source_type, :source_path, :pfn_path]]))
 end

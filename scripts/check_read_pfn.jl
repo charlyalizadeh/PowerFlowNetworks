@@ -50,8 +50,8 @@ function check_networks(db, source_type; rethrow_error)
     source_type = map(s -> "'$s'", source_type)
     query = "SELECT name, scenario, source_path, source_type FROM instances WHERE source_type IN ($(join(source_type, ',')))"
     results = DBInterface.execute(db, query) |> DataFrame
-    func(row) = check_network_dfrow(row; rethrow_error=rethrow_error)
-    func.(eachrow(results[!, [:name, :scenario, :source_path, :source_type]]))
+    check_function(row) = check_network_dfrow(row; rethrow_error=rethrow_error)
+    check_function.(eachrow(results[!, [:name, :scenario, :source_path, :source_type]]))
 end
 
 function main()

@@ -6,7 +6,7 @@ function get_population_stats(population)
         return val, val, val, val, 0
     end
 end
-const _single_features_func_graph = Dict(
+const _single_features_functions_graph = Dict(
     "nb_edge" => (ne, false),
     "nb_vertex" => (nv, false),
     "global_clustering_coefficient" => (global_clustering_coefficient, false),
@@ -15,7 +15,7 @@ const _single_features_func_graph = Dict(
     "radius" => (radius, false),
     "degree" => (degree, true)
 )
-const _single_features_func_network = Dict(
+const _single_features_functions_network = Dict(
     "PD" => (:bus, :PD),
     "QD" => (:bus, :QD),
     "GS" => (:bus, :GS),
@@ -34,7 +34,7 @@ const _single_features_func_network = Dict(
     "BR_X" => (:branch, :BR_X),
     "BR_B" => (:branch, :BR_B)
 )
-const _single_features_func_source_path = Dict(
+const _single_features_functions_source_path = Dict(
     "nbus" => nbus,
     "nbranch" => nbranch,
     "nbranch_unique" => nbranch_unique,
@@ -73,18 +73,18 @@ const _feature_info_dict = Dict(
 
 # Single features
 function get_single_feature_graph(feature_name::AbstractString, g::SimpleGraph)
-    feature_tuple = _single_features_func_graph[feature_name]
+    feature_tuple = _single_features_functions_graph[feature_name]
     feature = feature_tuple[1](g)
     return !feature_tuple[2] ? feature : get_population_stats(feature)
 end
 function get_single_feature_network(feature_name::AbstractString, network::PowerFlowNetwork)
-    feature_tuple = _single_features_func_network[feature_name]
+    feature_tuple = _single_features_functions_network[feature_name]
     feature = getfield(network, feature_tuple[1])[!, feature_tuple[2]]
     return get_population_stats(feature)
 end
 function get_single_feature_source_path(feature_name::AbstractString, source_path::AbstractString)
-    feature_func = _single_features_func_source_path[feature_name]
-    feature = feature_func(source_path)
+    feature_functions = _single_features_functions_source_path[feature_name]
+    feature = feature_functions(source_path)
     return feature
 end
 

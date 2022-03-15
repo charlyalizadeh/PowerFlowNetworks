@@ -71,8 +71,8 @@ function _check_sanity(db, rows, checks)
     for c in checks
         check_results = nothing
         if need_db[c]
-            check_func(row) = check_functions[c](db, row)
-            check_results = check_func.(eachrow(rows))
+            check_function(row) = check_functions[c](db, row)
+            check_results = check_function.(eachrow(rows))
         else
             check_results = check_functions[c].(eachrow(rows))
         end

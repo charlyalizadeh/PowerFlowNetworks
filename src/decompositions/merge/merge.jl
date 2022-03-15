@@ -2,12 +2,12 @@ include("molzahn.jl")
 include("sliwak.jl")
 include("treshold_functions.jl")
 
-const heuristic_func = Dict(
+const heuristic_functions = Dict(
     "molzahn" => molzahn_heuristic,
     "sliwak" => sliwak_heuristic
 )
 
-const update_func = Dict(
+const update_functions = Dict(
     "molzahn" => update_molzahn,
     "sliwak" => update_sliwak
 )
@@ -39,7 +39,7 @@ function merge_clique(clique, cliquetree, edge)
 end
 
 function minimize(clique, cliquetree; heuristic_name, merge_kwargs)
-    heuristic = heuristic_func[heuristic_name]
+    heuristic = heuristic_functions[heuristic_name]
     deltas = [heuristic(clique, edge; merge_kwargs=merge_kwargs) for edge in cliquetree]
     index = argmin(deltas)
     return cliquetree[index]
@@ -63,7 +63,7 @@ function merge_dec(clique::AbstractVector, cliquetree::AbstractVector,
         end
         heuristic_name = heuristics[heuristic_index]
         edge = minimize(merge_kwargs["clique"], merge_kwargs["cliquetree"]; heuristic_name=heuristic_name, merge_kwargs=merge_kwargs)
-        update_func[heuristic_name](clique=merge_kwargs["clique"], cliquetree=merge_kwargs["cliquetree"], edge=edge, merge_kwargs=merge_kwargs)
+        update_functions[heuristic_name](clique=merge_kwargs["clique"], cliquetree=merge_kwargs["cliquetree"], edge=edge, merge_kwargs=merge_kwargs)
         merge_kwargs["clique"], merge_kwargs["cliquetree"] = merge_clique(merge_kwargs["clique"], merge_kwargs["cliquetree"], edge)
         iter += 1
     end

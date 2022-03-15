@@ -62,8 +62,8 @@ function generate_decompositions!(db::SQLite.DB,
     option = JSON.parse(read(open(preprocess_path, "r"), String))
     option = Dict(Symbol(k) => v for (k, v) in option)
     results = DBInterface.execute(db, query) |> DataFrame
-    generate_func!(row) = generate_decomposition_dfrow!(db, row, cliques_path, cliquetrees_path, graphs_path,
-                                                        extension_alg, option, preprocess_path;
-                                                        seed=seed, rng=rng, kwargs...)
-    generate_func!.(eachrow(results[!, [:name, :scenario, :graph_path]]))
+    generate_function!(row) = generate_decomposition_dfrow!(db, row, cliques_path, cliquetrees_path, graphs_path,
+                                                            extension_alg, option, preprocess_path;
+                                                            seed=seed, rng=rng, kwargs...)
+    generate_function!.(eachrow(results[!, [:name, :scenario, :graph_path]]))
 end
