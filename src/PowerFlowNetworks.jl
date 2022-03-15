@@ -13,6 +13,7 @@ using SparseArrays
 using LinearAlgebra
 using Combinatorics
 import JSON
+using MPI
 
 mutable struct PowerFlowNetwork
     bus::DataFrame
