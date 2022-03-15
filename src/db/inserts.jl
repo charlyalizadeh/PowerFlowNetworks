@@ -37,3 +37,13 @@ function insert_merge!(db::SQLite.DB, in_id::Int, out_id::Int,
     """
     DBInterface.execute(db, query)
 end
+
+function insert_combination!(db::SQLite.DB, in_id1::Int, in_id2::Int, out_id::Int,
+                             how::AbstractString, extension_alg::AbstractString)
+
+    query = """
+    INSERT INTO combinations(in_id1, in_id2, out_id, how, extension_alg)
+    VALUES ($in_id1, $in_id2, $out_id, '$how', '$extension_alg')
+    """
+    DBInterface.execute(db, query)
+end
