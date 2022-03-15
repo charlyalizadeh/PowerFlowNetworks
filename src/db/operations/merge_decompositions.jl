@@ -58,8 +58,9 @@ end
 
 function merge_decompositions!(db::SQLite.DB, heuristic::Vector{String}, heuristic_switch::Vector{Int},
                                treshold_name::AbstractString, merge_kwargs::AbstractDict;
-                               rng=MersenneTwister(42), min_nv=typemin(Int), max_nv=typemax(Int),
-                               subset=nothing)
+                               min_nv=typemin(Int), max_nv=typemax(Int), subset=nothing,
+                               rng=MersenneTwister(42))
+                              
     query = "SELECT id, origin_name, origin_scenario, clique_path, cliquetree_path, graph_path, nb_added_edge_dec FROM decompositions WHERE nb_vertex >= $min_nv AND nb_vertex <= $max_nv"
     if !isnothing(subset)
         query *= " AND id IN ($(join(subset, ',')))"

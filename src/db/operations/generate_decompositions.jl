@@ -49,8 +49,8 @@ end
 function generate_decompositions!(db::SQLite.DB,
                                   cliques_path, cliquetrees_path, graphs_path,
                                   extension_alg::AbstractString, preprocess_path::AbstractString;
-                                  seed=MersenneTwister(42), rng=MersenneTwister(42),
                                   min_nv=typemin(Int), max_nv=typemax(Int), subset=nothing,
+                                  seed=MersenneTwister(42), rng=MersenneTwister(42),
                                   kwargs...)
     !isdir(cliques_path) && mkpath(cliques_path)
     !isdir(cliquetrees_path) && mkpath(cliquetrees_path)
