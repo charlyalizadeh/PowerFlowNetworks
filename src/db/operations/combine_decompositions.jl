@@ -52,17 +52,20 @@ function combine_decomposition_dfrow!(db::SQLite.DB, row; how, extension_alg, rn
                            how=how, extension_alg=extension_alg, rng=rng)
 end
 
-function combine_decompositions!(db::SQLite.DB; how::AbstractString, extension_alg::AbstractString, min_nv=typemin(Int), max_nv=typemax(Int), subset=nothing, rng=MersenneTwister(42))
-    query = "SELECT id, origin_name, origin_scenario, clique_path, cliquetree_path, graph_path, nb_added_edge_dec FROM decompositions WHERE nb_vertex >= $min_nv AND nb_vertex <= $max_nv"
+function combine_decompositions!(db::SQLite.DB; how::AbstractString, extension_alg::AbstractString,
+                                 min_nv=typemin(Int), max_nv=typemax(Int), subset=nothing, exclude=["combine"], rng=MersenneTwister(42))
     query = """
-    SELECT d1.id, d1.origin_name, d1.origin_scenario, d1.graph_path, d1.clique_path, d1.cliquetree_path, d1.nb_added_edge_dec,
-           d2.id, d2.origin_name, d2.origin_scenario, d2.graph_path
+    SELECT d1.id, d1.origin_name, d1.origin_scenario, d1.graph_path, d1.clique_path, d1.cliquetree_path, d1.nb_added_edge_dec, d1.extension_alg,
+           d2.id, d2.origin_name, d2.origin_scenario, d2.graph_path, d2.extension_alg
     FROM decompositions AS d1 CROSS JOIN decompositions AS d2
-    WHERE d1.origin_name = d2.origin_name AND d1.origin_scenario = d2.origin_scenario AND d1.id <> d2.id 
+    WHERE d1.origin_name = d2.origin_name AND d1.origin_scenario = d2.origin_scenario AND d1.id > d2.id 
     """
     if !isnothing(subset)
         subset = ["('$(s[1])', $(s[2]))" for s in subset]
         query *= " AND (d1.origin_name, d1.origin_scenario) IN ($(join(subset, ',')))"
+    end
+    for e in exclude
+        query *= " AND d1.extension_alg <> '$e' AND d2.extension_alg <> '$e'"
     end
     results = DBInterface.execute(db, query) |> DataFrame
     combine_function!(row) = combine_decomposition_dfrow!(db, row; how=how, extension_alg=extension_alg, rng=rng)
