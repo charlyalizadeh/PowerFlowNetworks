@@ -19,3 +19,12 @@ function table_count(db::SQLite.DB, table)
     results = DBInterface.execute(db, query) |> DataFrame
     return results[1, Symbol("COUNT(*)")][1]
 end
+
+nb_instances(db::SQLite.DB) = table_count(db, "instances")
+nb_decompositions(db::SQLite.DB) = table_count(db, "decompositions")
+
+function get_table_ids(db::SQLite.DB, table)
+    query = "SELECT id FROM $table"
+    results = DBInterface.execute(db, query) |> DataFrame
+    return results[!, :id]
+end
