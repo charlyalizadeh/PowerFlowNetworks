@@ -20,6 +20,10 @@ function parse_commandline()
             help = "Maximum number of vertices a network had to have to be processed."
             arg_type = Int
             default = typemax(Int)
+        "--checks"
+            help = "Name of the checks to apply on the database."
+            arg_type = Vector{String}
+            default = ["chordality", "connectivity", "self_loops", "index_cliques", "source_graph"]
     end
     return parse_args(s)
 end
@@ -27,7 +31,8 @@ end
 function main()
     parsed_args = parse_commandline()
     db = SQLite.DB(parsed_args["dbpath"])
-    check_connectivity_instances(db; min_nv=parsed_args["min_nv"], max_nv=parsed_args["max_nv"])
+    check_sanity(db, parsed_args["checks"];
+                 min_nv=parsed_args["min_nv"], max_nv=parsed_args["max_nv"])
 end
 
 main()
