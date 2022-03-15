@@ -112,7 +112,8 @@ function create_combinations_table(db)
         in_id1 INTEGER NOT NULL,
         in_id2 INTEGER NOT NULL,
         out_id INTEGER NOT NULL,
-        combine_type TEXT NOT NULL,
+        how TEXT NOT NULL,
+        extension_alg TEXT NOT NULL,
 
         PRIMARY KEY(in_id1, in_id2, out_id),
         FOREIGN KEY(in_id1) REFERENCES decompositions(id),
