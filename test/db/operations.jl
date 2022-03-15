@@ -7,22 +7,42 @@
 
     save_basic_features_instances!(db)
     save_features_instances!(db)
-    serialize_instances!(db, "test/data/networks_serialized", "test/data/graphs")
-    generate_decompositions!(db, "test/data/cliques", "test/data/cliquetrees", "test/data/graphs",
-                             "cholesky", "test/data/configs/preprocess_default.json";
-                             subset=[("C2FEN02312", 3), ("case6ww", 0)])
+    serialize_instances!(db;
+                         serialize_path="test/data/networks_serialized",
+                         graphs_path="test/data/graphs")
+    generate_decompositions!(db;
+                             cliques_path="test/data/cliques",
+                             cliquetrees_path="test/data/cliquetrees",
+                             graphs_path="test/data/graphs",
+                             extension_alg="cholesky",
+                             preprocess_path="test/data/configs/preprocess_default.json",
+                             subset=[1, 2])
     @test table_count(db, "decompositions") == 2
-    generate_decompositions!(db, "test/data/cliques", "test/data/cliquetrees", "test/data/graphs",
-                             "minimum_degree", "test/data/configs/preprocess_add_random_50.json";
-                             subset=[("C2S6N02045", 1)])
+    generate_decompositions!(db;
+                             cliques_path="test/data/cliques",
+                             cliquetrees_path="test/data/cliquetrees",
+                             graphs_path="test/data/graphs",
+                             extension_alg="minimum_degree",
+                             preprocess_path="test/data/configs/preprocess_add_random_50.json",
+                             subset=[3])
     @test table_count(db, "decompositions") == 3
-    merge_decompositions!(db, ["molzahn"], [0], "clique_nv_up", Dict("treshold_percent" => 0.5); subset=[1, 2])
+    merge_decompositions!(db;
+                          heuristic=["molzahn"],
+                          heuristic_switch=[0],
+                          treshold_name="clique_nv_up",
+                          merge_kwargs=Dict("treshold_percent" => 0.5),
+                          subset=[1, 2])
     @test table_count(db, "decompositions") == 5
     @test table_count(db, "merges") == 2
-    generate_decompositions!(db, "test/data/cliques", "test/data/cliquetrees", "test/data/graphs",
-                             "minimum_degree", "test/data/configs/preprocess_add_random_50.json", subset=[("case6ww", 0)])
-    combine_decompositions!(db; how="vertices_intersect", extension_alg="cholesky", subset=[("case6ww", 0)])
-    combine_decompositions!(db; how="vertices_union", extension_alg="minimum_degree", subset=[("case6ww", 0)])
-    combine_decompositions!(db; how="clique_intersect", extension_alg="cholesky", subset=[("case6ww", 0)])
-    combine_decompositions!(db; how="clique_union", extension_alg="minimum_degree", subset=[("case6ww", 0)])
+    generate_decompositions!(db;
+                             cliques_path="test/data/cliques",
+                             cliquetrees_path="test/data/cliquetrees",
+                             graphs_path="test/data/graphs",
+                             extension_alg="minimum_degree",
+                             preprocess_path="test/data/configs/preprocess_add_random_50.json",
+                             subset=[1])
+    combine_decompositions!(db; how="vertices_intersect", extension_alg="cholesky", subset=[1])
+    combine_decompositions!(db; how="vertices_union", extension_alg="minimum_degree", subset=[1])
+    combine_decompositions!(db; how="clique_intersect", extension_alg="cholesky", subset=[1])
+    combine_decompositions!(db; how="clique_union", extension_alg="minimum_degree", subset=[1])
 end
