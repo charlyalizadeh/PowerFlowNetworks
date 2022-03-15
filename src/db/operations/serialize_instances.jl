@@ -1,5 +1,5 @@
 function serialize_instance!(db::SQLite.DB, serialize_path, graphs_path, name, scenario, source_type, source_path)
-    println("Serializing: $name scenario $scenario")
+    @info "Serializing instance network and graph: ($name, $scenario)"
     pfn_path = abspath(joinpath(serialize_path, "$(name)_$(scenario)_network.bin"))
     graph_path = abspath(joinpath(graphs_path, "$(name)_$(scenario)_graph.lgz"))
     network = PowerFlowNetwork(source_path, source_type)
@@ -27,6 +27,8 @@ function serialize_instances!(db::SQLite.DB, serialize_path, graphs_path;
         subset = ["('$(s[1])', $(s[2]))" for s in subset]
         query *= " AND (name, scenario) IN ($(join(subset, ',')))"
     end
+    @info "Serialize instance network and graph config: min_nv=$min_nv, max_nv=$max_nv, recompute=$recompute"
+    @info "subset\n$subset\nend subset"
     results = DBInterface.execute(db, query) |> DataFrame
     serialize_function!(row) = serialize_instance_dfrow!(db, serialize_path, graphs_path, row)
     serialize_function!.(eachrow(results[!, [:name, :scenario, :source_type, :source_path]]))

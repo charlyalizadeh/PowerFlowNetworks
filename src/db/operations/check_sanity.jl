@@ -36,8 +36,6 @@ function _check_source_graph(db, row)
 end
 
 
-
-
 const check_functions = Dict(
     "chordality" => _check_chordality,
     "connectivity" => _check_connectivity,

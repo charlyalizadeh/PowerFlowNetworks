@@ -3,7 +3,7 @@ function generate_decomposition!(db::SQLite.DB, name::AbstractString, scenario::
                                  extension_alg::AbstractString, option::AbstractDict,
                                  preprocess_path::AbstractString, graph_path::AbstractString;
                                  seed, rng, kwargs...)
-    println("Generating decomposition: $name scenario $scenario. ($extension_alg)")
+    @info "Generating decomposition: ($name $scenario) ($extension_alg)"
     g = loadgraph(graph_path)
 
     # Preprocessing
@@ -62,6 +62,8 @@ function generate_decompositions!(db::SQLite.DB,
     option = JSON.parse(read(open(preprocess_path, "r"), String))
     option = Dict(Symbol(k) => v for (k, v) in option)
     results = DBInterface.execute(db, query) |> DataFrame
+    @info "Generate decompositions config: extension_alg=$extension_alg, preprocess_path=$preprocess_path, min_nv=$min_nv, max_nv=$max_nv, seed=$seed, rng=$rng"
+    @info "subset\n$subset\nend subset"
     generate_function!(row) = generate_decomposition_dfrow!(db, row, cliques_path, cliquetrees_path, graphs_path,
                                                             extension_alg, option, preprocess_path;
                                                             seed=seed, rng=rng, kwargs...)

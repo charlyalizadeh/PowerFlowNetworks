@@ -1,5 +1,5 @@
 function save_basic_features_instance!(db::SQLite.DB, name, scenario, source_type, source_path)
-    println("Saving features: $name scenario $scenario")
+    @info "Saving basic instance features: ($name, $scenario)"
     _nbus = nbus(source_path, source_type)
     _nbranch_unique = nbranch(source_path, source_type; distinct_pair=true)
     _nbranch = nbranch(source_path, source_type)
@@ -26,6 +26,8 @@ function save_basic_features_instances!(db::SQLite.DB; recompute=false, subset=n
         query *= " AND (name, scenario) IN ($(join(subset, ',')))"
     end
     results = DBInterface.execute(db, query) |> DataFrame
+    @info "Saving basic instance features config: recompute=$recompute"
+    @info "subset\n$subset\nend subset"
     save_function!(row) = save_basic_features_instance_dfrow!(db, row)
     save_function!.(eachrow(results[!, [:name, :scenario, :source_type, :source_path]]))
 end

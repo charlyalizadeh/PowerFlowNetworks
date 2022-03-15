@@ -4,7 +4,7 @@ function merge_decomposition!(db::SQLite.DB, id::Int, name::AbstractString, scen
                               heuristic::Vector{String}, heuristic_switch::Vector{Int},
                               treshold_name::AbstractString, merge_kwargs::AbstractDict;
                               rng)
-    println("Merging decomposition: $name $scenario $id. ($heuristic, $heuristic_switch)")
+    @info "Merging decomposition: ($name, $scenario) $id"
     
     # Retrieve the cliques array and the cliquetree
     clique = read_clique(clique_path)
@@ -66,6 +66,9 @@ function merge_decompositions!(db::SQLite.DB, heuristic::Vector{String}, heurist
         query *= " AND id IN ($(join(subset, ',')))"
     end
     results = DBInterface.execute(db, query) |> DataFrame
+    @info "Merging config: heuristic=$heuristic heuristic_switch=$heuristic_switch, treshold_name=$treshold_name, min_nv=$min_nv, max_nv=$max_nv, rng=$rng"
+    @info "merge_kwargs\n$merge_kwargs\nend merge_kwargs"
+    @info "subset\n$subset\nend subset"
     merge_function!(row) = merge_decomposition_dfrow!(db, row,
                                                       heuristic, heuristic_switch, treshold_name, merge_kwargs;
                                                       rng=rng)
