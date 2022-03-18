@@ -27,5 +27,6 @@ slurm_header = '\n'.join([f"#SBATCH --{k}={v}" for k, v in slurm_config.items()]
 for p in process:
     path = project_dir.joinpath("slurm", f"{p}.slurm")
     with open(path, "w") as file:
+        file.write("#!/bin/sh\n")
         file.write(slurm_header)
         file.write(f"julia --project={project_dir} {mpi_script} --process_type {p} --config_key {p} --log_dir {log_dir}")
