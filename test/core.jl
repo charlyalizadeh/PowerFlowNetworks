@@ -1,6 +1,6 @@
 @testset "Core" begin
         path = "test/data/case6ww.m"
-        network = PowerFlowNetwork(path, "MATPOWER-M")
+        network = PowerFlowNetwork(path, "MATPOWERM")
         @test nbus(network) == 6
         @test nbranch(network) == 11
         @test ngen(network) == 3

@@ -1,7 +1,7 @@
 @testset "Graphs" begin
-    # From MATPOWER-M files
+    # From MATPOWERM files
     path = "./test/data/case6ww.m"
-    network = PowerFlowNetwork(path, "MATPOWER-M")
+    network = PowerFlowNetwork(path, "MATPOWERM")
     g = SimpleGraph(network)
     @test nv(g) == nbus(network)
     @test ne(g) == nbranch(network)

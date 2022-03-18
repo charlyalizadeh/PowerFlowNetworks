@@ -13,7 +13,7 @@
 
 
     path = "./test/data/case6ww.m"
-    network = PowerFlowNetwork(path, "MATPOWER-M")
+    network = PowerFlowNetwork(path, "MATPOWERM")
     features_opf = get_features_opf(network)
 
     @test (features_opf["PD_max"], features_opf["PD_min"]) == (70, 0)

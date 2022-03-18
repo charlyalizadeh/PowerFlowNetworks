@@ -1,6 +1,6 @@
 @testset "Read MATPOWER" begin
     path = "./test/data/case6ww.m"
-    network = PowerFlowNetwork(path, "MATPOWER-M")
+    network = PowerFlowNetwork(path, "MATPOWERM")
     @test network.baseMVA == 100
     bus = zeros(6, 17)
     bus[:, 1:13] = [1  3  0   0   0  0  1  1.05  0  230  1  1.05  1.05;
@@ -38,7 +38,7 @@
     @test network.bus == DataFrame(bus, colnames["bus"])
     @test network.gen == DataFrame(gen, colnames["gen"])
     @test network.branch == DataFrame(branch, colnames["branch"])
-    @test nbus(network) == nbus(path, "MATPOWER-M")
-    @test nbranch(network) == nbranch(path, "MATPOWER-M")
-    @test nbranch(network; distinct_pair=true) == nbranch(path, "MATPOWER-M"; distinct_pair=true)
+    @test nbus(network) == nbus(path, "MATPOWERM")
+    @test nbranch(network) == nbranch(path, "MATPOWERM")
+    @test nbranch(network; distinct_pair=true) == nbranch(path, "MATPOWERM"; distinct_pair=true)
 end

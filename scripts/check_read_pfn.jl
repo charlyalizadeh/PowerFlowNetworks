@@ -15,7 +15,7 @@ function parse_commandline()
             default = "data/PowerFlowNetworks.sqlite"
         "--source_type"
             help = "The source types to check."
-            default = ["RAWGO", "MATPOWER-M"]
+            default = ["RAWGO", "MATPOWERM"]
             arg_type = Vector{String}
         "--rethrow"
             help = "Wether to rethrow the errors. (will stop the execution)"

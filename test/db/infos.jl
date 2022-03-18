@@ -15,7 +15,7 @@
     name = "case6ww"
     scenario = 0
     source_path = "./test/data/case6ww.m"
-    source_type = "MATPOWER-M"
+    source_type = "MATPOWERM"
     date = Dates.now()
     load_instance_in_db!(db, name, scenario, source_path, source_type, date)
     @test table_count(db, "instances") == 1
