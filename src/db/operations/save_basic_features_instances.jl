@@ -19,7 +19,7 @@ end
 function save_basic_features_instances!(db::SQLite.DB; recompute=false, subset=nothing)
     query = "SELECT name, scenario, source_type, source_path FROM instances"
     if !recompute
-        query *= " WHERE nbus IS NULL OR nbranch_unique IS NULL OR nbranch IS NULL OR ngen IS NULL"
+        query *= " WHERE (nbus IS NULL OR nbranch_unique IS NULL OR nbranch IS NULL OR ngen IS NULL)"
     end
     if !isnothing(subset)
         if recompute
