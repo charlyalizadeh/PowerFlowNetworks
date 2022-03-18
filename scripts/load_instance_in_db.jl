@@ -20,7 +20,7 @@ function parse_commandline()
         "--indirs_matpowerm"
             help = "Directory/ies containing the MATPOWERM networks."
             arg_type = Vector{String}
-            default = ["data/MATPOWER"]
+            default = ["data/MATPOWERM"]
     end
     return parse_args(s)
 end

@@ -41,9 +41,9 @@ shutil.rmtree('__MACOSX')
 if not pathlib.Path("data/archives/matpower7.1.zip").exists():
     print("The matpower archive version 7.1 is not present under `data/archives/`. Please download the matpower archive manually.")
 else:
-    pathlib.Path("data/MATPOWER").mkdir(parents=True, exist_ok=True)
+    pathlib.Path("data/MATPOWERM").mkdir(parents=True, exist_ok=True)
     shutil.unpack_archive('data/archives/matpower7.1.zip')
     for filename in pathlib.Path('matpower7.1/data').iterdir():
-        dst = pathlib.Path('data/', 'MATPOWER/')
+        dst = pathlib.Path('data/', 'MATPOWERM/')
         shutil.move(filename, dst)
     shutil.rmtree('matpower7.1')
