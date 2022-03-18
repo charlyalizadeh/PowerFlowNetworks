@@ -44,7 +44,7 @@ function load_rawgo_instance!(db::SQLite.DB, path::AbstractString)
         source_path = abspath(joinpath(path, scenario, "case.raw"))
         @info "  $(scenario_nb)"
         try
-            load_instance!(db, name, scenario_nb, source_path, "RAWGO", date)
+            load_instance_in_db!(db, name, scenario_nb, source_path, "RAWGO", date)
         catch e
             if isa(e, SQLiteException) && e.msg == "UNIQUE constraint failed: instances.name, instances.scenario"
                 @warn "$(name) scenario $(scenario_nb) already in the database. Loading ignored."
@@ -72,7 +72,7 @@ function load_matpower_mat_instance!(db::SQLite.DB, path::AbstractString)
     source_type = "MATPOWERM"
     @info "Loading $(name)"
     try
-        load_instance!(db, name, scenario_nb, source_path, source_type, date)
+        load_instance_in_db!(db, name, scenario_nb, source_path, source_type, date)
     catch e
         if isa(e, SQLiteException) && e.msg == "UNIQUE constraint failed: instances.name, instances.scenario"
             @warn "$(name) scenario $(scenario_nb) already in the database. Loading ignored."
