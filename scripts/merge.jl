@@ -7,7 +7,6 @@ using JSON
 
 ArgParse.parse_item(::Type{Vector{String}}, x::AbstractString) = split(x, ",")
 ArgParse.parse_item(::Type{Vector{Int}}, x::AbstractString) = parse.(Int, split(x, ","))
-ArgParse.parse_item(::Type{Dict}, x::AbstractString) = JSON.parse(x)
 
 function parse_commandline()
     s = ArgParseSettings()
@@ -27,10 +26,9 @@ function parse_commandline()
             help = "Name of the treshold used to stop the merge"
             arg_type = String
             default = "clique_nv_up"
-        "--merge_kwargs"
-            help = "Keyword arguments used in the merge algorithm"
-            arg_type = Dict
-            default = Dict("treshold_percent" => 0.1)
+        "--kwargs_path"
+            help = "Julia file containing a dict named `merge_kwargs` containing the keyword arguments of the merge."
+            arg_type = String
         "--min_nv"
             help = "Minimum number of vertices a network had to have to be processed."
             arg_type = Int
@@ -45,15 +43,16 @@ end
 
 function main()
     parsed_args = parse_commandline()
+    include("../$(parsed_args["kwargs_path"])")
     db = SQLite.DB(parsed_args["dbpath"])
     if "sliwak" in parsed_args["heuristic"]
         error("Sliwak merge not implemented yet. (I need to get the coefficients of the merge for every instance)")
     end
-    merge_decompositions!(db,
-                          parsed_args["heuristic"],
-                          parsed_args["heuristic_switch"],
-                          parsed_args["treshold_name"],
-                          parsed_args["merge_kwargs"],
+    merge_decompositions!(db;
+                          heuristic=parsed_args["heuristic"],
+                          heuristic_switch=parsed_args["heuristic_switch"],
+                          treshold_name=parsed_args["treshold_name"],
+                          merge_kwargs=merge_kwargs,
                           min_nv=parsed_args["min_nv"],
                           max_nv=parsed_args["max_nv"])
 end

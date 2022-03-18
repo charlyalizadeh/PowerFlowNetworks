@@ -26,7 +26,7 @@ function parse_commandline()
             default = "data/graphs/"
         "--preprocess_path"
             help = "JSON file containing the preprocess option."
-            default = "configs/preprocess_default.json"
+            default = "data/configs/preprocess_default.json"
         "--min_nv"
             help = "Minimum number of vertices a network had to have to be processed."
             arg_type = Int
@@ -42,12 +42,12 @@ end
 function main()
     parsed_args = parse_commandline()
     db = SQLite.DB(parsed_args["dbpath"])
-    generate_decompositions!(db,
-                             parsed_args["cliques_path"],
-                             parsed_args["cliquetrees_path"],
-                             parsed_args["graphs_path"],
-                             parsed_args["extension_alg"],
-                             parsed_args["preprocess_path"];
+    generate_decompositions!(db;
+                             cliques_path=parsed_args["cliques_path"],
+                             cliquetrees_path=parsed_args["cliquetrees_path"],
+                             graphs_path=parsed_args["graphs_path"],
+                             extension_alg=parsed_args["extension_alg"],
+                             preprocess_path=parsed_args["preprocess_path"],
                              min_nv=parsed_args["min_nv"],
                              max_nv=parsed_args["max_nv"])
 end

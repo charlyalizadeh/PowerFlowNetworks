@@ -37,8 +37,11 @@ end
 function main()
     parsed_args = parse_commandline()
     db = SQLite.DB(parsed_args["dbpath"])
-    serialize_instances!(db, parsed_args["serialize_path"], parsed_args["graphs_path"];
-                         min_nv=parsed_args["min_nv"], max_nv=parsed_args["max_nv"],
+    serialize_instances!(db;
+                         serialize_path=parsed_args["serialize_path"],
+                         graphs_path=parsed_args["graphs_path"],
+                         min_nv=parsed_args["min_nv"],
+                         max_nv=parsed_args["max_nv"],
                          recompute=parsed_args["recompute"])
 end
 

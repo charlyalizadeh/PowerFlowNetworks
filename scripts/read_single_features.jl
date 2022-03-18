@@ -35,9 +35,11 @@ end
 function main()
     parsed_args = parse_commandline()
     db = SQLite.DB(parsed_args["dbpath"])
-    save_single_features_instances!(db, parsed_args["feature_names"];
-                                   min_nv=parsed_args["min_nv"], max_nv=parsed_args["max_nv"],
-                                   recompute=parsed_args["recompute"])
+    save_single_features_instances!(db;
+                                    feature_name=parsed_args["feature_names"],
+                                    min_nv=parsed_args["min_nv"],
+                                    max_nv=parsed_args["max_nv"],
+                                    recompute=parsed_args["recompute"])
 end
 
 main()
