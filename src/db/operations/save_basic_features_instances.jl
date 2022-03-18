@@ -22,7 +22,7 @@ function save_basic_features_instances!(db::SQLite.DB; recompute=false, subset=n
         query *= " WHERE (nbus IS NULL OR nbranch_unique IS NULL OR nbranch IS NULL OR ngen IS NULL)"
     end
     if !isnothing(subset)
-        if recompute
+        if !recompute
             query *= " AND id IN ($(join(subset, ',')))"
         else
             query *= " WHERE id IN ($(join(subset, ',')))"
