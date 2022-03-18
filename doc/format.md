@@ -312,7 +312,7 @@ Q
 
 * `mpc.bus`
 
-| **MATPOWER-M** | **DATA BLOCK** | **COLUMN** | **COLUMN_ID** |
+| **MATPOWERM** | **DATA BLOCK** | **COLUMN** | **COLUMN_ID** |
 |----------------|----------------|------------|---------------|
 | BUS_I          | _Bus_          | I          | 1             |
 | BUS_TYPE       |                |            |               |
@@ -334,7 +334,7 @@ Q
 
 * `mpc.gen`
 
-| **MATPOWER-M** | **DATA BLOCK** | **COLUMN** | **COLUMN_ID** |
+| **MATPOWERM** | **DATA BLOCK** | **COLUMN** | **COLUMN_ID** |
 |----------------|----------------|------------|---------------|
 | GEN_BUS        | _Generator_    | I          | 1             |
 | PG             | _Generator_    | PG         | 3             |
@@ -364,7 +364,7 @@ Q
 
 * `mpc.branch`
 
-| **MATPOWER-M** | **DATA BLOCK** | **COLUMN** | **COLUMN_ID** |
+| **MATPOWERM** | **DATA BLOCK** | **COLUMN** | **COLUMN_ID** |
 |----------------|----------------|------------|---------------|
 | F_BUS          | _Branch_       | I          | 1             |
 | T_BUS          | _Branch_       | J          | 2             |
@@ -390,7 +390,7 @@ Q
 
 * `mpc.gencost`
 
-| **MATPOWER-M** | **DATA BLOCK** | **COLUMN** | **COLUMN_ID** |
+| **MATPOWERM** | **DATA BLOCK** | **COLUMN** | **COLUMN_ID** |
 |----------------|----------------|------------|---------------|
 | MODEL          |                |            |               |
 | STARTUP        |                |            |               |
