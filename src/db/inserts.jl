@@ -1,12 +1,33 @@
+# TODO: Better solution than this
+_set_immediate(query) = "BEGIN IMMEDIATE;\n" * query * "\n" * "END;\n"
+function execute_set_immediate(db, query)
+    #query = _set_immediate(query)
+    is_executed = false
+    while !is_executed
+        try
+            is_executed = true
+            DBInterface.execute(db, query)
+        catch e
+            if isa(e, SQLiteException) && e.msg == "database is locked"
+                is_executed = false
+                sleep(100)
+                continue
+            else
+                rethrow()
+            end
+        end
+    end
+end
+
 function load_instance_in_db!(db::SQLite.DB,
                         name::AbstractString, scenario::Int,
                         source_path::AbstractString, source_type::AbstractString,
                         date::DateTime)
     query = """
     INSERT INTO instances(name, scenario, source_path, source_type, date) 
-    VALUES('$name', $scenario, '$source_path', '$source_type', '$date')
+    VALUES('$name', $scenario, '$source_path', '$source_type', '$date');
     """
-    DBInterface.execute(db, query)
+    execute_set_immediate(db, query)
 end
 
 function insert_decomposition!(db::SQLite.DB, origin_id, uuid,
@@ -24,8 +45,8 @@ function insert_decomposition!(db::SQLite.DB, origin_id, uuid,
         feature_value = feature[2]
         query *= ", $feature_value"
     end
-    query *= ")"
-    DBInterface.execute(db, query)
+    query *= ");"
+    execute_set_immediate(db, query)
 end
 
 function insert_merge!(db::SQLite.DB, in_id::Int, out_id::Int,
@@ -33,9 +54,9 @@ function insert_merge!(db::SQLite.DB, in_id::Int, out_id::Int,
                        treshold_percent::Float64, nb_added_edge::Int)
     query = """
     INSERT INTO merges(in_id, out_id, heuristics, treshold_name, treshold_percent, nb_added_edge)
-    VALUES ($in_id, $out_id, '$heuristics', '$treshold_name', $treshold_percent, $nb_added_edge)
+    VALUES ($in_id, $out_id, '$heuristics', '$treshold_name', $treshold_percent, $nb_added_edge);
     """
-    DBInterface.execute(db, query)
+    execute_set_immediate(db, query)
 end
 
 function insert_combination!(db::SQLite.DB, in_id1::Int, in_id2::Int, out_id::Int,
@@ -43,7 +64,7 @@ function insert_combination!(db::SQLite.DB, in_id1::Int, in_id2::Int, out_id::In
 
     query = """
     INSERT INTO combinations(in_id1, in_id2, out_id, how, extension_alg)
-    VALUES ($in_id1, $in_id2, $out_id, '$how', '$extension_alg')
+    VALUES ($in_id1, $in_id2, $out_id, '$how', '$extension_alg');
     """
-    DBInterface.execute(db, query)
+    execute_set_immediate(db, query)
 end
