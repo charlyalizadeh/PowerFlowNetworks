@@ -33,8 +33,10 @@ function main()
     parsed_args = parse_commandline()
     db = SQLite.DB(parsed_args["dbpath"])
     include("../$(parsed_args["config_path"])")
+    kwargs = process_kwargs[parsed_args["config_key"]]
+    kwargs = Dict(Symbol(k) => v for (k, v) in kwargs)
     execute_process_mpi(db, parsed_args["process_type"], parsed_args["log_dir"];
-                        process_kwargs[parsed_args["config_key"]]...)
+                        kwargs...)
 end
 
 main()
