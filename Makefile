@@ -20,7 +20,7 @@ check_raw_go_dirs:
 	python scripts/check_raw_go_dirs.py
 
 load_instance:
-	julia --project=./ scripts/load_instance.jl --dbpath $(DBPATH) --indirs_rawgo $(INDIRS_RAWGO) --indirs_matpowerm $(INDIRS_MATPOWERM)
+	julia --project=./ scripts/load_instance_in_db.jl --dbpath $(DBPATH) --indirs_rawgo $(INDIRS_RAWGO) --indirs_matpowerm $(INDIRS_MATPOWERM)
 
 check_read_pfn:
 	julia --project=./ scripts/check_read_pfn.jl --dbpath $(DBPATH) --source_type $(SOURCE_TYPE)
