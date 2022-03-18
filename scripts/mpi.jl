@@ -4,6 +4,7 @@ using SQLite
 using ArgParse
 
 
+
 function parse_commandline()
     s = ArgParseSettings()
     @add_arg_table s begin
@@ -17,9 +18,13 @@ function parse_commandline()
         "--log_dir"
             help = "The directory where to store the logs of the process."
             arg_type = String
-        "--kwargs_path"
-            help = "Julia file containing a dict named `process_kwargs` containing the keyword arguments of the process."
+        "--config_key"
+            help = "Key corresponding to the keyword arguments used in this process."
             arg_type = String
+        "--config_path"
+            help = "Path to a julia file containing a dict with the keyword arguments."
+            arg_type = String
+            default = "data/configs/kwargs.jl"
     end
     return parse_args(s)
 end
@@ -27,9 +32,9 @@ end
 function main()
     parsed_args = parse_commandline()
     db = SQLite.DB(parsed_args["dbpath"])
-    include("../$(parsed_args["kwargs_path"])")
+    include("../$(parsed_args["config_path"])")
     execute_process_mpi(db, parsed_args["process_type"], parsed_args["log_dir"];
-                        process_kwargs...)
+                        process_kwargs[parsed_args["config_key"]]...)
 end
 
 main()

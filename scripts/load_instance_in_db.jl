@@ -12,7 +12,7 @@ function parse_commandline()
     @add_arg_table s begin
         "--dbpath", "-p"
             help = "Path of the sqlite database file."
-            default = "data/PowerFlowNetwork.sqlite"
+            default = "data/PowerFlowNetworks.sqlite"
         "--indirs_rawgo"
             help = "Directory/ies containing the RAWGO networks."
             arg_type = Vector{String}
