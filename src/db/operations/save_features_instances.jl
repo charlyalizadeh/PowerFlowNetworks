@@ -15,7 +15,7 @@ function save_features_instance!(db::SQLite.DB, name, scenario, source_type, sou
     end
     query = query[begin:end - 2]
     query *= " WHERE name = '$name' AND scenario = $scenario"
-    DBInterface.execute(db, query)
+    execute_set_immediate(db, query)
 end
 
 function save_features_instance_dfrow!(db::SQLite.DB, row) 

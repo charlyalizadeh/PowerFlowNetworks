@@ -7,7 +7,7 @@ function serialize_instance!(db::SQLite.DB, serialize_path, graphs_path, name, s
     serialize(pfn_path, network)
     savegraph(graph_path, g)
     query = "UPDATE instances SET pfn_path = '$pfn_path', graph_path = '$graph_path' WHERE name = '$name' AND scenario = $scenario"
-    DBInterface.execute(db, query)
+    execute_set_immediate(db, query)
 end
 
 function serialize_instance_dfrow!(db::SQLite.DB, serialize_path, graphs_path, row)
