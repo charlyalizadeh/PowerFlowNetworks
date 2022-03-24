@@ -35,7 +35,6 @@ function _check_source_graph(db, row)
     return !isequal(source_graph, g) && all(in(g_edges), source_edges) && vertices(g) == vertices(source_graph)
 end
 
-
 const check_functions = Dict(
     "chordality" => _check_chordality,
     "connectivity" => _check_connectivity,

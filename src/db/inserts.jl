@@ -1,21 +1,8 @@
 # TODO: Better solution than this
-_set_immediate(query) = "BEGIN IMMEDIATE;\n" * query * "\n" * "END;\n"
-function execute_set_immediate(db, query)
-    #query = _set_immediate(query)
-    is_executed = false
-    while !is_executed
-        try
-            is_executed = true
-            DBInterface.execute(db, query)
-        catch e
-            if isa(e, SQLiteException) && e.msg == "database is locked"
-                is_executed = false
-                sleep(100)
-                continue
-            else
-                rethrow()
-            end
-        end
+function execute_set_immediate(db, query; rng=MersenneTwister(42))
+    uuid = uuid1(rng)
+    open("queries/$uuid.txt", "w") do io
+        write(io, query)
     end
 end
 
