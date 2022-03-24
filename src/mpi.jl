@@ -65,5 +65,6 @@ function execute_process_mpi(db::SQLite.DB, process_type, log_dir; kwargs...)
         MPI.Irecv!(indexes, 0, 0, comm)
         @info "Recieved: $indexes"
         process_functions[process_type](db; subset=indexes, kwargs...)
+        @info "Process done."
     end
 end
