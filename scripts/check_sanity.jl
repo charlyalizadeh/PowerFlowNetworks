@@ -23,7 +23,7 @@ function parse_commandline()
         "--checks"
             help = "Name of the checks to apply on the database."
             arg_type = Vector{String}
-            default = ["chordality", "connectivity", "self_loops", "index_clique", "source_graph"]
+            default = ["chordality", "connectivity", "self_loops", "index_clique", "source_graph", "serialize_graph", "serialize_network"]
     end
     return parse_args(s)
 end
