@@ -15,8 +15,10 @@ using Combinatorics
 import JSON
 using MPI
 using Logging
+using CSV
 
 mutable struct PowerFlowNetwork
+    name::String
     bus::DataFrame
     gen::DataFrame
     branch::DataFrame
@@ -30,6 +32,7 @@ include("utils/graphs/ischordal.jl")
 include("utils/graphs/build_graph.jl")
 include("utils/clique_cliquetree.jl")
 include("io/read.jl")
+include("io/write.jl")
 include("read_features.jl")
 include("graphs/graphs.jl")
 include("graphs/operations.jl")
@@ -52,6 +55,7 @@ export nbus, nbranch, ngen, is_disjoint, has_bus, has_branch, has_gen,
 export ischordal
 export nbranch_unique, ngen_unique
 export PowerFlowNetwork
+export write_pfn
 export Graph
 export add_edges_distance!, add_edges_random!, add_edges!
 export setup_db

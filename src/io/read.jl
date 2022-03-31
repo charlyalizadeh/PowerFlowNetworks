@@ -38,6 +38,19 @@ const ntransformer_functions = Dict(
     "RAWGO" => ntransformer_rawgo
 )
 
+function get_network_name(path::AbstractString, format::AbstractString)
+    if format == "MATPOWERM"
+        return basename(path)[begin:end - 2]
+    elseif format == "RAWGO"
+        paths = splitpath(path)
+        name = paths[end - 2]
+        scenario = parse(Int, paths[end - 1][begin + 9: end])
+        return "$(name)_$(scenario)"
+    else
+        error("Not Implemented")
+    end
+end
+
 
 function read_network(path::AbstractString, format::AbstractString)
     bus, gen, branch, baseMVA = get_data_functions[format](path)
@@ -45,7 +58,8 @@ function read_network(path::AbstractString, format::AbstractString)
     bus = DataFrame(bus, colnames["bus"])
     gen = DataFrame(gen, colnames["gen"])
     branch = DataFrame(branch, colnames["branch"])
-    return PowerFlowNetwork(bus, gen, branch, baseMVA)
+    name = get_network_name(path, format)
+    return PowerFlowNetwork(name, bus, gen, branch, baseMVA)
 end
 
 nbus(path::AbstractString, format::AbstractString) = nbus_functions[format](path)
