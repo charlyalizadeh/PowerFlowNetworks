@@ -3,7 +3,7 @@ function combine_decomposition!(db::SQLite.DB, id::Int, name::AbstractString, sc
                                 id_1::Int, graph_path_1::AbstractString,
                                 id_2::Int, graph_path_2::AbstractString;
                                 how::AbstractString, extension_alg::AbstractString, rng)
-    @info "Combining decompositions ($name, $scenario) (in1=$id_1, in2=$id_2)"
+    println("Combining decompositions ($name, $scenario) (in1=$id_1, in2=$id_2)")
     
     # Retrieve the graphs
     g1 = loadgraph(graph_path_1)
@@ -67,8 +67,8 @@ function combine_decompositions!(db::SQLite.DB; how::AbstractString, extension_a
         query *= " AND d1.extension_alg <> '$e' AND d2.extension_alg <> '$e'"
     end
     results = DBInterface.execute(db, query) |> DataFrame
-    @info "Combine config: how=$how, extension_alg=$extension_alg, min_nv=$min_nv, max_nv=$max_nv, exlucde=$exclude, rng=$rng"
-    @info "subset\n$subset\nend subset"
+    println("Combine config: how=$how, extension_alg=$extension_alg, min_nv=$min_nv, max_nv=$max_nv, exlucde=$exclude, rng=$rng")
+    println("subset\n$subset\nend subset")
     combine_function!(row) = combine_decomposition_dfrow!(db, row; how=how, extension_alg=extension_alg, rng=rng)
     combine_function!.(eachrow(results[!, ["origin_id", "origin_name", "origin_scenario", "clique_path", "cliquetree_path", "nb_added_edge_dec",
                                            "id", "graph_path", "id_1", "graph_path_1"]])) 

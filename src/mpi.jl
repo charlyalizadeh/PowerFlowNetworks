@@ -29,17 +29,15 @@ function execute_process_mpi(db::SQLite.DB, process_type, log_dir; kwargs...)
     comm, rank, size = mpi_init()
     log_dir = joinpath(log_dir, process_type)
     !isdir(log_dir) && mkpath(log_dir)
-    io = open(joinpath(log_dir, "$rank.txt"), "w+")
-    logger = ConsoleLogger(io, meta_formatter=(args...) -> (:white, "", ""))
-    with_logger(logger) do
-        @info "Rank: $rank / $size"
+    redirect_stdio(stdout=joinpath(log_dir, "$rank.txt"), stderr=joinpath(log_dir, "$rank.txt")) do
+        print("Rank: $rank / $size\n")
         if rank == 0
             table = table_to_process[process_type]
             ids = get_table_ids(db, table)
             if isempty(ids)
-                @info "Nothing to process."
+                print("Nothing to process.\n")
                 for i in 1:size
-                    @info "Sending to $(i - 1): []"
+                    print("Sending to $(i - 1): []\n")
                     MPI.Isend(Vector{Int}(), i - 1, 0, comm)
                 end
             else
@@ -49,22 +47,23 @@ function execute_process_mpi(db::SQLite.DB, process_type, log_dir; kwargs...)
                     stop = start + nb_ids_per_chunk
                     stop = stop > length(ids) ? length(ids) : stop
                     chunk = ids[start:stop]
-                    @info "Sending to $(i - 1):\n$chunk"
+                    print("Sending to $(i - 1):\n$chunk\n")
                     MPI.Isend(chunk, i - 1, 0, comm)
                 end
             end
         end
-        MPI.Barrier(comm)
         status = MPI.Probe(0, 0, comm)
         count = MPI.Get_count(status, Int)
         if count == 0
-            @info "Nothing to process. Exciting."
+            print("Nothing to process. Exiting.\n")
+            MPI.Finalize()
             return
         end
         indexes = Array{Int}(undef, count)
         MPI.Irecv!(indexes, 0, 0, comm)
-        @info "Recieved: $indexes"
+        print("Recieved: $indexes\n")
         process_functions[process_type](db; subset=indexes, kwargs...)
-        @info "Process done."
+        print("Process done.\n")
+        MPI.Finalize()
     end
 end
