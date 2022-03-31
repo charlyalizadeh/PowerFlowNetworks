@@ -35,19 +35,33 @@ function _check_source_graph(db, row)
     return !isequal(source_graph, g) && all(in(g_edges), source_edges) && vertices(g) == vertices(source_graph)
 end
 
+function _check_serialize_graph(row)
+    graph_path = row[:graph_path]
+    return isfile(graph_path)
+end
+
+function _check_serialize_network(row)
+    pfn_path = row[:pfn_path]
+    return isfile(pfn_path)
+end
+
 const check_functions = Dict(
     "chordality" => _check_chordality,
     "connectivity" => _check_connectivity,
     "self_loops" => _check_self_loops,
     "index_clique" => _check_index_clique,
-    "source_graph" => _check_source_graph
+    "source_graph" => _check_source_graph,
+    "serialize_graph" => _check_serialize_graph,
+    "serialize_network" => _check_serialize_network
 )
 const need_db = Dict(
     "chordality" => false,
     "connectivity" => false,
     "self_loops" => false,
     "index_clique" => false,
-    "source_graph" => true
+    "source_graph" => true,
+    "serialize_graph" => false,
+    "serialize_network" => false
 )
 const valid_check_instance = Dict(
     "chordality" => true,
@@ -55,6 +69,8 @@ const valid_check_instance = Dict(
     "self_loops" => true,
     "index_clique" => false,
     "source_graph" => false,
+    "serialize_graph" => true,
+    "serialize_network" => true,
 )
 const valid_check_decomposition = Dict(
     "chordality" => true,
@@ -62,6 +78,8 @@ const valid_check_decomposition = Dict(
     "self_loops" => true,
     "index_clique" => true,
     "source_graph" => true,
+    "serialize_graph" => true,
+    "serialize_network" => false,
 )
 
 function _check_sanity(db, rows, checks)
