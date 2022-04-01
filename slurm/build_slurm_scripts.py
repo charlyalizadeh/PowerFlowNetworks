@@ -14,12 +14,14 @@ process = [
     "generate_decompositions",
     "merge_decompositions",
     "combine_decompositions",
+    "delete_duplicates"
 ]
 slurm_config = {
     "job-name": "PFN",
     "output": log_dir.joinpath("output.txt"),
     "error": log_dir.joinpath("error.txt"),
-    "ntasks": 40,
+    "ntasks": 56,
+    "partition": "MISC-56c-VERYSHORT"
 }
 slurm_header = '\n'.join([f"#SBATCH --{k}={v}" for k, v in slurm_config.items()]) + '\n\n'
 for p in process:
@@ -28,5 +30,6 @@ for p in process:
         file.write("#!/bin/sh\n")
         file.write(slurm_header)
         file.write(f"srun julia --project={project_dir} {mpi_script} --process_type {p} --config_key {p} --log_dir {log_dir}\n")
-        file.write(f"julia --project={project_dir} scripts/write_queries.jl\n")
-        file.write(f"rm -f queries/*\n")
+        if p not in ("merge_decompositions", "generate_decompositions", "combine_decompositions"):
+            file.write(f"julia --project={project_dir} scripts/write_queries.jl\n")
+            file.write(f"rm -f queries/*\n")
