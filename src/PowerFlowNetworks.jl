@@ -66,7 +66,7 @@ export merge_dec
 export combine_graph
 export save_features_instances!, save_basic_features_instances!, save_single_features_instances!,
        serialize_instances!, generate_decompositions!, merge_decompositions!, combine_decompositions!,
-       check_sanity
+       check_sanity, delete_duplicates!
 export execute_process_mpi
 
 end
