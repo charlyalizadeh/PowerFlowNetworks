@@ -5,6 +5,7 @@ using ArgParse
 
 
 ArgParse.parse_item(::Type{Vector{String}}, x::AbstractString) = split(x, ",")
+ArgParse.parse_item(::Type{Union{Int, Nothing}}, x::AbstractString) = x == "nothing" ? nothing : parse(Int, x)
 
 function parse_commandline()
     s = ArgParseSettings()
@@ -14,16 +15,16 @@ function parse_commandline()
             default = "data/PowerFlowNetworks.sqlite"
         "--min_nv"
             help = "Minimum number of vertices a network had to have to be processed."
-            arg_type = Int
-            default = typemin(Int)
+            arg_type = Union{Int, Nothing}
+            default = nothing
         "--max_nv"
             help = "Maximum number of vertices a network had to have to be processed."
-            arg_type = Int
-            default = typemax(Int)
+            arg_type = Union{Int, Nothing}
+            default = nothing
         "--checks"
             help = "Name of the checks to apply on the database."
             arg_type = Vector{String}
-            default = ["chordality", "connectivity", "self_loops", "index_clique", "source_graph", "serialize_graph", "serialize_network"]
+            default = ["chordality", "connectivity", "self_loops", "index_clique", "source_graph", "serialize_graph", "serialize_network", "basic_feature"]
     end
     return parse_args(s)
 end
