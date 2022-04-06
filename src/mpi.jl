@@ -13,7 +13,8 @@ const process_functions = Dict(
     "serialize_instances" => serialize_instances!,
     "generate_decompositions" => generate_decompositions!,
     "merge_decompositions" => merge_decompositions!,
-    "combine_decompositions" => combine_decompositions!
+    "combine_decompositions" => combine_decompositions!,
+    "delete_duplicates" => delete_duplicates!
 )
 const table_to_process = Dict(
     "save_basic_features_instances" => "instances",
@@ -22,7 +23,8 @@ const table_to_process = Dict(
     "serialize_instances" => "instances",
     "generate_decompositions" => "instances",
     "merge_decompositions" => "decompositions",
-    "combine_decompositions" => "instances"
+    "combine_decompositions" => "instances",
+    "delete_duplicates" => "instances"
 )
 
 function execute_process_mpi(db::SQLite.DB, process_type, log_dir; kwargs...)
@@ -34,6 +36,7 @@ function execute_process_mpi(db::SQLite.DB, process_type, log_dir; kwargs...)
         if rank == 0
             table = table_to_process[process_type]
             ids = get_table_ids(db, table)
+            println("Number of ids: $(length(ids))")
             if isempty(ids)
                 print("Nothing to process.\n")
                 for i in 1:size
@@ -46,8 +49,11 @@ function execute_process_mpi(db::SQLite.DB, process_type, log_dir; kwargs...)
                     start = (i - 1) * nb_ids_per_chunk + 1
                     stop = start + nb_ids_per_chunk
                     stop = stop > length(ids) ? length(ids) : stop
+                    if i == size && stop != length(ids)
+                        stop = length(ids)
+                    end
                     chunk = ids[start:stop]
-                    print("Sending to $(i - 1):\n$chunk\n")
+                    print("Sending [$start -> $stop] to $(i - 1):\n$chunk\n")
                     MPI.Isend(chunk, i - 1, 0, comm)
                 end
             end
