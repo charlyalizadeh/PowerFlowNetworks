@@ -1,24 +1,40 @@
 dflt = Dict{String, Any}(
-    "min_nv" => 100,
-    "max_nv" => 500
+    "min_nv" => 1000,
+    "max_nv" => 15000
 )
 
 process_kwargs = Dict(
-  "save_basic_features_instances" => Dict(),
+  "save_basic_features_instances" => Dict("recompute" => false),
   "save_single_features_instances" => dflt,
-  "save_features_instances" => dflt,
+  "save_features_instances" => merge(dflt, Dict("recompute" => false)),
   "serialize_instances" => merge(dflt, Dict("serialize_path" => "data/serialize_networks",
                                              "graphs_path" => "data/graphs")),
-  "generate_decompositions" => merge(dflt, Dict("cliques_path" => "data/cliques",
+  "generate_decompositions_20dist3cholesky" => merge(dflt, Dict("cliques_path" => "data/cliques",
                                                 "cliquetrees_path" => "data/cliquetrees",
                                                 "graphs_path" => "data/graphs",
                                                 "extension_alg" => "cholesky",
-                                                "preprocess_path" => "data/configs/preprocess_default.json")),
+                                                "preprocess_path" => "data/configs/preprocess_20dist3.json")),
+  "generate_decompositions_20dist3minimum_degree" => merge(dflt, Dict("cliques_path" => "data/cliques",
+                                                "cliquetrees_path" => "data/cliquetrees",
+                                                "graphs_path" => "data/graphs",
+                                                "extension_alg" => "minimum_degree",
+                                                "preprocess_path" => "data/configs/preprocess_20dist3.json")),
+  "generate_decompositions_0cholesky" => merge(dflt, Dict("cliques_path" => "data/cliques",
+                                                "cliquetrees_path" => "data/cliquetrees",
+                                                "graphs_path" => "data/graphs",
+                                                "extension_alg" => "cholesky",
+                                                "preprocess_path" => "data/configs/preprocess_0.json")),
+  "generate_decompositions_0minimum_degree" => merge(dflt, Dict("cliques_path" => "data/cliques",
+                                                "cliquetrees_path" => "data/cliquetrees",
+                                                "graphs_path" => "data/graphs",
+                                                "extension_alg" => "minimum_degree",
+                                                "preprocess_path" => "data/configs/preprocess_0.json")),
   "merge_decompositions" => merge(dflt, Dict("heuristic" => ["molzahn"],
                                              "heuristic_switch" => [0],
                                              "treshold_name" => "cliques_nv_up",
-                                             "merge_kwargs" => Dict("treshold_percent" => 0.5))),
+                                             "merge_kwargs" => Dict("treshold_percent" => 0.1))),
   "combine_decompositions" => merge(dflt, Dict("how" => "cliques_intersect",
                                                "extension_alg" => "cholesky",
                                                "exclude" => ["combine"])),
+  "delete_duplicates" => Dict()
 )
