@@ -36,5 +36,6 @@ process_kwargs = Dict(
   "combine_decompositions" => merge(dflt, Dict("how" => "cliques_intersect",
                                                "extension_alg" => "cholesky",
                                                "exclude" => ["combine"])),
-  "delete_duplicates" => Dict()
+  "delete_duplicates" => Dict(),
+  "export_matpowerm_instances" => merge(dflt, Dict("export_dir" => "data/matpowerm_instance"))
 )
