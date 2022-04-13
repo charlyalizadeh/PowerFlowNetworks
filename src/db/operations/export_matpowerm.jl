@@ -3,13 +3,13 @@ function export_matpowerm_instance!(db::SQLite.DB, export_dir, name, scenario, s
     export_path = ""
     if source_type == "MATPOWERM"
         export_path = joinpath(export_dir, basename(source_path))
-        cp(source_path, export_path)
+        cp(source_path, export_path; force=true)
     else
         network = ismissing(pfn_path) ? PowerFlowNetwork(source_path, source_type) : deserialize(pfn_path)
         export_path = joinpath(export_dir, "$(name)_$(scenario).m")
         write_pfn(export_path, network)
     end
-    query = "UPDATE instances SET matpowerm_path = $export_path WHERE name = '$name' AND scenario = $scenario"
+    query = "UPDATE instances SET matpowerm_path = '$export_path' WHERE name = '$name' AND scenario = $scenario"
     execute_set_immediate(db, query)
 end
 
