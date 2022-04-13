@@ -11,6 +11,7 @@ setup_process = [
     #"save_single_features_instances",
     "save_features_instances",
     "serialize_instances",
+    "export_matpowerm_instances"
 ]
 process = [
     "generate_decompositions",
