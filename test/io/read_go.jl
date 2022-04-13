@@ -1,5 +1,5 @@
 @testset "Read RAWGO" begin
-        path = "./test/data/C2FEN02312_3.raw"
+        path = "./test/data/C2FEN02312/scenario_3/case.raw"
         network = PowerFlowNetwork(path, "RAWGO")
         @test network.baseMVA == 100
         @test size(network.bus, 1) == 2312

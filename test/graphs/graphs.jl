@@ -12,7 +12,7 @@
     end
 
     # From RAWGO files (with non continuous index)
-    path = "./test/data/C2S6N02045_1.raw"
+    path = "./test/data/C2S6N02045/scenario_1/case.raw"
     network = PowerFlowNetwork(path, "RAWGO")
     g = SimpleGraph(network)
     @test nv(g) == nbus(network)
