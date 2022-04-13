@@ -4,7 +4,7 @@ function _delete_duplicate!(db::SQLite.DB, base_id, graph::AbstractGraph, id, gr
     if graph == other_graph
         println("ICI")
         query = "DELETE FROM decompositions WHERE id = $id"
-        execute_set_immediate(db, query)
+        execute_query(db, query)
     end
 end
 

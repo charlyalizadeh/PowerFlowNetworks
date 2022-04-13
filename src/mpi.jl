@@ -31,47 +31,68 @@ const table_to_process = Dict(
 
 function execute_process_mpi(db::SQLite.DB, process_type, log_dir; kwargs...)
     comm, rank, size = mpi_init()
+    nb_process = size - 1
     log_dir = joinpath(log_dir, process_type)
     !isdir(log_dir) && mkpath(log_dir)
     redirect_stdio(stdout=joinpath(log_dir, "$rank.txt"), stderr=joinpath(log_dir, "$rank.txt")) do
-        print("Rank: $rank / $size\n")
+        println("Rank: $rank / $size")
         if rank == 0
             table = table_to_process[process_type]
             ids = get_table_ids(db, table)
             println("Number of ids: $(length(ids))")
             if isempty(ids)
-                print("Nothing to process.\n")
-                for i in 1:size
-                    print("Sending to $(i - 1): []\n")
-                    MPI.Isend(Vector{Int}(), i - 1, 0, comm)
+                println("Nothing to process.")
+                for i in 1:nb_process
+                    println("Sending to $(i - 1): []")
+                    MPI.Isend(Vector{Int}(), i, 0, comm)
                 end
             else
-                nb_ids_per_chunk = Int(floor(length(ids) / size))
-                for i in 1:size
+                nb_ids_per_chunk = Int(floor(length(ids) / nb_process))
+                for i in 1:nb_process
                     start = (i - 1) * nb_ids_per_chunk + 1
                     stop = start + nb_ids_per_chunk
                     stop = stop > length(ids) ? length(ids) : stop
-                    if i == size && stop != length(ids)
+                    if i == nb_process && stop != length(ids)
                         stop = length(ids)
                     end
                     chunk = ids[start:stop]
-                    print("Sending [$start -> $stop] to $(i - 1):\n$chunk\n")
-                    MPI.Isend(chunk, i - 1, 0, comm)
+                    println("Sending [$start -> $stop] to $(i):\n$chunk\n")
+                    MPI.Isend(chunk, i, 0, comm)
                 end
             end
-        end
-        status = MPI.Probe(0, 0, comm)
-        count = MPI.Get_count(status, Int)
-        if count == 0
-            print("Nothing to process. Exiting.\n")
+            process_done = zeros(Bool, nb_process)
+            while !all(process_done)
+                for i in 1:nb_process
+                    has_recieved, status = MPI.Iprobe(i, 0, comm)
+                    if has_recieved
+                        query, status = MPI.recv(i, 0, comm)
+                        query = String(query)
+                        println("Recieved query: $query")
+                        if query == "over"
+                            println("Process $i over.")
+                            process_done[i] = true
+                        else
+                            DBInterface.execute(db, query)
+                        end
+                    end
+                end
+            end
+            MPI.Barrier(comm)
             MPI.Finalize()
-            return
+        else
+            indexes, status = MPI.recv(0, 0, comm)
+            if length(indexes) == 0
+                println("Nothing to process. Exiting.")
+                MPI.Finalize()
+                return
+            end
+            println("Recieved: $indexes")
+            process_functions[process_type](db; subset=indexes, kwargs...)
+            println("Process done.")
+            MPI.send(['o', 'v', 'e', 'r'], 0, 0, comm)
+            println("Finalize.")
+            MPI.Barrier(comm)
+            MPI.Finalize()
         end
-        indexes = Array{Int}(undef, count)
-        MPI.Irecv!(indexes, 0, 0, comm)
-        print("Recieved: $indexes\n")
-        process_functions[process_type](db; subset=indexes, kwargs...)
-        print("Process done.\n")
-        MPI.Finalize()
     end
 end

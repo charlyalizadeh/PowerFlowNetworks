@@ -27,7 +27,7 @@ function save_single_features_instance!(db::SQLite.DB, feature_names, use_networ
         end
     end
     query = query[begin:end - 1] * " WHERE name = '$name' AND scenario = $scenario"
-    execute_set_immediate(db, query)
+    execute_query(db, query)
 end
 
 function save_single_features_instance_dfrow!(db::SQLite.DB, feature_names, use_network, row)

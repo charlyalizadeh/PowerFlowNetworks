@@ -1,8 +1,9 @@
-# TODO: Better solution than this
-function execute_set_immediate(db, query; rng=MersenneTwister(42))
-    uuid = uuid1(rng)
-    open("queries/$uuid.txt", "w") do io
-        write(io, query)
+function execute_query(db, query)
+    if !MPI.Initialized()
+        DBInterface.execute(db, query)
+    else
+        query = [c for c in query]
+        MPI.send(query, 0, 0, MPI.COMM_WORLD)
     end
 end
 
@@ -14,7 +15,7 @@ function load_instance_in_db!(db::SQLite.DB,
     INSERT INTO instances(name, scenario, source_path, source_type, date) 
     VALUES('$name', $scenario, '$source_path', '$source_type', '$date');
     """
-    execute_set_immediate(db, query)
+    execute_query(db, query)
 end
 
 function insert_decomposition!(db::SQLite.DB, origin_id, uuid,
@@ -33,7 +34,7 @@ function insert_decomposition!(db::SQLite.DB, origin_id, uuid,
         query *= ", $feature_value"
     end
     query *= ");"
-    execute_set_immediate(db, query)
+    execute_query(db, query)
 end
 
 function insert_merge!(db::SQLite.DB, in_id::Int, out_id::Int,
@@ -43,7 +44,7 @@ function insert_merge!(db::SQLite.DB, in_id::Int, out_id::Int,
     INSERT INTO merges(in_id, out_id, heuristics, treshold_name, treshold_percent, nb_added_edge)
     VALUES ($in_id, $out_id, '$heuristics', '$treshold_name', $treshold_percent, $nb_added_edge);
     """
-    execute_set_immediate(db, query)
+    execute_query(db, query)
 end
 
 function insert_combination!(db::SQLite.DB, in_id1::Int, in_id2::Int, out_id::Int,
@@ -53,5 +54,5 @@ function insert_combination!(db::SQLite.DB, in_id1::Int, in_id2::Int, out_id::In
     INSERT INTO combinations(in_id1, in_id2, out_id, how, extension_alg)
     VALUES ($in_id1, $in_id2, $out_id, '$how', '$extension_alg');
     """
-    execute_set_immediate(db, query)
+    execute_query(db, query)
 end

@@ -9,7 +9,7 @@ function save_basic_features_instance!(db::SQLite.DB, name, scenario, source_typ
     SET nbus = $_nbus, nbranch_unique = $_nbranch_unique, nbranch = $_nbranch, ngen = $_ngen
     WHERE name = '$name' AND scenario = $scenario;
     """
-    execute_set_immediate(db, query)
+    execute_query(db, query)
 end
 
 function save_basic_features_instance_dfrow!(db::SQLite.DB, row)

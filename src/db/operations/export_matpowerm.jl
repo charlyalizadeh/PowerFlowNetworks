@@ -10,7 +10,7 @@ function export_matpowerm_instance!(db::SQLite.DB, export_dir, name, scenario, s
         write_pfn(export_path, network)
     end
     query = "UPDATE instances SET matpowerm_path = '$export_path' WHERE name = '$name' AND scenario = $scenario"
-    execute_set_immediate(db, query)
+    execute_query(db, query)
 end
 
 function export_matpowerm_instance_dfrow!(db::SQLite.DB, export_dir, row)
