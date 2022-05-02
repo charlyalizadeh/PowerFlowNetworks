@@ -8,7 +8,6 @@ config_path = project_dir.joinpath("data", "configs", "kwargs.jl")
 log_dir = project_dir.joinpath("slurm", ".log")
 setup_process = [
     "save_basic_features_instances",
-    #"save_single_features_instances",
     "save_features_instances",
     "serialize_instances",
     "export_matpowerm_instances"
@@ -47,7 +46,7 @@ with open(setup_db_path, "w") as file:
     file.write(slurm_header)
     file.write(setup_db_header)
     file.write(f"julia --project=./ $LOAD_SCRIPT --dbpath $DBPATH --indirs_rawgo $INDIRS_RAWGO --indirs_matpowerm $INDIRS_MATPOWERM\n")
+    file.write("wait\n")
     for p in setup_process:
         file.write(f"srun julia --project={project_dir} {mpi_script} --process_type {p} --config_key {p} --log_dir {log_dir}\n")
-        file.write(f"julia --project={project_dir} scripts/write_queries.jl\n")
-        file.write(f"rm -f queries/*\n")
+        file.write("wait\n")

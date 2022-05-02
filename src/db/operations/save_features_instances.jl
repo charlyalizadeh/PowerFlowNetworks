@@ -9,6 +9,8 @@ function save_features_instance!(db::SQLite.DB, name, scenario, source_type, sou
             query *= "$feature_name = '+Infinity', "
         elseif feature_value == -Inf
             query *= "$feature_name = '-Infinity', "
+        elseif isnan(feature_value)
+            query *= "$feature_name = 'NaN', "
         else
             query *= "$feature_name = $feature_value, "
         end
