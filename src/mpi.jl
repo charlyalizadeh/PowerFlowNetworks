@@ -43,8 +43,8 @@ function execute_process_mpi(db::SQLite.DB, process_type, log_dir; kwargs...)
             if isempty(ids)
                 println("Nothing to process.")
                 for i in 1:nb_process
-                    println("Sending to $(i - 1): []")
-                    MPI.Isend(Vector{Int}(), i, 0, comm)
+                    println("Sending to $(i - 1): [-1]")
+                    MPI.send([-1], i, 0, comm)
                 end
             else
                 nb_ids_per_chunk = Int(floor(length(ids) / nb_process))
@@ -57,7 +57,10 @@ function execute_process_mpi(db::SQLite.DB, process_type, log_dir; kwargs...)
                     end
                     chunk = ids[start:stop]
                     println("Sending [$start -> $stop] to $(i):\n$chunk\n")
-                    MPI.Isend(chunk, i, 0, comm)
+                    if isempty(chunk)
+                        chunck = [-1]
+                    end
+                    MPI.send(chunk, i, 0, comm)
                 end
             end
             process_done = zeros(Bool, nb_process)
@@ -72,7 +75,12 @@ function execute_process_mpi(db::SQLite.DB, process_type, log_dir; kwargs...)
                             println("Process $i over.")
                             process_done[i] = true
                         else
-                            DBInterface.execute(db, query)
+                            try
+                                DBInterface.execute(db, query)
+                            catch e
+                                @warn query
+                                rethrow()
+                            end
                         end
                     end
                 end
@@ -81,7 +89,7 @@ function execute_process_mpi(db::SQLite.DB, process_type, log_dir; kwargs...)
             MPI.Finalize()
         else
             indexes, status = MPI.recv(0, 0, comm)
-            if length(indexes) == 0
+            if indexes == [-1]
                 println("Nothing to process. Exiting.")
                 MPI.Finalize()
                 return
