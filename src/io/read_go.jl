@@ -13,7 +13,7 @@ _get_rawgo_colnames() = Dict(
 
 _get_rawgo_apply_colnames() = Dict(
     "LOAD" => ["PL", "QL"],
-    "GENERATOR" => ["PG", "QG", "QT", "QB", "PT", "PB"],
+    "GENERATOR" => ["PG", "QG", "QT", "QB", "PT", "PB", "STAT"],
     "FIXED SHUNT" => ["GL", "BL"]
 )
 
@@ -80,7 +80,7 @@ function _extract_gen(dfs)
         return zeros(0, 25)
     end
     gen = zeros(ngen, 25)
-    gen[:, [1, 2, 3, 4, 5, 9, 10, 15]] .= dfs["GENERATOR"][!, [:I, :PG, :QG, :QT, :QB, :PT, :PB, :STAT]]
+    gen[:, [1, 2, 3, 4, 5, 8, 9, 10]] .= dfs["GENERATOR"][!, [:I, :PG, :QG, :QT, :QB, :STAT, :PT, :PB]]
     return gen
 end
 function _extract_branch(dfs)
