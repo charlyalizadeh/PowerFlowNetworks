@@ -80,7 +80,7 @@ function _extract_gen(dfs)
         return zeros(0, 25)
     end
     gen = zeros(ngen, 25)
-    gen[:, [1, 2, 3, 4, 5, 9, 10]] .= dfs["GENERATOR"][!, [:I, :PG, :QG, :QT, :QB, :PT, :PB]]
+    gen[:, [1, 2, 3, 4, 5, 9, 10, 15]] .= dfs["GENERATOR"][!, [:I, :PG, :QG, :QT, :QB, :PT, :PB, :STAT]]
     return gen
 end
 function _extract_branch(dfs)
