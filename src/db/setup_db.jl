@@ -80,9 +80,11 @@ function create_decompositions_table(db)
         clique_size_max INTEGER, clique_size_min INTEGER, clique_size_mean REAL, clique_size_median REAL, clique_size_var REAL,
         nb_lc INTEGER,
 
-        solve_config_path TEXT,
         date_solving TEXT,
         solve_log_path TEXT,
+        objective REAL, nb_iter INTEGER, m REAL,
+        solving_time REAL,
+
 
         PRIMARY KEY(id),
         FOREIGN KEY(origin_name, origin_scenario) REFERENCES instances(name, scenario)
