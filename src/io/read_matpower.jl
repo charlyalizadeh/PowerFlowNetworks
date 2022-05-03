@@ -9,6 +9,11 @@ get_matpower_cols() = Dict(
     "gencost" => ["MODEL", "STARTUP", "SHUTDOWN", "NCOST", "COST"]
 )
 
+function get_matpower_gencost_cols(gencost)
+    nb_costs = size(gencost, 2) - 4
+    return vcat(["MODEL", "STARTUP", "SHUTDOWN", "NCOST"], ["COST$i" for i in 1:nb_costs])
+end
+
 function _row_to_array_matpower_mat(row)
     row = split(row, ';')[1]
     values = split(row, '\t')[2:end]
@@ -36,8 +41,8 @@ function get_data_matpower_m(path::AbstractString)
     lines = split(file_string, '\n')
     lines = [l for l in lines if !startswith(lstrip(l), "%")]
     data = Dict()
-    occursin_pattern = ["mpc.bus", "mpc.gen ", "mpc.branch"]
-    occursin_key = ["bus", "gen", "branch"]
+    occursin_pattern = ["mpc.bus", "mpc.gen ", "mpc.branch", "mpc.gencost"]
+    occursin_key = ["bus", "gen", "branch", "gencost"]
     dims = [17, 25, 21]
     pattern_idx = 1
     for (i, f) in enumerate(lines)
@@ -47,7 +52,11 @@ function get_data_matpower_m(path::AbstractString)
             key = occursin_key[pattern_idx]
             mat = _parse_matrix_matpower_mat(lines, i + 1)
             sizes = size(mat)
-            data[key] = zeros(sizes[1], dims[pattern_idx])
+            if key == "gencost"
+                data[key] = zeros(sizes[1], sizes[2])
+            else
+                data[key] = zeros(sizes[1], dims[pattern_idx])
+            end
             data[key][1:sizes[1], 1:sizes[2]] = mat
             pattern_idx += 1
             if pattern_idx > length(occursin_pattern)
@@ -55,7 +64,10 @@ function get_data_matpower_m(path::AbstractString)
             end
         end
     end
-    return data["bus"], data["gen"], data["branch"], data["baseMVA"]
+    if !haskey(data, "gencost")
+        data["gencost"] = zeros(0, 5)
+    end
+    return data["bus"], data["gen"], data["branch"], data["gencost"], data["baseMVA"]
 end
 
 function get_data_matpower_mat(path::AbstractString)

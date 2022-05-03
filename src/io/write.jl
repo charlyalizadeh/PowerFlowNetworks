@@ -40,7 +40,10 @@ mpc.branch = [
 %	1	startup	shutdown	n	x1	y1	...	xn	yn
 %	2	startup	shutdown	n	c(n-1)	...	c0
 mpc.gencost = [
-];"""
+\t"""
+    write(io, text)
+    CSV.write(io, network.gencost; delim='\t', append=true, newline=";\n\t")
+    text = "];"
     write(io, text)
 end
 

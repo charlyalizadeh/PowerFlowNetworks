@@ -51,15 +51,30 @@ function get_network_name(path::AbstractString, format::AbstractString)
     end
 end
 
+function convert_cols_to_int!(df::DataFrame, cols)
+    for c in cols
+        df[!, c] = floor.(Int, df[!, c])
+    end
+end
 
 function read_network(path::AbstractString, format::AbstractString)
-    bus, gen, branch, baseMVA = get_data_functions[format](path)
+    bus, gen, branch, gencost, baseMVA = get_data_functions[format](path)
     colnames = get_matpower_cols()
+
     bus = DataFrame(bus, colnames["bus"])
+    convert_cols_to_int!(bus, [:ID, :TYPE])
+
     gen = DataFrame(gen, colnames["gen"])
+    convert_cols_to_int!(gen, [:ID, :GEN_STATUS])
+
     branch = DataFrame(branch, colnames["branch"])
+    convert_cols_to_int!(branch, [:SRC, :DST, :BR_STATUS])
+
+    gencost = DataFrame(gencost, get_matpower_gencost_cols(gencost))
+    convert_cols_to_int!(gencost, [:MODEL, :NCOST])
+
     name = get_network_name(path, format)
-    return PowerFlowNetwork(name, bus, gen, branch, baseMVA)
+    return PowerFlowNetwork(name, bus, gen, branch, gencost, baseMVA)
 end
 
 nbus(path::AbstractString, format::AbstractString) = nbus_functions[format](path)

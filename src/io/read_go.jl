@@ -93,9 +93,26 @@ function _extract_branch(dfs)
     branch[nrow(dfs["BRANCH"]) + 1:end, [1, 2]] .= dfs["TRANSFORMER"][!, [:I, :J]]
     return branch
 end
+function _extract_gencost_json(json_data)
+    max_length = maximum([length(gen["cblocks"]) for gen in json_data["generators"]]) * 2
+    gencost = zeros(length(json_data["generators"]), max_length + 4)
+    gencost[:, 1] = ones(size(gencost, 1))
+    for (i, gen) in enumerate(json_data["generators"])
+        coeffs = [[b["pmax"], b["c"]] for b in gen["cblocks"]]
+        sort!(coeffs, by=x -> x[1])
+        coeffs = reduce(vcat, coeffs)
+        gencost[i, Array(5:length(coeffs) + 4)] = coeffs
+        gencost[i, 4] = length(gen["cblocks"])
+        gencost[i, 2] = gen["sucost"]
+        gencost[i, 3] = gen["sdcost"]
+    end
+    return gencost
+end
 
 function get_data_rawgo(path::AbstractString)
-    file_string = read(open(path, "r"), String)
+    raw_path = joinpath(path, "case.raw")
+    json_path = joinpath(path, "case.json")
+    file_string = read(open(raw_path, "r"), String)
     lines = split(file_string, '\n')
     baseMVA = parse(Float64, split(lines[1], ',')[2])
     blocks = split(file_string, r"\n0 \/")
@@ -117,7 +134,8 @@ function get_data_rawgo(path::AbstractString)
     end
     dfs = _data_rawgo_to_dfs(data)
     _clean_rawgo_dfs(dfs)
-    return _extract_bus(dfs), _extract_gen(dfs), _extract_branch(dfs), baseMVA
+    json_data = JSON.parse(open(json_path, "r"))
+    return _extract_bus(dfs), _extract_gen(dfs), _extract_branch(dfs), _extract_gencost_json(json_data), baseMVA
 end
 
 # Core
