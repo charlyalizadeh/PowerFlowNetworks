@@ -15,7 +15,9 @@ const process_functions = Dict(
     "merge_decompositions" => merge_decompositions!,
     "combine_decompositions" => combine_decompositions!,
     "delete_duplicates" => delete_duplicates!,
-    "export_matpowerm_instances" => export_matpowerm_instances!
+    "export_matpowerm_instances" => export_matpowerm_instances!,
+    "solve_decompositions" => solve_decompositions!,
+    "load_matctr_instances" => load_matctr_instances!
 )
 const table_to_process = Dict(
     "save_basic_features_instances" => "instances",
@@ -26,7 +28,9 @@ const table_to_process = Dict(
     "merge_decompositions" => "decompositions",
     "combine_decompositions" => "instances",
     "delete_duplicates" => "instances",
-    "export_matpowerm_instances" => "instances"
+    "export_matpowerm_instances" => "instances",
+    "solve_decompositions" => "decompositions",
+    "load_matctr_instances" => "instances"
 )
 
 function execute_process_mpi(db::SQLite.DB, process_type, log_dir; kwargs...)

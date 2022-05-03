@@ -14,14 +14,22 @@ using LinearAlgebra
 using Combinatorics
 import JSON
 using MPI
+
+# Solve module
 using Logging
 using CSV
+using Printf
+using JuMP
+using Mosek
+using MosekTools
+import Base.Iterators: flatten
 
 mutable struct PowerFlowNetwork
     name::String
     bus::DataFrame
     gen::DataFrame
     branch::DataFrame
+    gencost::DataFrame
     baseMVA::Float64
 end
 
@@ -44,6 +52,7 @@ include("decompositions/chordal_extension/chordal_extension.jl")
 include("decompositions/merge/merge.jl")
 include("decompositions/combine/combine.jl")
 include("db/operations.jl")
+include("solve/solve.jl")
 include("mpi.jl")
 
 
@@ -53,6 +62,7 @@ SimpleGraph(network::PowerFlowNetwork) = to_simple_graph(network)
 export nbus, nbranch, ngen, is_disjoint, has_bus, has_branch, has_gen,
        has_continuous_index, normalize_index, merge_duplicate_branch!
 export ischordal
+export read_cliquetree, read_clique, get_nv, get_ne, get_nb_lc
 export nbranch_unique, ngen_unique
 export PowerFlowNetwork
 export write_pfn
@@ -66,7 +76,9 @@ export merge_dec
 export combine_graph
 export save_features_instances!, save_basic_features_instances!, save_single_features_instances!,
        serialize_instances!, generate_decompositions!, merge_decompositions!, combine_decompositions!,
-       check_sanity, delete_duplicates!, export_matpowerm_instances!
+       check_sanity, delete_duplicates!, export_matpowerm_instances!, load_matctr_instances!, solve_decompositions!
+export solve_sdp
 export execute_process_mpi
+
 
 end
