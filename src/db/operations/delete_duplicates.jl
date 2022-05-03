@@ -1,4 +1,4 @@
-function _delete_duplicate!(db::SQLite.DB, base_id, graph::AbstractGraph, id, graph_path)
+function delete_duplicate!(db::SQLite.DB, base_id, graph::AbstractGraph, id, graph_path)
     println("Comparing $base_id and $id")
     other_graph = loadgraph(graph_path)
     if graph == other_graph
@@ -14,7 +14,7 @@ function delete_duplicate_dfrow!(db::SQLite.DB, id, origin_name::AbstractString,
     query = "SELECT id, graph_path FROM decompositions WHERE origin_name='$origin_name' AND origin_scenario=$origin_scenario AND id > $id"
     results = DBInterface.execute(db, query) |> DataFrame
     graph = loadgraph(graph_path)
-    delete_duplicate_function!(row) = _delete_duplicate!(db, id, graph, row[:id], row[:graph_path])
+    delete_duplicate_function!(row) = delete_duplicate!(db, id, graph, row[:id], row[:graph_path])
     delete_duplicate_function!.(eachrow(results[!, [:id, :graph_path]]))
 end
 
