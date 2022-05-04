@@ -1,9 +1,6 @@
 function save_features_instance!(db::SQLite.DB, name, scenario, source_type, source_path)
     println("Saving instance features: ($name, $scenario)")
     network = PowerFlowNetwork(source_path, source_type)
-    if source_type == "RAWGO"
-        source_path = joinpath(source_path, "case.raw")
-    end
     merge_duplicate_branch!(network)
     features = get_features_instance(network)
     query = "UPDATE instances SET "

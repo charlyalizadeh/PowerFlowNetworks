@@ -1,8 +1,5 @@
 function save_basic_features_instance!(db::SQLite.DB, name, scenario, source_type, source_path)
     println("Saving basic instance features: ($name, $scenario)")
-    if source_type == "RAWGO"
-        source_path = joinpath(source_path, "case.raw")
-    end
     _nbus = nbus(source_path, source_type)
     _nbranch_unique = nbranch(source_path, source_type; distinct_pair=true)
     _nbranch = nbranch(source_path, source_type)

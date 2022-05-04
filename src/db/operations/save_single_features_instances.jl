@@ -1,9 +1,6 @@
 function save_single_features_instance!(db::SQLite.DB, feature_names, use_network, name, scenario, source_type, source_path, pfn_path)
     println("Saving instance features: ($name, $scenario)")
     network = nothing
-    if source_type == "RAWGO"
-        source_path = joinpath(source_path, "case.raw")
-    end
     if use_network
         network = ismissing(pfn_path) ? PowerFlowNetwork(source_path, source_type) : deserialize(pfn_path)
     end
