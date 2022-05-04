@@ -1,0 +1,9 @@
+buses: 2045
+loads: 799
+fixed_shunts: 893
+generators: 314
+nontransformer_branches: 2334
+transformers: 548
+transformer impedance correction tables: 31
+switched_shunts: 16
+contingencies: 342

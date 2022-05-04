@@ -16,10 +16,11 @@
         @test is_disjoint(network) == true
 
 
-        path = "test/data/C2FEN02312/scenario_3/case.raw"
+        path = "test/data/C2FEN02312/scenario_3/"
         network = PowerFlowNetwork(path, "RAWGO")
-        @test nbranch_unique(network) == nbranch_unique(path)
+        raw_path = joinpath(path, "case.raw")
+        @test nbranch_unique(network) == nbranch_unique(raw_path)
         merge_duplicate_branch!(network)
-        @test nbranch_unique(network) == nbranch_unique(path)
+        @test nbranch_unique(network) == nbranch_unique(raw_path)
         @test nbranch(network) == nbranch_unique(network)
 end
