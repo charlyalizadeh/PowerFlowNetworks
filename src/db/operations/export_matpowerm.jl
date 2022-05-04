@@ -27,7 +27,7 @@ function export_matpowerm_instances!(db::SQLite.DB; min_nv, max_nv, export_dir, 
         query *= " AND id IN ($(join(subset, ',')))"
     end
     results = DBInterface.execute(db, query) |> DataFrame
-    println("Exporting instance to MATPOWERM file: recompute=$recompute")
+    println("Exporting instance to MATPOWERM file: recompute=$recompute, min_nv=$min_nv, max_nv=$max_nv, export_dir=$export_dir")
     println("subset\n$subset\nend subset")
     export_function!(row) = export_matpowerm_instance_dfrow!(db, export_dir, row)
     export_function!.(eachrow(results[!, [:name, :scenario, :source_type, :source_path, :pfn_path]]))
