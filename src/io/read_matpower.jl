@@ -10,6 +10,9 @@ get_matpower_cols() = Dict(
 )
 
 function get_matpower_gencost_cols(gencost)
+    if size(gencost, 1) == 0
+        return ["MODEL", "STARTUP", "SHUTDOWN", "NCOST"]
+    end
     nb_costs = size(gencost, 2) - 4
     return vcat(["MODEL", "STARTUP", "SHUTDOWN", "NCOST"], ["COST$i" for i in 1:nb_costs])
 end
@@ -65,7 +68,7 @@ function get_data_matpower_m(path::AbstractString)
         end
     end
     if !haskey(data, "gencost")
-        data["gencost"] = zeros(0, 5)
+        data["gencost"] = zeros(0, 4)
     end
     return data["bus"], data["gen"], data["branch"], data["gencost"], data["baseMVA"]
 end

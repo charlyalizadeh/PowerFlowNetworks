@@ -44,15 +44,22 @@ function _data_rawgo_to_dfs(data)
     end
     return Dict(k => DataFrame(data[k], colnames[k]) for k in keys(data))
 end
-function _clean_rawgo_df(df; index_cols, apply_cols, func)
+function _clean_rawgo_df(df; index_cols, apply_cols, func, return_indices=false)
     gds = groupby(df, index_cols)
-    return combine(gds, apply_cols .=> func; renamecols=false)
+    if !return_indices
+        return combine(gds, apply_cols .=> func; renamecols=false)
+    else
+        indices = groupindices(gds)
+        return combine(gds, apply_cols .=> func; renamecols=false), indices
+    end
 end
 function _clean_rawgo_dfs(dfs)
     apply_colnames = _get_rawgo_apply_colnames()
     dfs["LOAD"] = _clean_rawgo_df(dfs["LOAD"]; index_cols=["I"], apply_cols=apply_colnames["LOAD"], func=sum)
-    dfs["GENERATOR"] = _clean_rawgo_df(dfs["GENERATOR"]; index_cols=["I"], apply_cols=apply_colnames["GENERATOR"], func=sum)
     dfs["FIXED SHUNT"] = _clean_rawgo_df(dfs["FIXED SHUNT"]; index_cols=["I"], apply_cols=apply_colnames["FIXED SHUNT"], func=sum)
+    dfs["GENERATOR"], indices = _clean_rawgo_df(dfs["GENERATOR"]; index_cols=["I"], apply_cols=apply_colnames["GENERATOR"], func=sum, return_indices=true)
+    dfs["GENERATOR"][!, :STAT] = map(x -> x > 0 ? 1 : 0, dfs["GENERATOR"][!, :STAT])
+    return indices
 end
 
 # Extract the PowerFlowNetwork fields
@@ -98,20 +105,63 @@ function _extract_gencost_json(json_data)
     gencost = zeros(length(json_data["generators"]), max_length + 4)
     gencost[:, 1] = ones(size(gencost, 1))
     for (i, gen) in enumerate(json_data["generators"])
-        coeffs = [[b["pmax"], b["c"]] for b in gen["cblocks"]]
-        sort!(coeffs, by=x -> x[1])
-        coeffs = reduce(vcat, coeffs)
-        gencost[i, Array(5:length(coeffs) + 4)] = coeffs
-        gencost[i, 4] = length(gen["cblocks"])
+        costs = [[b["pmax"], b["c"]] for b in gen["cblocks"]]
+        sort!(costs, by=x -> x[1])
+        costs = reduce(vcat, costs)
+        gencost[i, 5:(length(costs) + 4)] = costs
+        gencost[i, 4] = size(gen["cblocks"], 1)
         gencost[i, 2] = gen["sucost"]
         gencost[i, 3] = gen["sdcost"]
     end
     return gencost
 end
+function _get_max_ncost_rop(rop_data)
+    lines = split(rop_data, "\n")[2:end - 1]
+    current_idx = 1
+    max_ncost = 0
+    while current_idx <= length(lines)
+        ncost = parse(Int, split(strip(lines[current_idx]), ",")[end])
+        if ncost > max_ncost
+            max_ncost = ncost
+        end
+        current_idx += ncost + 1
+    end
+    return max_ncost
+end
+_extract_cost(line) = parse.(Float64, split(strip(line), ",")[[2, 1]])
+function _extract_gencost_rop(rop_data)
+    rop_data = split(rop_data, "0 /")[11]
+    max_ncost = _get_max_ncost_rop(rop_data)
+    gencost = zeros(0, (max_ncost * 2) + 4)
+    lines = split(rop_data, "\n")[2:end - 1]
+    current_idx = 1
+    while current_idx <= length(lines)
+        ncost = parse(Int, split(strip(lines[current_idx]), ",")[end])
+        costs = zeros((max_ncost * 2) + 4)
+        costs[1] = 1
+        costs[4] = ncost
+        non_zero_costs = sort([_extract_cost(lines[current_idx + i]) for i in 1:ncost], by=x->x[1])
+        costs[5:((ncost * 2) + 4)] = reduce(vcat, non_zero_costs)
+        gencost = [gencost; costs']
+        current_idx += ncost + 1
+    end
+    return gencost
+end
+function _combine_gencost(gencost, indices)
+    gencost_cols = get_matpower_gencost_cols(gencost)
+    df = DataFrame(gencost, gencost_cols)
+    df[!, :indices] = indices
+    gd = groupby(df, :indices)
+    cd = combine(gd, [:MODEL] .=> first, [:STARTUP, :SHUTDOWN] .=> sum, :NCOST .=> maximum, gencost_cols[5:end] .=> sum)
+    select!(cd, Not(:indices))
+    return Tables.matrix(cd)
+end
 
 function get_data_rawgo(path::AbstractString)
+    path = _resolve_rawgo_path(path, "dir")
     raw_path = joinpath(path, "case.raw")
     json_path = joinpath(path, "case.json")
+    rop_path = joinpath(path, "case.rop")
     file_string = read(open(raw_path, "r"), String)
     lines = split(file_string, '\n')
     baseMVA = parse(Float64, split(lines[1], ',')[2])
@@ -133,13 +183,47 @@ function get_data_rawgo(path::AbstractString)
         data[blocks_name[i]] = _parse_rawgo_mat(block; startat=startat, modulo=modulo)
     end
     dfs = _data_rawgo_to_dfs(data)
-    _clean_rawgo_dfs(dfs)
-    json_data = JSON.parse(open(json_path, "r"))
-    return _extract_bus(dfs), _extract_gen(dfs), _extract_branch(dfs), _extract_gencost_json(json_data), baseMVA
+    gencost = zeros(0, 4)
+    if isfile(json_path)
+        json_data = JSON.parse(open(json_path, "r"))
+        gencost = _extract_gencost_json(json_data)
+    elseif isfile(rop_path)
+        rop_data = read(open(rop_path, "r"), String)
+        gencost = _extract_gencost_rop(rop_data)
+    else
+        @warn "No cost file found in $(path)."
+    end
+    indices = _clean_rawgo_dfs(dfs)
+    if size(gencost, 1) != 0
+        gencost = _combine_gencost(gencost, indices)
+    end
+    return _extract_bus(dfs), _extract_gen(dfs), _extract_branch(dfs), gencost, baseMVA
 end
 
 # Core
+function _resolve_rawgo_path(path::AbstractString, to="dir")
+    # Get the scenario directory
+    paths = splitpath(path)
+    scenario_dir = ""
+    if occursin("case", paths[end])
+        scenario_dir = join(paths[1:end-1], "/")
+    else
+        scenario_dir = path
+    end
+    if to == "dir"
+        return scenario_dir
+    elseif to == "raw"
+        return joinpath(scenario_dir, "case.raw")
+    elseif to == "json"
+        return joinpath(scenario_dir, "case.json")
+    elseif to == "rop"
+        return joinpath(scenario_dir, "case.rop")
+    end
+    error("`to` must be equal to \"dir\", \"raw\" \"json\" or \"rop\".")
+end
+
 function nbus_rawgo(path::AbstractString)
+    path = _resolve_rawgo_path(path, "raw")
     file_string = read(open(path, "r"), String)
     blocks = split(file_string, r"\n0 \/")
     nbus = length(split(blocks[1], '\n')) - 3
@@ -147,6 +231,7 @@ function nbus_rawgo(path::AbstractString)
 end
 
 function nbranch_rawgo(path::AbstractString; distinct_pair=false)
+    path = _resolve_rawgo_path(path, "raw")
     nbranch = nothing
     file_string = read(open(path, "r"), String)
     blocks = split(file_string, r"\n0 \/")
@@ -161,6 +246,7 @@ function nbranch_rawgo(path::AbstractString; distinct_pair=false)
 end
 
 function ntransformer_rawgo(path::AbstractString; distinct_pair=false)
+    path = _resolve_rawgo_path(path, "raw")
     ntransformer = nothing
     file_string = read(open(path, "r"), String)
     blocks = split(file_string, r"\n0 \/")
@@ -178,6 +264,7 @@ function ntransformer_rawgo(path::AbstractString; distinct_pair=false)
 end
 
 function ngen_rawgo(path::AbstractString; distinct_pair=false)
+    path = _resolve_rawgo_path(path, "raw")
     ngen = nothing
     file_string = read(open(path, "r"), String)
     blocks = split(file_string, r"\n0 \/")

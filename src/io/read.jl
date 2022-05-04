@@ -42,9 +42,10 @@ function get_network_name(path::AbstractString, format::AbstractString)
     if format == "MATPOWERM"
         return basename(path)[begin:end - 2]
     elseif format == "RAWGO"
+        path = _resolve_rawgo_path(path, "dir")
         paths = splitpath(path)
-        name = paths[end - 2]
-        scenario = parse(Int, paths[end - 1][begin + 9: end])
+        name = paths[end - 1]
+        scenario = parse(Int, paths[end][begin + 9: end])
         return "$(name)_$(scenario)"
     else
         error("Not Implemented")
@@ -82,35 +83,27 @@ nbranch(path::AbstractString, format::AbstractString; distinct_pair=false) = nbr
                                                                              ntransformer_functions[format](path; distinct_pair)
 ngen(path::AbstractString, format::AbstractString; distinct_pair=false) = ngen_functions[format](path; distinct_pair)
 
-function nbus(path::AbstractString)
-    extension = splitext(path)[end]
-    if extension == ".m"
-        nbus(path, "MATPOWERM")
-    elseif extension == ".raw"
-        nbus(path, "RAWGO")
+
+function _get_source_type(path::AbstractString)
+    if splitext(path)[end] == ".m"
+        return "MATPOWERM"
     else
-        error("Not Implemented")
+        # TODO: better distinction
+        return "RAWGO"
     end
+end
+
+function nbus(path::AbstractString)
+    source_type = _get_source_type(path)
+    return nbus(path, source_type)
 end
 function nbranch(path::AbstractString; distinct_pair=false)
-    extension = splitext(path)[end]
-    if extension == ".m"
-        nbranch(path, "MATPOWERM"; distinct_pair=distinct_pair)
-    elseif extension == ".raw"
-        nbranch(path, "RAWGO"; distinct_pair=distinct_pair)
-    else
-        error("Not Implemented")
-    end
+    source_type = _get_source_type(path)
+    return nbranch(path, source_type; distinct_pair=distinct_pair)
 end
 function ngen(path::AbstractString; distinct_pair=false)
-    extension = splittext(path)[end]
-    if extension == ".m"
-        ngen(path, "MATPOWERM"; distinct_pair=distinct_pair)
-    elseif extension == ".raw"
-        ngen(path, "RAWGO"; distinct_pair=distinct_pair)
-    else
-        error("Not Implemented")
-    end
+    source_type = _get_source_type(path)
+    return ngen(path, source_type; distinct_pair=distinct_pair)
 end
 
 nbranch_unique(path::AbstractString) = nbranch(path::AbstractString; distinct_pair=true)
