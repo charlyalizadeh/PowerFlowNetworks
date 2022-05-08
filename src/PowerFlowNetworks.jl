@@ -44,15 +44,12 @@ include("io/write.jl")
 include("read_features.jl")
 include("graphs/graphs.jl")
 include("graphs/operations.jl")
-include("db/setup_db.jl")
-include("db/infos.jl")
-include("db/inserts.jl")
 include("utils/graphs/operators.jl")
 include("decompositions/chordal_extension/chordal_extension.jl")
 include("decompositions/merge/merge.jl")
 include("decompositions/combine/combine.jl")
-include("db/operations.jl")
 include("solve/solve.jl")
+include("db/db.jl")
 include("mpi.jl")
 
 
@@ -71,6 +68,7 @@ export add_edges_distance!, add_edges_random!, add_edges!
 export setup_db
 export has_opf_tables, count_missing_columns, table_count, nb_instances, nb_decompositions, get_table_ids
 export load_instance_in_db!
+export export_db
 export chordal_extension
 export merge_dec
 export combine_graph

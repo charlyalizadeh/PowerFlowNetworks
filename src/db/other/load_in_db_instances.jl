@@ -66,6 +66,10 @@ function clean_dirs(dirs; verbose=true)
 end
 
 function load_in_db_instances!(db::SQLite.DB, indirs_rawgo, indirs_matpowerm)
+    tables = ["instances", "decompositions", "mergers", "combinations", "solve_results"]
+    if !isdb || any(map(x -> !(x in SQLite.tables(db)[:name]), tables))
+        db = setup_db(dbpath)
+    end
     indirs_rawgo = clean_dirs(indirs_rawgo)
     indirs_matpowerm = clean_dirs(indirs_matpowerm)
     load_matpower_mat_instances!(db, indirs_matpowerm)
