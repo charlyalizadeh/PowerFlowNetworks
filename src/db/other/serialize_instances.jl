@@ -3,6 +3,7 @@ function serialize_instance!(db::SQLite.DB, serialize_path, graphs_path, name, s
     pfn_path = abspath(joinpath(serialize_path, "$(name)_$(scenario)_network.bin"))
     graph_path = abspath(joinpath(graphs_path, "$(name)_$(scenario)_graph.lgz"))
     network = PowerFlowNetwork(source_path, source_type)
+    set_index_gencost!(network)
     g = SimpleGraph(network)
     serialize(pfn_path, network)
     savegraph(graph_path, g)
