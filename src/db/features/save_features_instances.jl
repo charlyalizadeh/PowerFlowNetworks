@@ -20,10 +20,6 @@ function save_features_instance!(db::SQLite.DB, name, scenario, source_type, sou
     execute_query(db, query)
 end
 
-function save_features_instance_dfrow!(db::SQLite.DB, row) 
-    save_features_instance!(db, row[:name], row[:scenario], row[:source_type], row[:source_path])
-end
-
 function save_features_instances!(db::SQLite.DB; min_nv=typemin(Int), max_nv=typemax(Int), recompute=false, subset=nothing)
     query = "SELECT name, scenario, source_type, source_path FROM instances WHERE nbus >= $min_nv AND nbus <= $max_nv"
     if !recompute
@@ -34,6 +30,6 @@ function save_features_instances!(db::SQLite.DB; min_nv=typemin(Int), max_nv=typ
     end
     results = DBInterface.execute(db, query) |> DataFrame
     println("Saving instance features config: min_nv=$min_nv, max_nv=$max_nv, recompute=$recompute")
-    save_function!(row) = save_features_instance_dfrow!(db, row)
-    save_function!.(eachrow(results[!, [:name, :scenario, :source_type, :source_path]]))
+    save_function!(row) = save_features_instance!(db, row[:name], row[:scenario], row[:source_type], row[:source_path])
+    save_function!.(eachrow(results))
 end

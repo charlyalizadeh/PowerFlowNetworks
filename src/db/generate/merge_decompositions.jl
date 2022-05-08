@@ -49,13 +49,6 @@ function merge_decomposition!(db::SQLite.DB, id::Int, origin_id::Int, name::Abst
     insert_merge!(db, id, out_id, heuristics_db, treshold_name, treshold_percent, nb_added_edge)
 end
 
-function merge_decomposition_dfrow!(db::SQLite.DB, row,
-                                    heuristic::Vector{String}, heuristic_switch::Vector{Int},
-                                    treshold_name::AbstractString, merge_kwargs::AbstractDict; rng)
-    merge_decomposition!(db, row[:id], row[:origin_id], row[:origin_name], row[:origin_scenario], row[:clique_path], row[:cliquetree_path], row[:graph_path], row[:nb_added_edge_dec], 
-                         heuristic, heuristic_switch, treshold_name, merge_kwargs, rng=rng)
-end
-
 function merge_decompositions!(db::SQLite.DB;
                                heuristic::Vector{String}, heuristic_switch::Vector{Int},
                                treshold_name::AbstractString, merge_kwargs::AbstractDict,
@@ -70,8 +63,8 @@ function merge_decompositions!(db::SQLite.DB;
     println("Merging config: heuristic=$heuristic heuristic_switch=$heuristic_switch, treshold_name=$treshold_name, min_nv=$min_nv, max_nv=$max_nv, rng=$rng")
     println("merge_kwargs\n$merge_kwargs\nend merge_kwargs")
     println("subset\n$subset\nend subset")
-    merge_function!(row) = merge_decomposition_dfrow!(db, row,
-                                                      heuristic, heuristic_switch, treshold_name, merge_kwargs;
-                                                      rng=rng)
-    merge_function!.(eachrow(results[!, [:id, :origin_id, :origin_name, :origin_scenario, :clique_path, :cliquetree_path, :graph_path, :nb_added_edge_dec]]))
+    merge_function!(row) = merge_decomposition!(db, row[:id], row[:origin_id], row[:origin_name], row[:origin_scenario], row[:clique_path], row[:cliquetree_path], row[:graph_path], row[:nb_added_edge_dec],
+                                                heuristic, heuristic_switch, treshold_name, merge_kwargs;
+                                                rng=rng)
+    merge_function!.(eachrow(results))
 end

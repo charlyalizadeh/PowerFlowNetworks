@@ -11,7 +11,6 @@ function solve_decomposition!(db::SQLite.DB, id, origin_name, origin_scenario, c
     execute_query(db, query)
 end
 
-
 function solve_decomposition_dfrow!(db::SQLite.DB, id, origin_id, origin_name, origin_scenario, clique_path, cliquetree_path, mat_paths, ctr_paths)
     if !haskey(mat_paths, origin_id) || !haskey(ctr_paths, origin_id) || ismissing(ctr_paths[origin_id]) || ismissing(mat_paths[origin_id])
         println("No matctr files registered in the database for ($origin_name, $origin_scenario).")
@@ -19,8 +18,6 @@ function solve_decomposition_dfrow!(db::SQLite.DB, id, origin_id, origin_name, o
         solve_decomposition!(db, id, origin_name, origin_scenario, clique_path, cliquetree_path, mat_paths[origin_id], ctr_paths[origin_id])
     end
 end
-
-
 
 function solve_decompositions!(db::SQLite.DB; subset=nothing)
     println("Solving decompositions")

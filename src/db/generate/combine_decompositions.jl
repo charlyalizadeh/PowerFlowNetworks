@@ -44,14 +44,6 @@ function combine_decomposition!(db::SQLite.DB, id::Int, name::AbstractString, sc
     insert_combination!(db, id_1, id_2, out_id, how, extension_alg)
 end
 
-function combine_decomposition_dfrow!(db::SQLite.DB, row; how, extension_alg, rng)
-    combine_decomposition!(db, row["origin_id"], row["origin_name"], row["origin_scenario"],
-                           row["clique_path"], row["cliquetree_path"], row["nb_added_edge_dec"],
-                           row["id"], row["graph_path"],
-                           row["id_1"], row["graph_path_1"];
-                           how=how, extension_alg=extension_alg, rng=rng)
-end
-
 function combine_decompositions!(db::SQLite.DB; how::AbstractString, extension_alg::AbstractString,
                                  min_nv=typemin(Int), max_nv=typemax(Int), subset=nothing, exclude=["combine"], rng=MersenneTwister(42))
     query = """
@@ -69,7 +61,10 @@ function combine_decompositions!(db::SQLite.DB; how::AbstractString, extension_a
     results = DBInterface.execute(db, query) |> DataFrame
     println("Combine config: how=$how, extension_alg=$extension_alg, min_nv=$min_nv, max_nv=$max_nv, exlucde=$exclude, rng=$rng")
     println("subset\n$subset\nend subset")
-    combine_function!(row) = combine_decomposition_dfrow!(db, row; how=how, extension_alg=extension_alg, rng=rng)
-    combine_function!.(eachrow(results[!, ["origin_id", "origin_name", "origin_scenario", "clique_path", "cliquetree_path", "nb_added_edge_dec",
-                                           "id", "graph_path", "id_1", "graph_path_1"]])) 
+    combine_function!(row) = combine_decomposition!(db, row[:origin_id], row[:origin_name], row[:origin_scenario],
+                                                    row[:clique_path], row[:cliquetree_path], row[:nb_added_edge_dec],
+                                                    row[:id], row[:graph_path],
+                                                    row[:id_1], row[:graph_path_1];
+                                                    how=how, extension_alg=extension_alg, rng=rng)
+    combine_function!.(eachrow(results))
 end

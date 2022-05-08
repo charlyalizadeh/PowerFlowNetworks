@@ -12,10 +12,6 @@ function save_basic_features_instance!(db::SQLite.DB, name, scenario, source_typ
     execute_query(db, query)
 end
 
-function save_basic_features_instance_dfrow!(db::SQLite.DB, row)
-    save_basic_features_instance!(db, row[:name], row[:scenario], row[:source_type], row[:source_path])
-end
-
 function save_basic_features_instances!(db::SQLite.DB; recompute=false, subset=nothing)
     query = "SELECT name, scenario, source_type, source_path FROM instances"
     if !recompute
@@ -31,6 +27,6 @@ function save_basic_features_instances!(db::SQLite.DB; recompute=false, subset=n
     results = DBInterface.execute(db, query) |> DataFrame
     println("Saving basic instance features config: recompute=$recompute")
     println("subset\n$subset\nend subset")
-    save_function!(row) = save_basic_features_instance_dfrow!(db, row)
-    save_function!.(eachrow(results[!, [:name, :scenario, :source_type, :source_path]]))
+    save_function!(row) = save_basic_features_instance!(db, row[:name], row[:scenario], row[:source_type], row[:source_path])
+    save_function!.(eachrow(results))
 end

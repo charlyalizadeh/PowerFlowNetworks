@@ -33,10 +33,6 @@ function load_matctr_instance!(db::SQLite.DB, name, scenario, source_type, out)
     execute_query(db, query)
 end
 
-function load_matctr_instance_dfrow!(db::SQLite.DB, row, out)
-    load_matctr_instance!(db, row[:name], row[:scenario], row[:source_type], out)
-end
-
 function load_matctr_instances!(db::SQLite.DB; out, recompute=false, subset=nothing, min_nv=typemin(Int), max_nv=typemax(Int))
     query = "SELECT name, scenario, source_type FROM instances WHERE nbus >= $min_nv AND nbus <= $max_nv"
     if !recompute
@@ -48,6 +44,6 @@ function load_matctr_instances!(db::SQLite.DB; out, recompute=false, subset=noth
     results = DBInterface.execute(db, query) |> DataFrame
     println("Loading matctr paths: out=$out, recompute=$recompute")
     println("subset\n$subset\nend subset")
-    load_matctr_instance_function!(row) = load_matctr_instance_dfrow!(db, row, out)
-    load_matctr_instance_function!.(eachrow(results[!, [:name, :scenario, :source_type]]))
+    load_matctr_instance_function!(row) = load_matctr_instance_dfrow!(db, row[:name], row[:scenario], row[:source_type], out)
+    load_matctr_instance_function!.(eachrow(results))
 end

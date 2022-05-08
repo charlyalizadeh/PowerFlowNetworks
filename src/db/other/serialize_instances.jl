@@ -10,10 +10,6 @@ function serialize_instance!(db::SQLite.DB, serialize_path, graphs_path, name, s
     execute_query(db, query)
 end
 
-function serialize_instance_dfrow!(db::SQLite.DB, serialize_path, graphs_path, row)
-    serialize_instance!(db, serialize_path, graphs_path, row[:name], row[:scenario], row[:source_type], row[:source_path])
-end
-
 function serialize_instances!(db::SQLite.DB;
                               serialize_path, graphs_path,
                               min_nv=typemin(Int), max_nv=typemax(Int), recompute=false,
@@ -30,6 +26,6 @@ function serialize_instances!(db::SQLite.DB;
     println("Serialize instance network and graph config: min_nv=$min_nv, max_nv=$max_nv, recompute=$recompute")
     println("subset\n$subset\nend subset")
     results = DBInterface.execute(db, query) |> DataFrame
-    serialize_function!(row) = serialize_instance_dfrow!(db, serialize_path, graphs_path, row)
-    serialize_function!.(eachrow(results[!, [:name, :scenario, :source_type, :source_path]]))
+    serialize_function!(row) = serialize_instance!(db, serialize_path, graphs_path, row[:name], row[:scenario], row[:source_type], row[:source_path])
+    serialize_function!.(eachrow(results))
 end

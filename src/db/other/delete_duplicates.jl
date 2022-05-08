@@ -8,7 +8,6 @@ function delete_duplicate!(db::SQLite.DB, base_id, graph::AbstractGraph, id, gra
     end
 end
 
-
 function delete_duplicate_dfrow!(db::SQLite.DB, id, origin_name::AbstractString, origin_scenario, graph_path)
     println("Delete duplicate: ($origin_name $origin_scenario)")
     query = "SELECT id, graph_path FROM decompositions WHERE origin_name='$origin_name' AND origin_scenario=$origin_scenario AND id > $id"
@@ -17,7 +16,6 @@ function delete_duplicate_dfrow!(db::SQLite.DB, id, origin_name::AbstractString,
     delete_duplicate_function!(row) = delete_duplicate!(db, id, graph, row[:id], row[:graph_path])
     delete_duplicate_function!.(eachrow(results[!, [:id, :graph_path]]))
 end
-
 
 
 function delete_duplicates!(db::SQLite.DB; subset=nothing)

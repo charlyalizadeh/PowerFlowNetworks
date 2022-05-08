@@ -30,10 +30,6 @@ function save_single_features_instance!(db::SQLite.DB, feature_names, use_networ
     execute_query(db, query)
 end
 
-function save_single_features_instance_dfrow!(db::SQLite.DB, feature_names, use_network, row)
-    save_single_features_instance!(db, feature_names, use_network, row[:name], row[:scenario], row[:source_type], row[:source_path], row[:pfn_path])
-end
-
 function save_single_features_instances!(db::SQLite.DB;
                                          feature_names, min_nv=typemin(Int), max_nv=typemax(Int),
                                          recompute=false, subset=nothing)
@@ -50,6 +46,6 @@ function save_single_features_instances!(db::SQLite.DB;
     results = DBInterface.execute(db, query) |> DataFrame
     println("Saving instance features: feature_names=$(feature_names), min_nv=$min_nv, max_nv=$max_nv, recompute=$recompute")
     println("subset\n$subset\nend subset")
-    save_function!(row) = save_single_features_instance_dfrow!(db, feature_names, use_network, row)
-    save_function!.(eachrow(results[!, [:name, :scenario, :source_type, :source_path, :pfn_path]]))
+    save_function!(row) = save_single_features_instance!(db, feature_names, use_network, row[:name], row[:scenario], row[:source_type], row[:source_path], row[:pfn_path])
+    save_function!.(eachrow(results))
 end

@@ -40,16 +40,6 @@ function generate_decomposition!(db::SQLite.DB, id::Int, name::AbstractString, s
     insert_decomposition!(db, id, uuid, name, scenario, extension_alg, preprocess_path, date, clique_path, cliquetree_path, graph_path_dec; features...)
 end
 
-function generate_decomposition_dfrow!(db::SQLite.DB, row, cliques_path::AbstractString, cliquetrees_path::AbstractString,
-                                       graphs_path::AbstractString,
-                                       extension_alg::AbstractString, option::AbstractDict, preprocess_path::AbstractString;
-                                       seed, rng, kwargs...)
-    generate_decomposition!(db, row[:id], row[:name], row[:scenario], cliques_path, cliquetrees_path, graphs_path,
-                            extension_alg, option,
-                            preprocess_path, row[:graph_path];
-                            seed=seed, rng=rng, kwargs...)
-end
-
 function generate_decompositions!(db::SQLite.DB;
                                   cliques_path, cliquetrees_path, graphs_path,
                                   extension_alg::AbstractString, preprocess_path::AbstractString,
@@ -67,8 +57,8 @@ function generate_decompositions!(db::SQLite.DB;
     option = JSON.parse(read(open(preprocess_path, "r"), String))
     option = Dict(Symbol(k) => v for (k, v) in option)
     results = DBInterface.execute(db, query) |> DataFrame
-    generate_function!(row) = generate_decomposition_dfrow!(db, row, cliques_path, cliquetrees_path, graphs_path,
-                                                            extension_alg, option, preprocess_path;
-                                                            seed=seed, rng=rng, kwargs...)
-    generate_function!.(eachrow(results[!, [:id, :name, :scenario, :graph_path]]))
+    generate_function!(row) = generate_decomposition!(db, row[:id], row[:name], row[:scenario], cliques_path, cliquetrees_path, graphs_path,
+                                                      extension_alg, option, preprocess_path, row[:graph_path];
+                                                      seed=seed, rng=rng, kwargs...)
+    generate_function!.(eachrow(results))
 end
