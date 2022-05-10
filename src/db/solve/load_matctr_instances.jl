@@ -44,6 +44,6 @@ function load_matctr_instances!(db::SQLite.DB; out, recompute=false, subset=noth
     results = DBInterface.execute(db, query) |> DataFrame
     println("Loading matctr paths: out=$out, recompute=$recompute")
     println("subset\n$subset\nend subset")
-    load_matctr_instance_function!(row) = load_matctr_instance_dfrow!(db, row[:name], row[:scenario], row[:source_type], out)
+    load_matctr_instance_function!(row) = load_matctr_instance!(db, row[:name], row[:scenario], row[:source_type], out)
     load_matctr_instance_function!.(eachrow(results))
 end
