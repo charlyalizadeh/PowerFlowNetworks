@@ -1,4 +1,4 @@
-MIN_NV = 100
+MIN_NV = 0
 MAX_NV = 500
 DBPATH = data/PowerFlowNetworks.sqlite
 _INDIRS_RAWGO = $(wildcard data/RAWGO/*)
@@ -20,7 +20,7 @@ check_raw_go_dirs:
 	python scripts/check_raw_go_dirs.py
 
 load_instance:
-	julia --project=./ scripts/load_instance_in_db.jl --dbpath $(DBPATH) --indirs_rawgo $(INDIRS_RAWGO) --indirs_matpowerm $(INDIRS_MATPOWERM)
+	julia --project=./ scripts/load_in_db_instances.jl --dbpath $(DBPATH) --indirs_rawgo $(INDIRS_RAWGO) --indirs_matpowerm $(INDIRS_MATPOWERM)
 
 check_read_pfn:
 	julia --project=./ scripts/check_read_pfn.jl --dbpath $(DBPATH) --source_type $(SOURCE_TYPE)
@@ -46,6 +46,8 @@ delete_db:
 	rm -rf data/cliques/
 	rm -rf data/networks_serialize/*
 	rm -rf data/PowerFlowNetworks.sqlite
+	rm -rf data/graphs/*
+	rm -rf data/matpowerm_instance/*
 
 clean_test_data:
 	rm test/data/cliques/*
