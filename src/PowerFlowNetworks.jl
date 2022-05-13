@@ -14,6 +14,7 @@ using LinearAlgebra
 using Combinatorics
 import JSON
 using MPI
+using Polynomials: Polynomial, fit, coeffs
 
 # Solve module
 using Logging
@@ -56,26 +57,43 @@ include("mpi.jl")
 PowerFlowNetwork(path::AbstractString, format::AbstractString) = read_network(path, format)
 SimpleGraph(network::PowerFlowNetwork) = to_simple_graph(network)
 
+# core
+export PowerFlowNetwork
 export nbus, nbranch, ngen, is_disjoint, has_bus, has_branch, has_gen,
-       has_continuous_index, normalize_index, merge_duplicate_branch!
+       has_continuous_index, normalize_index, merge_duplicate_branch!,
+       convert_gencost!
+
+# utils
 export ischordal
 export read_cliquetree, read_clique, get_nv, get_ne, get_nb_lc
+
+# io
 export nbranch_unique, ngen_unique
-export PowerFlowNetwork
 export write_pfn
+
+# graphs
 export Graph
 export add_edges_distance!, add_edges_random!, add_edges!
+export chordal_extension
+
+# decompositions
+export combine_graph
+export merge_dec
+
+# solve
+export solve_sdp
+
+# db
 export setup_db
 export has_opf_tables, count_missing_columns, table_count, nb_instances, nb_decompositions, get_table_ids
-export load_instance_in_db!
-export export_db
-export chordal_extension
-export merge_dec
-export combine_graph
-export save_features_instances!, save_basic_features_instances!, save_single_features_instances!,
-       serialize_instances!, generate_decompositions!, merge_decompositions!, combine_decompositions!,
-       check_sanity, delete_duplicates!, export_matpowerm_instances!, load_matctr_instances!, solve_decompositions!
-export solve_sdp
+export load_in_db_instances!
+export save_features_instances!, save_basic_features_instances!, save_single_features_instances!
+export generate_decompositions!, merge_decompositions!, combine_decompositions!
+export serialize_instances!, check_sanity, delete_duplicates!, export_matpowerm_instances!, load_matctr_instances!,
+       db_to_gnndata
+export solve_decompositions!
+
+# mpi
 export execute_process_mpi
 
 
