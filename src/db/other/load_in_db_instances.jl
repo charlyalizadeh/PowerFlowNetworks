@@ -7,6 +7,10 @@ function load_rawgo_instance!(db::SQLite.DB, path::AbstractString)
         !isdir(joinpath(path, scenario)) && continue
         scenario_nb = parse(Int, scenario[10:end])
         source_path = abspath(joinpath(path, scenario))
+        if !isfile(joinpath(source_path, "case.json")) && !isfile(joinpath(source_path, "case.rop"))
+            @warn "No cost file found for ($name, $scenario_nb), not loaded in the database."
+            continue
+        end
         @info "  $(scenario_nb)"
         try
             load_instance_in_db!(db, name, scenario_nb, source_path, "RAWGO", date)
@@ -67,8 +71,9 @@ end
 
 function load_in_db_instances!(db::SQLite.DB, indirs_rawgo, indirs_matpowerm)
     tables = ["instances", "decompositions", "mergers", "combinations", "solve_results"]
-    if !isdb || any(map(x -> !(x in SQLite.tables(db)[:name]), tables))
-        db = setup_db(dbpath)
+    isdb = isfile(db.file)
+    if any(map(x -> !(x in SQLite.tables(db)[:name]), tables))
+        db = setup_db(db.file)
     end
     indirs_rawgo = clean_dirs(indirs_rawgo)
     indirs_matpowerm = clean_dirs(indirs_matpowerm)
