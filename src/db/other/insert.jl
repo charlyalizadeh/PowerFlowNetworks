@@ -8,9 +8,9 @@ function execute_query(db, query)
 end
 
 function load_instance_in_db!(db::SQLite.DB,
-                        name::AbstractString, scenario::Int,
-                        source_path::AbstractString, source_type::AbstractString,
-                        date::DateTime)
+                              name::AbstractString, scenario::Int,
+                              source_path::AbstractString, source_type::AbstractString,
+                              date::DateTime)
     query = """
     INSERT INTO instances(name, scenario, source_path, source_type, date) 
     VALUES('$name', $scenario, '$source_path', '$source_type', '$date');
@@ -49,7 +49,6 @@ end
 
 function insert_combination!(db::SQLite.DB, in_id1::Int, in_id2::Int, out_id::Int,
                              how::AbstractString, extension_alg::AbstractString)
-
     query = """
     INSERT INTO combinations(in_id1, in_id2, out_id, how, extension_alg)
     VALUES ($in_id1, $in_id2, $out_id, '$how', '$extension_alg');
