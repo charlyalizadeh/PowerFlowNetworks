@@ -53,21 +53,29 @@ function _clean_rawgo_df(df; index_cols, apply_cols, func, return_indices=false)
         return combine(gds, apply_cols .=> func; renamecols=false), indices
     end
 end
-function _clean_rawgo_dfs(dfs)
+function _clean_rawgo_dfs(dfs; combine_gen=false)
     apply_colnames = _get_rawgo_apply_colnames()
     dfs["LOAD"] = _clean_rawgo_df(dfs["LOAD"]; index_cols=["I"], apply_cols=apply_colnames["LOAD"], func=sum)
     dfs["FIXED SHUNT"] = _clean_rawgo_df(dfs["FIXED SHUNT"]; index_cols=["I"], apply_cols=apply_colnames["FIXED SHUNT"], func=sum)
-    dfs["GENERATOR"], indices = _clean_rawgo_df(dfs["GENERATOR"]; index_cols=["I"], apply_cols=apply_colnames["GENERATOR"], func=sum, return_indices=true)
-    dfs["GENERATOR"][!, :STAT] = map(x -> x > 0 ? 1 : 0, dfs["GENERATOR"][!, :STAT])
+    indices = []
+    # Combine generators at the same bus (not needed, but I still keep it just in case)
+    if combine_gen
+        dfs["GENERATOR"], indices = _clean_rawgo_df(dfs["GENERATOR"]; index_cols=["I"], apply_cols=apply_colnames["GENERATOR"], func=sum, return_indices=true)
+        dfs["GENERATOR"][!, :STAT] = map(x -> x > 0 ? 1 : 0, dfs["GENERATOR"][!, :STAT])
+    end
     return indices
 end
 
 # Extract the PowerFlowNetwork fields
+_is_gen(bus_id, gen_ids) = bus_id in gen_ids ? 2 : 1
 function _extract_bus(dfs)
     nbus = size(dfs["BUS"], 1)
     bus = zeros(nbus, 17)
 
     bus[:, [1, 7, 8, 9, 10, 11, 12, 13]] .= dfs["BUS"][!, [:I, :AREA, :VM, :VA, :BASEKV, :ZONE, :NVHI, :NVLO]]
+    gen_ids = dfs["GENERATOR"][!, :I]
+    is_gen_function(row) = _is_gen(row[:I], gen_ids)
+    bus[:, 2] = is_gen_function.(eachrow(dfs["BUS"]))
 
     if nrow(dfs["LOAD"]) != 0
         idx = findall(in(dfs["LOAD"][!, :I]), bus[:, 1])
@@ -157,7 +165,7 @@ function _combine_gencost(gencost, indices)
     return Tables.matrix(cd)
 end
 
-function get_data_rawgo(path::AbstractString)
+function get_data_rawgo(path::AbstractString; combine_gen=false)
     path = _resolve_rawgo_path(path, "dir")
     raw_path = joinpath(path, "case.raw")
     json_path = joinpath(path, "case.json")
@@ -193,8 +201,8 @@ function get_data_rawgo(path::AbstractString)
     else
         @warn "No cost file found in $(path)."
     end
-    indices = _clean_rawgo_dfs(dfs)
-    if size(gencost, 1) != 0
+    indices = _clean_rawgo_dfs(dfs; combine_gen=combine_gen)
+    if combine_gen && size(gencost, 1) != 0
         gencost = _combine_gencost(gencost, indices)
     end
     return _extract_bus(dfs), _extract_gen(dfs), _extract_branch(dfs), gencost, baseMVA
