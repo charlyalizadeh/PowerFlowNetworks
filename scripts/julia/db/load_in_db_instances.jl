@@ -7,7 +7,7 @@ using ArgParse
 
 function parse_commandline()
     s = ArgParseSettings()
-    import_general_settings!(s, ["db"])
+    import_general_settings!(s, ["db", "toml_config"])
     @add_arg_table s begin
         "--indirs_rawgo"
             help = "Directory/ies containing the RAWGO networks."
@@ -22,12 +22,12 @@ function parse_commandline()
 end
 
 function main()
-    parsed_args = parse_commandline()
-    indirs_rawgo = parsed_args["indirs_rawgo"]
-    indirs_matpowerm = parsed_args["indirs_matpowerm"]
-    dbpath = parsed_args["dbpath"]
-    db = SQLite.DB(dbpath)
-    load_in_db_instances!(db, indirs_rawgo, indirs_matpowerm)
+    args = parse_commandline()
+    if args["toml_config"]
+        overwrite_toml!(args, args["toml_config_path"], args["toml_config_key"])
+    end
+    db = SQLite.DB(args["dbpath"])
+    load_in_db_instances!(db, args["indirs_rawgo"], args["indirs_matpowerm"])
 end
 
 main()
