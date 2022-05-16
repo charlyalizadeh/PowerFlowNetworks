@@ -1,4 +1,4 @@
-include("../src/PowerFlowNetworks.jl")
+include("../../src/PowerFlowNetworks.jl")
 using .PowerFlowNetworks
 using SQLite
 using Dates

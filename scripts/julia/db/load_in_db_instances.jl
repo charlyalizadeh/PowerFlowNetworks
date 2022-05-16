@@ -1,16 +1,14 @@
-include("../src/PowerFlowNetworks.jl")
+include("../../../src/PowerFlowNetworks.jl")
+include("../general_settings.jl")
 using .PowerFlowNetworks
 using SQLite
 using ArgParse
 
-ArgParse.parse_item(::Type{Vector{String}}, x::AbstractString) = split(x, ",")
 
 function parse_commandline()
     s = ArgParseSettings()
+    import_general_settings!(s, ["db"])
     @add_arg_table s begin
-        "--dbpath", "-p"
-            help = "Path of the sqlite database file."
-            default = "data/PowerFlowNetworks.sqlite"
         "--indirs_rawgo"
             help = "Directory/ies containing the RAWGO networks."
             arg_type = Vector{String}
