@@ -55,7 +55,7 @@ end
     "--toml_config_path"
         help = "Path of the TOML configuration file. (Ignored it `--toml_config` is not set)"
         arg_type = String
-        default = "configs/defaults.config"
+        default = "configs/defaults.toml"
     "--toml_config_key"
         help = "Key inside the TOML configuration file `--toml_config_file`. (Ignored it `--toml_config` is not set)"
         arg_type = String
