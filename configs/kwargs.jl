@@ -1,6 +1,6 @@
 dflt = Dict{String, Any}(
-    "min_nv" => 1000,
-    "max_nv" => 15000
+    "min_nv" => 0,
+    "max_nv" => 500
 )
 
 process_kwargs = Dict(
@@ -8,7 +8,7 @@ process_kwargs = Dict(
   "save_single_features_instances" => dflt,
   "save_features_instances" => merge(dflt, Dict("recompute" => false)),
   "serialize_instances" => merge(dflt, Dict("serialize_path" => "data/serialize_networks",
-                                             "graphs_path" => "data/graphs")),
+                                             "graphs_path" => "data/graphs", "recompute" => true)),
   "generate_decompositions_20dist3cholesky" => merge(dflt, Dict("cliques_path" => "data/cliques",
                                                 "cliquetrees_path" => "data/cliquetrees",
                                                 "graphs_path" => "data/graphs",
@@ -37,5 +37,7 @@ process_kwargs = Dict(
                                                "extension_alg" => "cholesky",
                                                "exclude" => ["combine"])),
   "delete_duplicates" => Dict(),
-  "export_matpowerm_instances" => merge(dflt, Dict("export_dir" => "data/matpowerm_instance"))
+  "export_matpowerm_instances" => merge(dflt, Dict("to" => "MATPOWERM", "export_dir" => "data/export", "recompute" => true)),
+  "load_matctr_instances" => merge(dflt, Dict("out" => "data/matctr")),
+  "solve_decompositions" => Dict()
 )
