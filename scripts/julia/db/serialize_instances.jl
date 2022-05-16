@@ -25,7 +25,7 @@ function main()
         overwrite_toml!(args, args["toml_config_path"], args["toml_config_key"])
     end
     db = SQLite.DB(args["dbpath"])
-    kwargs = strkey_to_symkey(args, ["serialize_path", "graphs_path", "min_nv", "max_nv", "subset", "recompute"])
+    kwargs = strkey_to_symkey(args, ["serialize_path", "graphs_path", "min_nv", "max_nv", "recompute"])
     if args["mpi"]
         execute_process_mpi(db, "serialize_instances", args["log_dir"]; kwargs...)
     else
