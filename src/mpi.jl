@@ -72,6 +72,7 @@ function listen_queries(db::SQLite.DB)
             if has_recieved
                 query, status = MPI.recv(i, 0, MPI.COMM_WORLD)
                 query = String(query)
+                println("[$i] Recieved query: $query")
                 if query == "over"
                     println("Process $i over.")
                     process_done[i] = true
