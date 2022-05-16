@@ -43,10 +43,10 @@ end
 
 function normalize_index!(network::PowerFlowNetwork)
     idx_map = [Pair(i, j) for (i, j) in zip(network.bus[!, :ID], 1:nbus(network))]
-    network.bus[!, :ID] = replace(network.bus[!, :ID], idx_map...)
-    network.gen[!, :ID] = replace(network.gen[!, :ID], idx_map...)
-    network.branch[!, :SRC] = replace(network.branch[!, :SRC], idx_map...)
-    network.branch[!, :DST] = replace(network.branch[!, :DST], idx_map...)
+    replace!(network.bus[!, :ID], idx_map...)
+    replace!(network.gen[!, :ID], idx_map...)
+    replace!(network.branch[!, :SRC], idx_map...)
+    replace!(network.branch[!, :DST], idx_map...)
 end
 
 function merge_duplicate_branch!(network::PowerFlowNetwork)
