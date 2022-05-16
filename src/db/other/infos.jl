@@ -3,6 +3,17 @@ function has_opf_tables(db::SQLite.DB)
     return all(map(in(SQLite.tables(db)[:name]), tables))
 end
 
+function has_column(db::SQLite.DB, table, column)
+    query = """
+    WITH tables AS (SELECT name tableName
+    FROM sqlite_master WHERE type = 'table' AND tableName NOT LIKE 'sqlite_%' AND tableName = '$table')
+    SELECT fields.name, fields.type, tableName
+    FROM tables CROSS JOIN pragma_table_info(tables.tableName) fields
+    """
+    results = DBInterface.execute(db, query) |> DataFrames
+    return column in results[!, :name]
+end
+
 function count_missing_columns(db::SQLite.DB, table, columns)
     query = """
     SELECT $(join(columns, ',')) FROM $table 
@@ -28,3 +39,4 @@ function get_table_ids(db::SQLite.DB, table)
     results = DBInterface.execute(db, query) |> DataFrame
     return results[!, :id]
 end
+

@@ -6,8 +6,8 @@ function combine_decomposition!(db::SQLite.DB, id::Int, name::AbstractString, sc
     println("Combining decompositions ($name, $scenario) (in1=$id_1, in2=$id_2)")
     
     # Retrieve the graphs
-    g1 = loadgraph(graph_path_1)
-    g2 = loadgraph(graph_path_2)
+    g1 = load_graph(graph_path_1)
+    g2 = load_graph(graph_path_2)
     
     # Combine
     g3 = combine_graph(g1, g2; how=how, extension_alg=extension_alg)
@@ -30,7 +30,7 @@ function combine_decomposition!(db::SQLite.DB, id::Int, name::AbstractString, sc
     graph_path = joinpath(graphs_path, "$(name)_$(scenario)_$(uuid)_graph.lgz")
     save_clique(clique, clique_path) 
     save_cliquetree(cliquetree, cliquetree_path)
-    savegraph(graph_path, g3)
+    serialize_graph(graph_path, g3)
 
     # Other columns
     date = Dates.now()
@@ -45,7 +45,7 @@ function combine_decomposition!(db::SQLite.DB, id::Int, name::AbstractString, sc
 end
 
 function combine_decompositions!(db::SQLite.DB; how::AbstractString, extension_alg::AbstractString,
-                                 min_nv=typemin(Int), max_nv=typemax(Int), subset=nothing, exclude=["combine"], rng=MersenneTwister(42))
+                                 min_nv=typemin(Int), max_nv=typemax(Int), subset=nothing, exclude=["combine"], rng=MersenneTwister(42), kwargs...)
     query = """
     SELECT d1.origin_id, d1.id, d1.origin_name, d1.origin_scenario, d1.graph_path, d1.clique_path, d1.cliquetree_path, d1.nb_added_edge_dec, d1.extension_alg,
            d2.id, d2.origin_name, d2.origin_scenario, d2.graph_path, d2.extension_alg

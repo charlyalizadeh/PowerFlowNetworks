@@ -1,27 +1,27 @@
 function serialize_instance!(db::SQLite.DB, serialize_path, graphs_path, name, scenario, source_type, source_path)
     println("Serializing instance network and graph: ($name, $scenario)")
-    pfn_path = abspath(joinpath(serialize_path, "$(name)_$(scenario)_network.bin"))
+    network_path = abspath(joinpath(serialize_path, "$(name)_$(scenario)_network.bin"))
     graph_path = abspath(joinpath(graphs_path, "$(name)_$(scenario)_graph.lgz"))
     network = PowerFlowNetwork(source_path, source_type)
     if get_cost_type(network) == "piecewise linear"
         convert_gencost!(network, "polynomial")
     end
     g = SimpleGraph(network)
-    serialize(pfn_path, network)
-    savegraph(graph_path, g)
-    query = "UPDATE instances SET pfn_path = '$pfn_path', graph_path = '$graph_path' WHERE name = '$name' AND scenario = $scenario"
+    serialize_network(network_path, network)
+    serialize_graph(graph_path, g)
+    query = "UPDATE instances SET network_path = '$network_path', graph_path = '$graph_path' WHERE name = '$name' AND scenario = $scenario"
     execute_query(db, query)
 end
 
 function serialize_instances!(db::SQLite.DB;
                               serialize_path, graphs_path,
                               min_nv=typemin(Int), max_nv=typemax(Int), recompute=false,
-                              subset=nothing)
+                              subset=nothing, kwargs...)
     !isdir(serialize_path) && mkpath(serialize_path)
     !isdir(graphs_path) && mkpath(graphs_path)
     query = "SELECT name, scenario, source_type, source_path FROM instances WHERE nbus >= $min_nv AND nbus <= $max_nv"
     if !recompute
-        query *= " AND (pfn_path IS NULL OR graph_path IS NULL)"
+        query *= " AND (network_path IS NULL OR graph_path IS NULL)"
     end
     if !isnothing(subset)
         query *= " AND id IN ($(join(subset, ',')))"

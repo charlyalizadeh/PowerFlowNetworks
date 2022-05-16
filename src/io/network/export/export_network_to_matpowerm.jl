@@ -2,7 +2,6 @@ function format_col(col, val)
     return col == 1 ? "\t$val" : val
 end
 
-
 function _get_number_rep(n)
     if isinteger(n) 
         @sprintf "%.0f" n 
@@ -20,7 +19,7 @@ function _df2matpowermcsv(df)
     df_str = join(_df2matpowermcsv_dfrow.(eachrow(df))) 
 end
 
-function write_pfn(io::IO, network::PowerFlowNetwork)
+function export_network_to_matpowerm(io::IO, network::PowerFlowNetwork)
     text = """function mpc = $(network.name)\n
 %% MATPOWER Case Format : Version 2
 mpc.version = '2';
@@ -51,9 +50,4 @@ $(_df2matpowermcsv(network.branch))];
 mpc.gencost = [
 $(_df2matpowermcsv(network.gencost))];"""
     write(io, text)
-end
-
-function write_pfn(file::AbstractString, network::PowerFlowNetwork)
-    io = open(file, "w")
-    write_pfn(io, network)
 end

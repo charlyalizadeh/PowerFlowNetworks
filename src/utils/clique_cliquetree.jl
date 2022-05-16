@@ -25,18 +25,8 @@ function get_nb_lc(clique, cliquetree)
     return nb_lc
 end
 
-save_clique(clique::Vector{Vector{Int}}, path::AbstractString) = writedlm(path, clique)
-
-save_cliquetree(cliquetree::Vector{Vector{Int}}, path::AbstractString) = writedlm(path, cliquetree)
-
-function read_cliquetree(path)
-    cliquetree = readdlm(path, '\t', Int)
-    cliquetree = [cliquetree[i, :] for i in 1:size(cliquetree, 1)]
-    return cliquetree
-end
-
-function read_clique(path)
-    lines = split(read(open(path, "r"), String), '\n')[begin:end-1]
-    clique = [parse.(Int, split(line, "\t")) for line in lines]
-    return clique
+function is_complete(clique)
+    nb_vertices = get_nv(clique)
+    nb_edges  = get_ne(clique)
+    return nb_edges == (nb_vertices * (nb_vertices - 1)) / 2
 end

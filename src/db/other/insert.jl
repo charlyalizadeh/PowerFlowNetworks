@@ -1,13 +1,42 @@
-function execute_query(db, query)
+function execute_query(db, query; wait_until_executed=false)
     if !MPI.Initialized()
         DBInterface.execute(db, query)
+    elseif wait_until_executed
+        query = "[WAIT]" * query
+        query = [c for c in query]
+        MPI.send(query, 0, 0, MPI.COMM_WORLD)
+        while true
+            has_recieved, status = MPI.Iprobe(0, 0, MPI.COMM_WORLD)
+            if has_recieved
+                query, status = MPI.recv(0, 0, MPI.COMM_WORLD)
+                query = String(query)
+                if query == "executed"
+                    return
+                end
+            end
+        end
     else
         query = [c for c in query]
         MPI.send(query, 0, 0, MPI.COMM_WORLD)
     end
 end
 
-function load_instance_in_db!(db::SQLite.DB,
+function execute_query_once(db, query)
+    if !MPI.Initialized()
+        DBInterface.execute(db, query)
+    else
+        comm = MPI.COMM_WORLD
+        rank = MPI.Comm_rank(comm)
+        size = MPI.Comm_size(comm)
+        if rank == 1
+            DBInterface.execute(db, query)
+            MPI.send(['B', 'a', 'r', 'r', 'i', 'e', 'r'], 0, 0, comm)
+        end
+        MPI.Barrier(comm)
+    end
+end
+
+function load_in_db_instance!(db::SQLite.DB,
                               name::AbstractString, scenario::Int,
                               source_path::AbstractString, source_type::AbstractString,
                               date::DateTime)
@@ -21,7 +50,7 @@ end
 function insert_decomposition!(db::SQLite.DB, origin_id, uuid,
                                origin_name, origin_scenario, extension_alg,
                                preprocess_path, date,
-                               clique_path, cliquetree_path, graph_path; kwargs...)
+                               clique_path, cliquetree_path, graph_path; wait_until_executed=false, kwargs...)
     query = "INSERT INTO decompositions(uuid, origin_id, origin_name, origin_scenario, extension_alg, preprocess_path, date, clique_path, cliquetree_path, graph_path"
     features = [(k, v) for (k, v) in kwargs]
     for feature in features
@@ -34,7 +63,7 @@ function insert_decomposition!(db::SQLite.DB, origin_id, uuid,
         query *= ", $feature_value"
     end
     query *= ");"
-    execute_query(db, query)
+    execute_query(db, query; wait_until_executed=wait_until_executed)
 end
 
 function insert_merge!(db::SQLite.DB, in_id::Int, out_id::Int,

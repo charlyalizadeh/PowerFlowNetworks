@@ -6,11 +6,10 @@ function create_instances_table(db)
         scenario INTEGER NOT NULL,
         source_path TEXT NOT NULL,
         source_type TEXT NOT NULL,
-        pfn_path TEXT,
+        network_path TEXT,
         graph_path TEXT,
         mat_path TEXT,
         ctr_path TEXT,
-        matpowerm_path TEXT,
         date TEXT NOT NULL,
 
         nbus INTEGER, nbranch INTEGER, nbranch_unique INTEGER, ngen INTEGER,

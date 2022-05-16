@@ -18,7 +18,7 @@ function _row_to_dict(row)
     return Dict(names(row) .=> values(row))
 end
 
-function db_to_gnndata(db, out)
+function export_db_to_gnndata(db, out)
     !isdir(out) && mkpath(out)
     instances_path = joinpath(out, "instances")
     decompositions_path = joinpath(out, "decompositions")
@@ -26,8 +26,8 @@ function db_to_gnndata(db, out)
     mkpath(decompositions_path)
     instances = DBInterface.execute(db, "SELECT * FROM instances WHERE pfn_path IS NOT NULL AND graph_path IS NOT NULL") |> DataFrame
     decompositions = DBInterface.execute(db, "SELECT * FROM decompositions") |> DataFrame
-    networks = Dict("$(row[:name])_$(row[:scenario])" => deserialize(row[:pfn_path]) for row in eachrow(instances))
-    graphs = Dict(row[:id] => loadgraph(row[:graph_path]) for row in eachrow(instances))    
+    networks = Dict("$(row[:name])_$(row[:scenario])" => load_network(row[:pfn_path]) for row in eachrow(instances))
+    graphs = Dict(row[:id] => load_graph(row[:graph_path]) for row in eachrow(instances))    
     # Saving instances
     for (name, network) in networks
         # nodes

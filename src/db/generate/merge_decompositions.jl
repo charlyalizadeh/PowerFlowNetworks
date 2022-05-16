@@ -8,6 +8,10 @@ function merge_decomposition!(db::SQLite.DB, id::Int, origin_id::Int, name::Abst
     
     # Retrieve the cliques array and the cliquetree
     clique = read_clique(clique_path)
+    if is_complete(clique)
+        @warn "Decomposition ($name, $scenario) $id corresponds to a complete graph. Merge aborted."
+        return
+    end
     cliquetree = read_cliquetree(cliquetree_path)
     
     # Merge
@@ -15,7 +19,7 @@ function merge_decomposition!(db::SQLite.DB, id::Int, origin_id::Int, name::Abst
                                                  treshold_name=treshold_name, merge_kwargs=merge_kwargs)
 
     # Extract features
-    g = loadgraph(graph_path)
+    g = load_graph(graph_path)
     merged_g = build_graph_from_clique(merged_clique)
     features = get_features_graph(merged_g)
     nb_added_edge = ne(merged_g) - ne(g)
@@ -33,13 +37,13 @@ function merge_decomposition!(db::SQLite.DB, id::Int, origin_id::Int, name::Abst
     graph_path_merge = joinpath(graphs_path, "$(name)_$(scenario)_$(uuid)_graph.lgz")
     save_clique(merged_clique, clique_path) 
     save_cliquetree(merged_cliquetree, cliquetree_path)
-    savegraph(graph_path_merge, merged_g)
+    serialize_graph(graph_path_merge, merged_g)
 
     # Other columns
     date = Dates.now()
 
     features = Dict(Symbol(k) => v for (k, v) in features)
-    insert_decomposition!(db, origin_id, uuid, name, scenario, "merge", "", date, clique_path, cliquetree_path, graph_path_merge; features...)
+    insert_decomposition!(db, origin_id, uuid, name, scenario, "merge", "", date, clique_path, cliquetree_path, graph_path_merge; wait_until_executed=true, features...)
 
     # Insert in merge table
     out_id = DBInterface.execute(db, "SELECT id FROM decompositions WHERE uuid = '$uuid'") |> DataFrame
@@ -53,7 +57,7 @@ function merge_decompositions!(db::SQLite.DB;
                                heuristic::Vector{String}, heuristic_switch::Vector{Int},
                                treshold_name::AbstractString, merge_kwargs::AbstractDict,
                                min_nv=typemin(Int), max_nv=typemax(Int), subset=nothing,
-                               rng=MersenneTwister(42))
+                               rng=MersenneTwister(42), kwargs...)
                               
     query = "SELECT id, origin_id, origin_name, origin_scenario, clique_path, cliquetree_path, graph_path, nb_added_edge_dec FROM decompositions WHERE nb_vertex >= $min_nv AND nb_vertex <= $max_nv"
     if !isnothing(subset)

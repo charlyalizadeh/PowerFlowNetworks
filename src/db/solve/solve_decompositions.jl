@@ -19,7 +19,7 @@ function solve_decomposition_dfrow!(db::SQLite.DB, id, origin_id, origin_name, o
     end
 end
 
-function solve_decompositions!(db::SQLite.DB; subset=nothing)
+function solve_decompositions!(db::SQLite.DB; subset=nothing, kwargs...)
     println("Solving decompositions")
     println("subset\n$subset\nend subset")
     query = "SELECT id, origin_id, origin_name, origin_scenario, clique_path, cliquetree_path FROM decompositions"

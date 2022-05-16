@@ -65,6 +65,9 @@ function merge_dec(clique::AbstractVector, cliquetree::AbstractVector,
         edge = minimize(merge_kwargs["clique"], merge_kwargs["cliquetree"]; heuristic_name=heuristic_name, merge_kwargs=merge_kwargs)
         update_functions[heuristic_name](clique=merge_kwargs["clique"], cliquetree=merge_kwargs["cliquetree"], edge=edge, merge_kwargs=merge_kwargs)
         merge_kwargs["clique"], merge_kwargs["cliquetree"] = merge_clique(merge_kwargs["clique"], merge_kwargs["cliquetree"], edge)
+        if length(merge_kwargs["clique"]) == 1
+            break
+        end
         iter += 1
     end
     clique, cliquetree = merge_kwargs["clique"], merge_kwargs["cliquetree"]

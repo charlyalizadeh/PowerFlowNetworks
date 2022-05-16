@@ -2,16 +2,16 @@ function generate_decomposition!(db::SQLite.DB, id::Int, name::AbstractString, s
                                  cliques_path::AbstractString, cliquetrees_path::AbstractString, graphs_path::AbstractString,
                                  extension_alg::AbstractString, option::AbstractDict,
                                  preprocess_path::AbstractString, graph_path::AbstractString;
-                                 seed, rng, kwargs...)
+                                 seed, rng, chordal_extension_kwargs...)
     println("Generating decomposition: ($name $scenario) ($extension_alg)")
-    g = loadgraph(graph_path)
+    g = load_graph(graph_path)
 
     # Preprocessing
     option = deepcopy(option)
     option[:nb_edges_to_add] != 0 && add_edges!(g, pop!(option, :nb_edges_to_add), pop!(option, :how); option...)
 
     # Chordal extension
-    chordal_g, data = chordal_extension(g, extension_alg; kwargs...)
+    chordal_g, data = chordal_extension(g, extension_alg; chordal_extension_kwargs...)
 
     # Features extraction
     features = get_features_graph(chordal_g)
@@ -31,7 +31,7 @@ function generate_decomposition!(db::SQLite.DB, id::Int, name::AbstractString, s
         cliquetree = [[1, 1]]
     end
     save_cliquetree(cliquetree, cliquetree_path)
-    savegraph(graph_path_dec, chordal_g)
+    serialize_graph(graph_path_dec, chordal_g)
 
     # Other columns
     date = Dates.now()
@@ -45,6 +45,7 @@ function generate_decompositions!(db::SQLite.DB;
                                   extension_alg::AbstractString, preprocess_path::AbstractString,
                                   min_nv=typemin(Int), max_nv=typemax(Int), subset=nothing,
                                   seed=MersenneTwister(42), rng=MersenneTwister(42),
+                                  chordal_extension_kwargs::AbstractDict=Dict(),
                                   kwargs...)
     println("Generate decompositions config: extension_alg=$extension_alg, preprocess_path=$preprocess_path, min_nv=$min_nv, max_nv=$max_nv, seed=$seed, rng=$rng")
     println("subset\n$subset\nend subset")
@@ -59,6 +60,6 @@ function generate_decompositions!(db::SQLite.DB;
     results = DBInterface.execute(db, query) |> DataFrame
     generate_function!(row) = generate_decomposition!(db, row[:id], row[:name], row[:scenario], cliques_path, cliquetrees_path, graphs_path,
                                                       extension_alg, option, preprocess_path, row[:graph_path];
-                                                      seed=seed, rng=rng, kwargs...)
+                                                      seed=seed, rng=rng, chordal_extension_kwargs...)
     generate_function!.(eachrow(results))
 end

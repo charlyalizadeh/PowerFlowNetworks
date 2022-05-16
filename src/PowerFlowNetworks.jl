@@ -13,8 +13,10 @@ using SparseArrays
 using LinearAlgebra
 using Combinatorics
 import JSON
+import TOML
 using MPI
 using Polynomials: Polynomial, fit, coeffs
+
 
 # Solve module
 using Logging
@@ -36,21 +38,29 @@ end
 
 
 include("core.jl")
+
 include("utils/graphs/lbfs.jl")
 include("utils/graphs/ischordal.jl")
 include("utils/graphs/build_graph.jl")
 include("utils/clique_cliquetree.jl")
-include("io/read.jl")
-include("io/write.jl")
+include("utils/graphs/operators.jl")
+include("utils/get_config_toml.jl")
+
+include("io/io.jl")
+
 include("read_features.jl")
+
 include("graphs/graphs.jl")
 include("graphs/operations.jl")
-include("utils/graphs/operators.jl")
+
 include("decompositions/chordal_extension/chordal_extension.jl")
 include("decompositions/merge/merge.jl")
 include("decompositions/combine/combine.jl")
+
 include("solve/solve.jl")
+
 include("db/db.jl")
+
 include("mpi.jl")
 
 
@@ -65,11 +75,15 @@ export nbus, nbranch, ngen, is_disjoint, has_bus, has_branch, has_gen,
 
 # utils
 export ischordal
-export read_cliquetree, read_clique, get_nv, get_ne, get_nb_lc
+export get_nv, get_ne, get_nb_lc
+export get_config_toml
 
 # io
 export nbranch_unique, ngen_unique
-export write_pfn
+export read_clique, read_cliquetree
+export serialize_graph, load_graph
+export serialize_network, load_network
+export export_network, read_network
 
 # graphs
 export Graph
@@ -89,7 +103,7 @@ export has_opf_tables, count_missing_columns, table_count, nb_instances, nb_deco
 export load_in_db_instances!
 export save_features_instances!, save_basic_features_instances!, save_single_features_instances!
 export generate_decompositions!, merge_decompositions!, combine_decompositions!
-export serialize_instances!, check_sanity, delete_duplicates!, export_matpowerm_instances!, load_matctr_instances!,
+export serialize_instances!, check_sanity, check_sanity_mpi, delete_duplicates!, export_instances!, load_matctr_instances!,
        db_to_gnndata
 export solve_decompositions!
 

@@ -19,10 +19,12 @@ include("generate/combine_decompositions.jl")
 include("solve/load_matctr_instances.jl")
 include("solve/solve_decompositions.jl")
 
+# Export
+include("export/export_db_to_gnndata.jl")
+include("export/export_instances.jl")
+
 # Other
 include("other/insert.jl")
 include("other/infos.jl")
 include("other/delete_duplicates.jl")
-include("other/export_matpowerm.jl")
 include("other/check_sanity.jl")
-include("other/export.jl")

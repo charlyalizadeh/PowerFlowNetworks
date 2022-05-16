@@ -1,6 +1,6 @@
-function save_features_instance!(db::SQLite.DB, name, scenario, source_type, source_path)
+function save_features_instance!(db::SQLite.DB, name, scenario, network_path, source_type, source_path)
     println("Saving instance features: ($name, $scenario)")
-    network = PowerFlowNetwork(source_path, source_type)
+    network = ismissing(network_path) ? PowerFlowNetwork(source_path, source_type) : load_network(network_path)
     merge_duplicate_branch!(network)
     features = get_features_instance(network)
     query = "UPDATE instances SET "
@@ -20,8 +20,8 @@ function save_features_instance!(db::SQLite.DB, name, scenario, source_type, sou
     execute_query(db, query)
 end
 
-function save_features_instances!(db::SQLite.DB; min_nv=typemin(Int), max_nv=typemax(Int), recompute=false, subset=nothing)
-    query = "SELECT name, scenario, source_type, source_path FROM instances WHERE nbus >= $min_nv AND nbus <= $max_nv"
+function save_features_instances!(db::SQLite.DB; min_nv=typemin(Int), max_nv=typemax(Int), recompute=false, subset=nothing, kwargs...)
+    query = "SELECT name, scenario, network_path, source_type, source_path FROM instances WHERE nbus >= $min_nv AND nbus <= $max_nv"
     if !recompute
         query *= " AND nb_edge IS NULL"
     end
@@ -30,6 +30,6 @@ function save_features_instances!(db::SQLite.DB; min_nv=typemin(Int), max_nv=typ
     end
     results = DBInterface.execute(db, query) |> DataFrame
     println("Saving instance features config: min_nv=$min_nv, max_nv=$max_nv, recompute=$recompute")
-    save_function!(row) = save_features_instance!(db, row[:name], row[:scenario], row[:source_type], row[:source_path])
+    save_function!(row) = save_features_instance!(db, row[:name], row[:scenario], row[:network_path], row[:source_type], row[:source_path])
     save_function!.(eachrow(results))
 end

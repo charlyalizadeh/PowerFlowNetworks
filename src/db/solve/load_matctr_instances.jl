@@ -33,7 +33,7 @@ function load_matctr_instance!(db::SQLite.DB, name, scenario, source_type, out)
     execute_query(db, query)
 end
 
-function load_matctr_instances!(db::SQLite.DB; out, recompute=false, subset=nothing, min_nv=typemin(Int), max_nv=typemax(Int))
+function load_matctr_instances!(db::SQLite.DB; out, recompute=false, subset=nothing, min_nv=typemin(Int), max_nv=typemax(Int), kwargs...)
     query = "SELECT name, scenario, source_type FROM instances WHERE nbus >= $min_nv AND nbus <= $max_nv"
     if !recompute
         query *= " AND mat_path IS NULL OR ctr_path IS NULL"

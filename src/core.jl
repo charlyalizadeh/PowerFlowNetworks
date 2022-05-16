@@ -91,8 +91,8 @@ function _convert_gencost_to_polynomial_dfrow(row, order=2)
     end
     polynome = fit(power, costs, order)
     new_coeffs = reverse(coeffs(polynome))
-    if new_coeffs == [0]
-        new_coeffs = zeros(Float64, order + 1)
+    if length(new_coeffs) < order + 1
+        new_coeffs = vcat(new_coeffs, zeros(Float64, (order + 1 - length(new_coeffs))))
     end
     return vcat([2], row[2], row[3], [order + 1], new_coeffs)
 end
