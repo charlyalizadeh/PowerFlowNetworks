@@ -6,31 +6,23 @@ function db_to_csv(db, out; tables=["instances", "decompositions"])
     end
 end
 
-function decomposition_to_gnndata(row, graph, out)
-    graph = loadgraph(row[:graph_path])
-    edges = [[e.src, e.dst] for e in Graphs.edges(graph)]
-    open(out, "w") do io
-        JSON.print(io, edges)
-    end
-end
-
 function _row_to_dict(row)
     return Dict(names(row) .=> values(row))
 end
 
 function export_db_to_gnndata(db, out)
     !isdir(out) && mkpath(out)
-    instances_path = joinpath(out, "instances")
-    decompositions_path = joinpath(out, "decompositions")
-    mkpath(instances_path)
-    mkpath(decompositions_path)
-    instances = DBInterface.execute(db, "SELECT * FROM instances WHERE pfn_path IS NOT NULL AND graph_path IS NOT NULL") |> DataFrame
+    instances = DBInterface.execute(db, "SELECT * FROM instances WHERE network_path IS NOT NULL AND graph_path IS NOT NULL") |> DataFrame
     decompositions = DBInterface.execute(db, "SELECT * FROM decompositions") |> DataFrame
-    networks = Dict("$(row[:name])_$(row[:scenario])" => load_network(row[:pfn_path]) for row in eachrow(instances))
-    graphs = Dict(row[:id] => load_graph(row[:graph_path]) for row in eachrow(instances))    
+    networks = Dict("$(row[:name])_$(row[:scenario])" => load_network(row[:network_path]) for row in eachrow(instances))
+    graphs = Dict("$(row[:name])_$(row[:scenario])" => load_graph(row[:graph_path]) for row in eachrow(instances))    
+    instances_dict = Dict()
     # Saving instances
     for (name, network) in networks
         # nodes
+        if !has_gencost_index(network)
+            set_gencost_index!(network)
+        end
         bus_dict = Dict(network.bus[!, :ID] .=> _row_to_dict.(eachrow(network.bus[!, Not(:ID)])))
         gen_dict = Dict(network.gen[!, :ID] .=> _row_to_dict.(eachrow(network.gen[!, Not(:ID)])))
         gencost_dict = Dict(network.gencost[!, :ID] .=> _row_to_dict.(eachrow(network.gencost[!, Not(:ID)])))
@@ -40,14 +32,28 @@ function export_db_to_gnndata(db, out)
         # edges
         edges = [[row[:SRC], row[:DST]] for row in eachrow(network.branch)]
         branch_dict = Dict(edges .=> _row_to_dict.(eachrow(network.branch[!, Not([:SRC, :DST])])))
-        final_dict = Dict("nodes" => node_dict, "edges" => branch_dict)
-        open(joinpath(instances_path, "$name.json"), "w") do io
-            JSON.print(io, final_dict)
-        end
+        final_dict = Dict("nodes_features" => node_dict, "edges_features" => branch_dict)
+        instances_dict[name] = final_dict
     end
 
+    decompositions_dict = Dict()
     # Saving decompositions
-    to_ggnndata_function(row) = decomposition_to_gnndata(row, graphs[row[:origin_id]],
-                                                         joinpath(decompositions_path, "$(row[:origin_name])_$(row[:origin_scenario])_$(row[:uuid]).json"))
-    to_ggnndata_function.(eachrow(decompositions))
+    for row in eachrow(decompositions)
+        ismissing(row[:solving_time]) && continue
+        name = "$(row[:origin_name])_$(row[:origin_scenario])"
+        graph = load_graph(row[:graph_path])
+        all_edges = [[e.src, e.dst] for e in Graphs.edges(graph)]
+        added_edges = [[e.src, e.dst] for e in Graphs.edges(graph) if !(e in Graphs.edges(graphs[name]))]
+        decompositions_dict["$(name)_$(row[:uuid])"] = merge(instances_dict[name], Dict("origin_name" => row[:origin_name],
+                                                                                        "origin_scenario" => row[:origin_scenario],
+                                                                                        "added_edges" => added_edges,
+                                                                                        "solving_time" => row[:solving_time],
+                                                                                        "uuid" => row[:uuid],
+                                                                                        "all_edges" => all_edges))
+    end
+    for (name, decomposition) in decompositions_dict
+        open(joinpath(out, "$name.json"), "w") do io
+            JSON.print(io, decomposition)
+        end
+    end
 end
