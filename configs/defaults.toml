@@ -1,3 +1,11 @@
 [load_in_db_instances_no_rawgo]
     indirs_rawgo = [""]
     indirs_matpowerm = ["data/MATPOWERM"]
+
+[0cholesky]
+    extension_alg = "cholesky"
+    preprocess_path = "configs/preprocess_0.json"
+
+[0minimum_degree]
+    extension_alg = "minimum_degree"
+    preprocess_path = "configs/preprocess_0.json"
