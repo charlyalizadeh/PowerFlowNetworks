@@ -69,7 +69,9 @@ function merge_duplicate_branch!(network::PowerFlowNetwork)
                              :MU_ANGMAX => maximum; renamecols=false)
 end
 
-function set_index_gencost!(network::PowerFlowNetwork)
+has_gencost_index(network::PowerFlowNetwork) = :ID in names(network.gencost)
+
+function set_gencost_index!(network::PowerFlowNetwork)
     if size(network.gencost, 1) != size(network.gen, 1)
         @warn "The network $(network.name) doesn't have the same dimension for `gencost` and `gen`. Cannot set the index for `gencost`."
     else

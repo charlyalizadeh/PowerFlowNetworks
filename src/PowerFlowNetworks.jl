@@ -71,7 +71,7 @@ SimpleGraph(network::PowerFlowNetwork) = to_simple_graph(network)
 export PowerFlowNetwork
 export nbus, nbranch, ngen, is_disjoint, has_bus, has_branch, has_gen,
        has_continuous_index, normalize_index, merge_duplicate_branch!,
-       convert_gencost!
+       convert_gencost!, has_gencost_index, set_gencost_index!
 
 # utils
 export ischordal
@@ -104,7 +104,7 @@ export load_in_db_instances!
 export save_features_instances!, save_basic_features_instances!, save_single_features_instances!
 export generate_decompositions!, merge_decompositions!, combine_decompositions!
 export serialize_instances!, check_sanity, check_sanity_mpi, delete_duplicates!, export_instances!, load_matctr_instances!,
-       db_to_gnndata
+       export_db_to_gnndata
 export solve_decompositions!
 
 # mpi
