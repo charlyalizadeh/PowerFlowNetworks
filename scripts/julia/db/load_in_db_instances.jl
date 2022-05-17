@@ -24,7 +24,7 @@ end
 function main()
     args = parse_commandline()
     if args["toml_config"]
-        overwrite_toml!(args, args["toml_config_path"], args["toml_config_key"])
+        args = overwrite_toml(args, args["toml_config_path"], args["toml_config_key"])
     end
     db = SQLite.DB(args["dbpath"])
     load_in_db_instances!(db, args["indirs_rawgo"], args["indirs_matpowerm"])

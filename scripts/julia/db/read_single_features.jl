@@ -20,7 +20,7 @@ end
 function main()
     args = parse_commandline()
     if args["toml_config"]
-        overwrite_args!(args, args["toml_config_path"], args["toml_config_key"])
+        args = overwrite_args(args, args["toml_config_path"], args["toml_config_key"])
     end
     db = SQLite.DB(args["dbpath"])
     kwargs = strkey_to_symkey(args, ["feature_names", "min_nv", "max_nv", "recompute"])

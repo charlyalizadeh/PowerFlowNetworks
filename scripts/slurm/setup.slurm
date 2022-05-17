@@ -5,11 +5,11 @@
 #SBATCH --ntasks=56
 #SBATCH --partition=MISC-56c-VERYSHORT
 
-project_dir='/nfs/homes/charly-kyan.alizadeh/repos/PowerFlowNetworks/'
+project_dir='/nfs/homes/charly-kyan.alizadeh/repos/PowerFlowNetworks'
 data_dir="$project_dir/data"
 script_dir="$project_dir/scripts"
-min_nv=1000
-max_nv=15000
+min_nv=100
+max_nv=500
 config_dir="$project_dir/configs"
 default_config_path="$config_dir/defaults.toml"
 

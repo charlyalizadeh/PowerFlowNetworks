@@ -20,7 +20,7 @@ function parse_commandline()
             default = "data/cliquetrees"
         "--graphs_path"
             help = "Where to store the graphs."
-            default = "data/graphs/"
+            default = "data/graphs_serialized/"
         "--preprocess_path"
             help = "JSON file containing the preprocess option."
             default = "configs/preprocess_default.json"
@@ -38,9 +38,11 @@ end
 
 function main()
     args = parse_commandline()
+    println(args)
     if args["toml_config"]
-        overwrite_toml!(args, args["toml_config_path"], args["toml_config_key"])
+        args = overwrite_toml(args, args["toml_config_path"], args["toml_config_key"])
     end
+    println(args)
     db = SQLite.DB(args["dbpath"])
     kwargs = strkey_to_symkey(args, ["extension_alg", "cliques_path", "cliquetrees_path", "graphs_path", "min_nv", "max_nv", "preprocess_path"])
     chordal_extension_kwargs = get_config_toml(args["kwargs_path"]; key_symbol=false)[args["kwargs_key"]]

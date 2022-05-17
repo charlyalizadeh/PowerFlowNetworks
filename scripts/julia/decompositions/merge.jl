@@ -36,7 +36,7 @@ end
 function main()
     args = parse_commandline()
     if args["toml_config"]
-        overwrite_toml!(args, args["toml_config_path"], args["toml_config_key"])
+        args = overwrite_toml(args, args["toml_config_path"], args["toml_config_key"])
     end
     db = SQLite.DB(args["dbpath"])
     if "sliwak" in args["heuristic"]

@@ -70,4 +70,17 @@ end
 
 strkey_to_symkey(args, subset=keys(args)) = Dict(Symbol(k) => v for (k, v) in args if k in subset)
 
-overwrite_toml!(dict, toml_config_path, toml_config_key) = merge!(dict, TOML.parsefile(toml_config_path)[toml_config_key])
+function overwrite_toml(dict, toml_config_path, toml_config_key)
+    newdict = Dict()
+    toml_dict = TOML.parsefile(toml_config_path)
+    toml_config_keys = split(toml_config_key, ".")
+    for key in toml_config_keys
+        for k in keys(toml_dict[key])
+            if !(typeof(toml_dict[key][k]) <: AbstractDict)
+                newdict[k] = toml_dict[key][k]
+            end
+        end
+        toml_dict = toml_dict[key]
+    end
+    return merge(Dict{Any, Any}(dict), newdict)
+end
