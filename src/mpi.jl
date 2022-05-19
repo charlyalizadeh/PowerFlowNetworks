@@ -43,6 +43,15 @@ function assign_indexes(db::SQLite.DB, table::String)
             println("Sending to $(i - 1): [-1]")
             MPI.send([-1], i, 0, MPI.COMM_WORLD)
         end
+    elseif length(ids) <= nb_process
+        for i in 1:length(ids)
+            println("Sending to $(i - 1): [$(ids[i])]")
+            MPI.send([ids[i]], i, 0, MPI.COMM_WORLD)
+        end
+        for i in length(ids):nb_process
+            println("Sending to $(i - 1): [-1]")
+            MPI.send([-1], i, 0, MPI.COMM_WORLD)
+        end
     else
         nb_ids_per_chunk = Int(floor(length(ids) / nb_process))
         for i in 1:nb_process
@@ -62,6 +71,49 @@ function assign_indexes(db::SQLite.DB, table::String)
     end
 end
 
+function get_query_part(query)
+    query = replace(query, "[" => "")
+    return split(query, "]")
+end
+
+function df_to_str(df)
+    io = IOBuffer()
+    CSV.write(io, df)
+    return String(take!(io))
+end
+
+function process_query(db::SQLite.DB, query)
+    query = String(query)
+    println("[$i] Recieved query: $query")
+    if query == "over"
+        println("Process $i over.")
+        process_done[i] = true
+    elseif query == "Barrier"
+        MPI.Barrier(MPI.COMM_WORLD)
+    else
+        query_parts = get_query_part(query)
+        if query_parts[1] == "WAIT"
+            DBInterface.execute(db, query_parts[2])
+            MPI.send(['e', 'x', 'e', 'c', 'u', 't', 'e', 'd'], i, 0, MPI.COMM_WORLD)
+        elseif query_parts[1] == "SLEEP"
+            time_to_sleep = parse(Float64, query_parts[2])
+            DBInterface.execute(db, query_parts[3])
+        elseif query_parts[1] == "RETURN"
+            results = DBInterface.execute(db, query_parts[2]) |> DataFrame
+            results_str = df_to_str(results)
+            MPI.send([c for c in results_str], i, 0, MPI.COMM_WORLD)
+        else
+            DBInterface.execute(db, query_parts[1])
+        end
+        try
+            DBInterface.execute(db, query)
+        catch e
+            @warn query
+            rethrow()
+        end
+    end
+end
+
 function listen_queries(db::SQLite.DB)
     size = MPI.Comm_size(MPI.COMM_WORLD)
     nb_process = size - 1
@@ -71,27 +123,6 @@ function listen_queries(db::SQLite.DB)
             has_recieved, status = MPI.Iprobe(i, 0, MPI.COMM_WORLD)
             if has_recieved
                 query, status = MPI.recv(i, 0, MPI.COMM_WORLD)
-                query = String(query)
-                println("[$i] Recieved query: $query")
-                if query == "over"
-                    println("Process $i over.")
-                    process_done[i] = true
-                elseif query == "Barrier"
-                    MPI.Barrier(MPI.COMM_WORLD)
-                else
-                    wait_until_executed = startswith(query, "[WAIT]")
-                    if wait_until_executed
-                        query = query[7:end]
-                    end
-                    try
-                        DBInterface.execute(db, query)
-                        if wait_until_executed
-                            MPI.send(['e', 'x', 'e', 'c', 'u', 't', 'e', 'd'], i, 0, MPI.COMM_WORLD)
-                        end
-                    catch e
-                        @warn query
-                        rethrow()
-                    end
                 end
             end
         end

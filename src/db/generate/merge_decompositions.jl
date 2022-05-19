@@ -43,10 +43,10 @@ function merge_decomposition!(db::SQLite.DB, id::Int, origin_id::Int, name::Abst
     date = Dates.now()
 
     features = Dict(Symbol(k) => v for (k, v) in features)
-    insert_decomposition!(db, origin_id, uuid, name, scenario, "merge", "", date, clique_path, cliquetree_path, graph_path_merge; wait_until_executed=true, features...)
+    insert_decomposition!(db, origin_id, uuid, name, scenario, "merge", "", date, clique_path, cliquetree_path, graph_path_merge; wait_until_executed=false, features...)
 
     # Insert in merge table
-    out_id = DBInterface.execute(db, "SELECT id FROM decompositions WHERE uuid = '$uuid'") |> DataFrame
+    out_id = execute_query(db, "SELECT id FROM decompositions WHERE uuid = '$uuid'"; return_results=true)
     out_id = out_id[1, :id]
     heuristics_db = join(heuristic, ":")
     treshold_percent = merge_kwargs["treshold_percent"]
