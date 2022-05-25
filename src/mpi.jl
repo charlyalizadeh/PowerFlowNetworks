@@ -123,7 +123,7 @@ function listen_queries(db::SQLite.DB)
             has_recieved, status = MPI.Iprobe(i, 0, MPI.COMM_WORLD)
             if has_recieved
                 query, status = MPI.recv(i, 0, MPI.COMM_WORLD)
-                end
+                process_done[i] = process_query(db, query, i)
             end
         end
     end
