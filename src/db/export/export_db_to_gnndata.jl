@@ -11,6 +11,7 @@ function _row_to_dict(row)
 end
 
 function export_db_to_gnndata(db, out)
+    println("Exporting to $out")
     !isdir(out) && mkpath(out)
     instances = DBInterface.execute(db, "SELECT * FROM instances WHERE network_path IS NOT NULL AND graph_path IS NOT NULL") |> DataFrame
     decompositions = DBInterface.execute(db, "SELECT * FROM decompositions") |> DataFrame
