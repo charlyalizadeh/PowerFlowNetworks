@@ -82,36 +82,31 @@ function df_to_str(df)
     return String(take!(io))
 end
 
-function process_query(db::SQLite.DB, query)
+function process_query(db::SQLite.DB, query, rank)
     query = String(query)
-    println("[$i] Recieved query: $query")
+    println("[$rank] Recieved query: $query")
     if query == "over"
-        println("Process $i over.")
-        process_done[i] = true
+        println("Process $rank over.")
+        return true
     elseif query == "Barrier"
         MPI.Barrier(MPI.COMM_WORLD)
     else
         query_parts = get_query_part(query)
         if query_parts[1] == "WAIT"
             DBInterface.execute(db, query_parts[2])
-            MPI.send(['e', 'x', 'e', 'c', 'u', 't', 'e', 'd'], i, 0, MPI.COMM_WORLD)
+            MPI.send(['e', 'x', 'e', 'c', 'u', 't', 'e', 'd'], rank, 0, MPI.COMM_WORLD)
         elseif query_parts[1] == "SLEEP"
             time_to_sleep = parse(Float64, query_parts[2])
             DBInterface.execute(db, query_parts[3])
         elseif query_parts[1] == "RETURN"
             results = DBInterface.execute(db, query_parts[2]) |> DataFrame
             results_str = df_to_str(results)
-            MPI.send([c for c in results_str], i, 0, MPI.COMM_WORLD)
+            MPI.send([c for c in results_str], rank, 0, MPI.COMM_WORLD)
         else
             DBInterface.execute(db, query_parts[1])
         end
-        try
-            DBInterface.execute(db, query)
-        catch e
-            @warn query
-            rethrow()
-        end
     end
+    return false
 end
 
 function listen_queries(db::SQLite.DB)
