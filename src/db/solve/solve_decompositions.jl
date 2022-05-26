@@ -19,7 +19,7 @@ function solve_decomposition_dfrow!(db::SQLite.DB, id, origin_id, origin_name, o
     end
 end
 
-function solve_decompositions!(db::SQLite.DB; subset=nothing, recompute=false, kwargs...)
+function solve_decompositions!(db::SQLite.DB; subset=nothing, recompute=false, cholesky=false, kwargs...)
     println("Solving decompositions")
     println("subset\n$subset\nend subset")
     query = "SELECT id, origin_id, origin_name, origin_scenario, clique_path, cliquetree_path FROM decompositions"
@@ -31,6 +31,13 @@ function solve_decompositions!(db::SQLite.DB; subset=nothing, recompute=false, k
             query *= " AND id IN ($(join(subset, ',')))"
         else
             query *= " WHERE id IN ($(join(subset, ',')))"
+        end
+    end
+    if cholesky
+        if !recompute && !isnothin(subset)
+            query *= " AND extension_alg = 'cholesky' AND preprocess_path='configs/preprocess_0.json'"
+        else
+            query *= " WHERE extension_alg = 'cholesky' AND preprocess_path='configs/preprocess_0.json'"
         end
     end
     results = DBInterface.execute(db, query) |> DataFrame
