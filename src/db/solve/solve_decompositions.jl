@@ -19,12 +19,19 @@ function solve_decomposition_dfrow!(db::SQLite.DB, id, origin_id, origin_name, o
     end
 end
 
-function solve_decompositions!(db::SQLite.DB; subset=nothing, kwargs...)
+function solve_decompositions!(db::SQLite.DB; subset=nothing, recompute=false, kwargs...)
     println("Solving decompositions")
     println("subset\n$subset\nend subset")
     query = "SELECT id, origin_id, origin_name, origin_scenario, clique_path, cliquetree_path FROM decompositions"
+    if !recompute
+        query *= " WHERE solving_time IS NULL"
+    end
     if !isnothing(subset)
-        query *= " WHERE id IN ($(join(subset, ',')))"
+        if !recompute
+            query *= " AND id IN ($(join(subset, ',')))"
+        else
+            query *= " WHERE id IN ($(join(subset, ',')))"
+        end
     end
     results = DBInterface.execute(db, query) |> DataFrame
     # Retrieving mat and ctr path
