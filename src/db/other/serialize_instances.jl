@@ -3,6 +3,7 @@ function serialize_instance!(db::SQLite.DB, serialize_path, graphs_path, name, s
     network_path = abspath(joinpath(serialize_path, "$(name)_$(scenario)_network.bin"))
     graph_path = abspath(joinpath(graphs_path, "$(name)_$(scenario)_graph.lgz"))
     network = PowerFlowNetwork(source_path, source_type)
+    replace_inf_by!(network)
     if get_cost_type(network) == "piecewise linear"
         convert_gencost!(network, "polynomial")
     end

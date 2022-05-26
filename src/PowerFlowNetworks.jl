@@ -71,7 +71,7 @@ SimpleGraph(network::PowerFlowNetwork) = to_simple_graph(network)
 export PowerFlowNetwork
 export nbus, nbranch, ngen, is_disjoint, has_bus, has_branch, has_gen,
        has_continuous_index, normalize_index, merge_duplicate_branch!,
-       convert_gencost!, has_gencost_index, set_gencost_index!
+       convert_gencost!, has_gencost_index, set_gencost_index!, replace_inf_by!
 
 # utils
 export ischordal

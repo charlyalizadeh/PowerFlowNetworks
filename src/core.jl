@@ -115,3 +115,8 @@ function convert_gencost!(network::PowerFlowNetwork, to)
         error("Not implemented")
     end
 end
+
+function replace_inf_by!(network::PowerFlowNetwork, by=1000000.0)
+    replace!(network.gen[!, :QMIN], -Inf => by)
+    replace!(network.gen[!, :QMAX], Inf => by)
+end
