@@ -34,7 +34,7 @@ function solve_decompositions!(db::SQLite.DB; subset=nothing, recompute=false, c
         end
     end
     if cholesky
-        if !recompute && !isnothin(subset)
+        if !recompute || !isnothing(subset)
             query *= " AND extension_alg = 'cholesky' AND preprocess_path='configs/preprocess_0.json'"
         else
             query *= " WHERE extension_alg = 'cholesky' AND preprocess_path='configs/preprocess_0.json'"

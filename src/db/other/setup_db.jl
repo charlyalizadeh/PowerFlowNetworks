@@ -60,6 +60,7 @@ function create_decompositions_table(db)
 
         extension_alg TEXT,
         preprocess_path TEXT,
+        preprocess_key TEXT,
         date TEXT,
 
         clique_path TEXT,

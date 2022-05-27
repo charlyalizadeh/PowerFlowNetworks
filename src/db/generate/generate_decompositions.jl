@@ -1,7 +1,7 @@
 function generate_decomposition!(db::SQLite.DB, id::Int, name::AbstractString, scenario::Union{Int, AbstractString},
                                  cliques_path::AbstractString, cliquetrees_path::AbstractString, graphs_path::AbstractString,
                                  extension_alg::AbstractString, option::AbstractDict,
-                                 preprocess_path::AbstractString, graph_path::AbstractString;
+                                 preprocess_path::AbstractString, preprocess_key::AbstractString, graph_path::AbstractString;
                                  seed, rng, chordal_extension_kwargs...)
     println("Generating decomposition: ($name $scenario) ($extension_alg)")
     g = load_graph(graph_path)
@@ -37,12 +37,12 @@ function generate_decomposition!(db::SQLite.DB, id::Int, name::AbstractString, s
     date = Dates.now()
 
     features = Dict(Symbol(k) => v for (k, v) in features)
-    insert_decomposition!(db, id, uuid, name, scenario, extension_alg, preprocess_path, date, clique_path, cliquetree_path, graph_path_dec; features...)
+    insert_decomposition!(db, id, uuid, name, scenario, extension_alg, preprocess_path, preprocess_key, date, clique_path, cliquetree_path, graph_path_dec; features...)
 end
 
 function generate_decompositions!(db::SQLite.DB;
                                   cliques_path, cliquetrees_path, graphs_path,
-                                  extension_alg::AbstractString, preprocess_path::AbstractString,
+                                  extension_alg::AbstractString, preprocess_path::AbstractString, preprocess_key::AbstractString,
                                   min_nv=typemin(Int), max_nv=typemax(Int), subset=nothing,
                                   seed=MersenneTwister(42), rng=MersenneTwister(42),
                                   chordal_extension_kwargs::AbstractDict=Dict(),
@@ -55,11 +55,11 @@ function generate_decompositions!(db::SQLite.DB;
     if !isnothing(subset)
         query *= " AND id IN ($(join(subset, ',')))"
     end
-    option = JSON.parse(read(open(preprocess_path, "r"), String))
+    option = TOML.parsefile(preprocess_path)[preprocess_key]
     option = Dict(Symbol(k) => v for (k, v) in option)
     results = DBInterface.execute(db, query) |> DataFrame
     generate_function!(row) = generate_decomposition!(db, row[:id], row[:name], row[:scenario], cliques_path, cliquetrees_path, graphs_path,
-                                                      extension_alg, option, preprocess_path, row[:graph_path];
+                                                      extension_alg, option, preprocess_path, preprocess_key, row[:graph_path];
                                                       seed=seed, rng=rng, chordal_extension_kwargs...)
     generate_function!.(eachrow(results))
 end
