@@ -1,0 +1,13 @@
+[0]
+    nb_edges_to_add = 0
+    how = "random"
+
+[0_01dist3]
+    nb_edges_to_add = 0.01
+    how = "distance"
+    distance = 3
+
+[20dist3]
+    nb_edges_to_add = 20
+    how = "distance"
+    distance = 3
