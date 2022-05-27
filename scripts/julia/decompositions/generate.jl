@@ -22,14 +22,16 @@ function parse_commandline()
             help = "Where to store the graphs."
             default = "data/graphs_serialized/"
         "--preprocess_path"
-            help = "JSON file containing the preprocess option."
-            default = "configs/preprocess_default.json"
+            help = "TOML file containing the preprocess option."
+            default = "configs/preprocess.toml"
+        "--preprocess_key"
+            help = "Key corresonding to the section name in the preprocess toml file."
         "--kwargs_path"
-            help = ".toml config files containing the configuration for the values for the `chordal_extension_kwargs` dictionary."
+            help = "TOML config file containing the configuration for the values for the `chordal_extension_kwargs` dictionary."
             arg_type = String
             default = "configs/chordal_extension.toml"
         "--kwargs_key"
-            help = "Key corresponding to the section name in the .toml config files."
+            help = "Key corresponding to the section name in the chordal extension kwargs toml file."
             arg_type = String
             default = "default"
     end
@@ -44,7 +46,7 @@ function main()
     end
     println(args)
     db = SQLite.DB(args["dbpath"])
-    kwargs = strkey_to_symkey(args, ["extension_alg", "cliques_path", "cliquetrees_path", "graphs_path", "min_nv", "max_nv", "preprocess_path"])
+    kwargs = strkey_to_symkey(args, ["extension_alg", "cliques_path", "cliquetrees_path", "graphs_path", "min_nv", "max_nv", "preprocess_path", "preprocess_key"])
     chordal_extension_kwargs = get_config_toml(args["kwargs_path"]; key_symbol=false)[args["kwargs_key"]]
     kwargs[:chordal_extension_kwargs] = chordal_extension_kwargs
     if args["mpi"]
