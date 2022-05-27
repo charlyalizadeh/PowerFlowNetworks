@@ -1,6 +1,8 @@
-# Setup/Load
-include("other/setup_db.jl")
-include("other/load_in_db_instances.jl")
+# Setup/Load/Insert/Delete
+include("setup_db.jl")
+include("load_in_db_instances.jl")
+include("insert.jl")
+include("delete_duplicates.jl")
 
 # Save features
 include("features/save_basic_features_instances.jl")
@@ -8,7 +10,7 @@ include("features/save_features_instances.jl")
 include("features/save_single_features_instances.jl")
 
 # Serialize
-include("other/serialize_instances.jl")
+include("serialize_instances.jl")
 
 # Generate
 include("generate/generate_decompositions.jl")
@@ -23,8 +25,6 @@ include("solve/solve_decompositions.jl")
 include("export/export_db_to_gnndata.jl")
 include("export/export_instances.jl")
 
-# Other
-include("other/insert.jl")
+# Infos
 include("other/infos.jl")
-include("other/delete_duplicates.jl")
 include("other/check_sanity.jl")
