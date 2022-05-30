@@ -6,8 +6,18 @@ script_dir="$project_dir/scripts"
 config_dir="$project_dir/configs"
 
 
-julia --project="$project_dir" "$script_dir/julia/decompositions/generate.jl" --toml_config --toml_config_key 100_500.0cholesky
-wait
-julia --project="$project_dir" "$script_dir/julia/decompositions/generate.jl" --toml_config --toml_config_key 100_500.0minimum_degree
-wait
-julia --project="$project_dir" "$script_dir/julia/decompositions/merge.jl" --toml_config --toml_config_key 100_500.merge_molzahn10
+#julia --project="$project_dir" "$script_dir/julia/decompositions/generate.jl" --toml_config --toml_config_key 100_2000.0cholesky
+#wait
+#julia --project="$project_dir" "$script_dir/julia/decompositions/generate.jl" --toml_config --toml_config_key 100_2000.0minimum_degree
+#wait
+#julia --project="$project_dir" "$script_dir/julia/decompositions/generate.jl" --toml_config --toml_config_key 100_2000.0_01dist3cholesky
+#wait
+#julia --project="$project_dir" "$script_dir/julia/decompositions/generate.jl" --toml_config --toml_config_key 100_2000.0_01dist3cholesky
+#wait
+#julia --project="$project_dir" "$script_dir/julia/decompositions/generate.jl" --toml_config --toml_config_key 100_2000.0_01dist3cholesky
+#wait
+#julia --project="$project_dir" "$script_dir/julia/decompositions/generate.jl" --toml_config --toml_config_key 100_2000.0_01dist3cholesky
+#wait
+#julia --project="$project_dir" "$script_dir/julia/decompositions/generate.jl" --toml_config --toml_config_key 100_2000.0_01dist3cholesky
+#wait
+julia --project="$project_dir" "$script_dir/julia/decompositions/merge.jl" --toml_config --toml_config_key 100_2000.merge_molzahn10
