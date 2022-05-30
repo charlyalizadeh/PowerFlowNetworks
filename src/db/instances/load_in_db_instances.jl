@@ -69,7 +69,7 @@ function clean_dirs(dirs; verbose=true)
     return cleaned_dirs
 end
 
-function load_in_db_instances!(db::SQLite.DB, indirs_rawgo, indirs_matpowerm)
+function load_in_db_instances!(db::SQLite.DB; indirs_rawgo, indirs_matpowerm)
     tables = ["instances", "decompositions", "mergers", "combinations", "solve_results"]
     isdb = isfile(db.file)
     if any(map(x -> !(x in SQLite.tables(db)[:name]), tables))
