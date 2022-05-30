@@ -53,9 +53,9 @@ include("read_features.jl")
 include("graphs/graphs.jl")
 include("graphs/operations.jl")
 
-include("decompositions/chordal_extension/chordal_extension.jl")
-include("decompositions/merge/merge.jl")
-include("decompositions/combine/combine.jl")
+include("chordal_extension/chordal_extension/chordal_extension.jl")
+include("chordal_extension/merge/merge.jl")
+include("chordal_extension/combine/combine.jl")
 
 include("solve/solve.jl")
 
@@ -90,7 +90,7 @@ export Graph
 export add_edges_distance!, add_edges_random!, add_edges!
 export chordal_extension
 
-# decompositions
+# chordal extension
 export combine_graph
 export merge_dec
 
@@ -106,6 +106,7 @@ export generate_decompositions!, merge_decompositions!, combine_decompositions!
 export serialize_instances!, check_sanity, check_sanity_mpi, delete_duplicates!, export_instances!, load_matctr_instances!,
        export_db_to_gnndata
 export solve_decompositions!
+export delete_db
 
 # mpi
 export execute_process_mpi
