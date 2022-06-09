@@ -43,7 +43,7 @@ function merge_decomposition!(db::SQLite.DB, id::Int, origin_id::Int, name::Abst
     date = Dates.now()
 
     features = Dict(Symbol(k) => v for (k, v) in features)
-    insert_decomposition!(db, origin_id, uuid, name, scenario, "merge", "", date, clique_path, cliquetree_path, graph_path_merge; wait_until_executed=false, features...)
+    insert_decomposition!(db, origin_id, uuid, name, scenario, "merge", "", "", date, clique_path, cliquetree_path, graph_path_merge; wait_until_executed=true, features...)
 
     # Insert in merge table
     out_id = execute_query(db, "SELECT id FROM decompositions WHERE uuid = '$uuid'"; return_results=true)
@@ -55,10 +55,10 @@ end
 
 function merge_decompositions!(db::SQLite.DB;
                                heuristic::Vector{String}, heuristic_switch::Vector{Int},
-                               treshold_name::AbstractString, merge_kwargs::AbstractDict,
+                               treshold_name::AbstractString, kwargs_path::AbstractString, kwargs_key::AbstractString,
                                min_nv=typemin(Int), max_nv=typemax(Int), subset=nothing,
                                rng=MersenneTwister(42), kwargs...)
-                              
+    merge_kwargs = TOML.parsefile(kwargs_path)[kwargs_key]
     query = "SELECT id, origin_id, origin_name, origin_scenario, clique_path, cliquetree_path, graph_path, nb_added_edge_dec FROM decompositions WHERE nb_vertex >= $min_nv AND nb_vertex <= $max_nv"
     if !isnothing(subset)
         query *= " AND id IN ($(join(subset, ',')))"
