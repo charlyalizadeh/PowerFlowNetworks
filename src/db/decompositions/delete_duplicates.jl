@@ -6,6 +6,7 @@ function delete_duplicate!(db::SQLite.DB, base_id, graph::AbstractGraph, id, gra
         query = "DELETE FROM decompositions WHERE id = $id"
         execute_query(db, query;  time_to_sleep=10)
     end
+    println()
 end
 
 function delete_duplicate_dfrow!(db::SQLite.DB, id, origin_name::AbstractString, origin_scenario, graph_path)
