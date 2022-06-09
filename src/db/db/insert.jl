@@ -10,7 +10,7 @@ function execute_query(db, query; wait_until_executed=false, time_to_sleep=0, re
             if has_recieved
                 query, status = MPI.recv(0, 0, MPI.COMM_WORLD)
                 query = String(query)
-                return DataFame(CSV.File(IOBuffer(query)))
+                return DataFrame(CSV.File(IOBuffer(query)))
             end
         end
     elseif wait_until_executed
