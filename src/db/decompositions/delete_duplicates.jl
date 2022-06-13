@@ -12,7 +12,7 @@ end
 function delete_duplicate_dfrow!(db::SQLite.DB, id, origin_name::AbstractString, origin_scenario, graph_path)
     println("Checking duplicate: ($origin_name $origin_scenario)")
     query = "SELECT id, graph_path FROM decompositions WHERE origin_name='$origin_name' AND origin_scenario=$origin_scenario AND id > $id"
-    results = DBInterface.execute(db, query) |> DataFrame
+    results = execute_query(db, query; return_results=true)
     graph = load_graph(graph_path)
     delete_duplicate_function!(row) = delete_duplicate!(db, id, graph, row[:id], row[:graph_path])
     delete_duplicate_function!.(eachrow(results[!, [:id, :graph_path]]))
