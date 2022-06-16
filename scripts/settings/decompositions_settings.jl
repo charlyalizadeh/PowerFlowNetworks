@@ -53,6 +53,18 @@ end
         default = "default"
 end
 @add_arg_table decompositions_settings["combine"] begin
+    "--how"
+        help = "Method used to combine the decompositions."
+        arg_type = String
+        default = "vertices_intersect"
+    "--extension_alg"
+        help = "Extension algorithm used in case the combination is not chordal."
+        arg_type = String
+        default = "cholesky"
+    "--percent_max"
+        help = "Percent of the cholesky time the decompositions must be under to be combined."
+        arg_type = Float64
+        default = 0.5
 end
 @add_arg_table decompositions_settings["solve"] begin
     "--cholesky"

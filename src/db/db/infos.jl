@@ -40,3 +40,9 @@ function get_table_ids(db::SQLite.DB, table)
     return results[!, :id]
 end
 
+function get_cholesky_times(db::SQLite.DB)
+    query = "SELECT origin_name, origin_scenario, solving_time FROM decompositions WHERE solving_time IS NOT NULL AND extension_alg = 'cholesky' AND preprocess_key = '0'"
+    results = DBInterface.execute(db, query) |> DataFrame
+    return Dict("$(row[:origin_name])_$(row[:origin_scenario])" => row[:solving_time] for row in eachrow(results))
+end
+

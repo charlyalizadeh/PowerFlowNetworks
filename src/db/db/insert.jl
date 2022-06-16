@@ -1,6 +1,10 @@
 function execute_query(db, query; wait_until_executed=false, time_to_sleep=0, return_results=false)
     if !MPI.Initialized()
-        DBInterface.execute(db, query)
+        if return_results
+            return DBInterface.execute(db, query) |> DataFrame
+        else
+            return DBInterface.execute(db, query)
+        end
     elseif return_results
         query = "[RETURN]" * query
         query = [c for c in query]

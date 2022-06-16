@@ -43,8 +43,8 @@ args_to_keep = Dict(
         ),
         "decompositions" => Dict(
             "generate" => ["min_nv", "max_nv", "extension_alg", "cliques_path", "cliquetrees_path", "graphs_path", "preprocess_path", "preprocess_key"],
-            "merge" => ["min_nv", "max_nv", "heuristic", "heuristic_switch", "treshold_name"],
-            "combine" => [], #TODO
+            "merge" => ["min_nv", "max_nv", "heuristic", "heuristic_switch", "treshold_name", "kwargs_path", "kwargs_key"],
+            "combine" => ["percent_max", "how", "extension_alg"],
             "solve" => ["min_nv", "max_nv", "recompute", "cholesky"],
             "delete_duplicates" => [],
             "export_to_gnndata" => ["out"]

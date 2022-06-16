@@ -98,15 +98,20 @@ export merge_dec
 export solve_sdp
 
 # db
+## db
 export setup_db
-export has_opf_tables, count_missing_columns, table_count, nb_instances, nb_decompositions, get_table_ids
+export has_opf_tables, count_missing_columns, table_count, nb_instances, nb_decompositions, get_table_ids, get_cholesky_times
+export check_sanity, check_sanity_mpi
+export delete_db
+## instances
 export load_in_db_instances!
 export save_features_instances!, save_basic_features_instances!, save_single_features_instances!
-export generate_decompositions!, merge_decompositions!, combine_decompositions!
-export serialize_instances!, check_sanity, check_sanity_mpi, delete_duplicates!, export_instances!, load_matctr_instances!,
+export serialize_instances!,  delete_duplicates! 
+export export_instances!, load_matctr_instances!
+## decompositions
+export generate_decompositions!, merge_decompositions!, combine_decompositions!,
        export_db_to_gnndata
 export solve_decompositions!
-export delete_db
 
 # mpi
 export execute_process_mpi
