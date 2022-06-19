@@ -98,6 +98,7 @@ function process_query(db::SQLite.DB, query, rank)
         elseif query_parts[1] == "SLEEP"
             time_to_sleep = parse(Float64, query_parts[2])
             DBInterface.execute(db, query_parts[3])
+            sleep(time_to_sleep)
         elseif query_parts[1] == "RETURN"
             results = DBInterface.execute(db, query_parts[2]) |> DataFrame
             results_str = df_to_str(results)
