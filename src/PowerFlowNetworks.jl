@@ -56,6 +56,7 @@ include("graphs/operations.jl")
 include("chordal_extension/chordal_extension/chordal_extension.jl")
 include("chordal_extension/merge/merge.jl")
 include("chordal_extension/combine/combine.jl")
+include("chordal_extension/interpolate/interpolate.jl")
 
 include("solve/solve.jl")
 
@@ -93,6 +94,7 @@ export chordal_extension
 # chordal extension
 export combine_graph
 export merge_dec
+export interpolate_graph
 
 # solve
 export solve_sdp
@@ -109,9 +111,8 @@ export save_features_instances!, save_basic_features_instances!, save_single_fea
 export serialize_instances!,  delete_duplicates! 
 export export_instances!, load_matctr_instances!
 ## decompositions
-export generate_decompositions!, merge_decompositions!, combine_decompositions!,
-       export_db_to_gnndata
-export solve_decompositions!
+export generate_decompositions!, merge_decompositions!, combine_decompositions!, interpolate_decompositions!,
+       export_db_to_gnndata, solve_decompositions!
 
 # mpi
 export execute_process_mpi

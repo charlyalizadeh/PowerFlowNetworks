@@ -15,6 +15,7 @@ include("instances/serialize_instances.jl")
 
 # Decompositions
 include("decompositions/combine_decompositions.jl")
+include("decompositions/interpolate_decompositions.jl")
 include("decompositions/delete_duplicates.jl")
 include("decompositions/export_db_to_gnndata.jl")
 include("decompositions/generate_decompositions.jl")

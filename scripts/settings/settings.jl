@@ -15,6 +15,7 @@ general_settings_map = Dict(
             "generate" => ["db", "nbus_limit", "mpi", "toml_config"],
             "merge" => ["db", "nbus_limit", "recompute", "mpi", "toml_config"],
             "combine" => ["db", "mpi", "toml_config"],
+            "interpolate" => ["db", "mpi", "toml_config"],
             "solve" => ["db", "nbus_limit", "recompute", "mpi"],
             "delete_duplicates" => ["db", "mpi"],
             "export_to_gnndata" => ["db"]

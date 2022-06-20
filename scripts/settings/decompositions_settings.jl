@@ -1,4 +1,4 @@
-decompositions_settings = Dict(setting_name => ArgParseSettings() for setting_name in ["generate", "merge", "combine", "solve", "delete_duplicates", "export_to_gnndata"])
+decompositions_settings = Dict(setting_name => ArgParseSettings() for setting_name in ["generate", "merge", "combine", "interpolate", "solve", "delete_duplicates", "export_to_gnndata"])
 for key in keys(decompositions_settings)
     decompositions_settings[key].error_on_conflict = false
 end
@@ -65,6 +65,16 @@ end
         help = "Percent of the cholesky time the decompositions must be under to be combined."
         arg_type = Float64
         default = 0.5
+end
+@add_arg_table decompositions_settings["interpolate"] begin
+    "--how"
+        help = "Method used to interpolate the decompositions."
+        arg_type = String
+        default = "vertices"
+    "--nb_per_interpolation"
+        help = "Number of decompositions used per interpolation."
+        arg_type = Int
+        default = 2
 end
 @add_arg_table decompositions_settings["solve"] begin
     "--cholesky"
