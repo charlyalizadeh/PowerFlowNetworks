@@ -10,16 +10,36 @@ function _row_to_dict(row)
     return Dict(names(row) .=> values(row))
 end
 
+function get_dec_type(row)
+    if row[:extension_alg] == "cholesky" && row[:nb_added_edge_dec] == "0"
+        return "cholesky"
+    elseif row[:extension_alg] == "merge"
+        query = "SELECT treshold_percent FROM merges WHERE out_id = $(row[:id])"
+        treshold_percent = DBInterface.execute(query) |> DataFrame
+        treshold_percent = treshold_percent[0, :treshold_percent]
+        return "merge:$(treshold_percent)"
+    else
+        return "$(row[:extension_alg]):$(row[:preprocess_key])"
+    end
+end
+
 function export_db_to_gnndata(db; out)
     println("Exporting to $out")
     !isdir(out) && mkpath(out)
+    decompositions = DBInterface.execute(db, "SELECT * FROM decompositions WHERE solving_time IS NOT NULL") |> DataFrame
+    decompositions_names = unique(["$(row[:origin_name])_$(row[:origin_scenario])" for row in eachrow(decompositions)])
     instances = DBInterface.execute(db, "SELECT * FROM instances WHERE network_path IS NOT NULL AND graph_path IS NOT NULL") |> DataFrame
-    decompositions = DBInterface.execute(db, "SELECT * FROM decompositions") |> DataFrame
     networks = Dict("$(row[:name])_$(row[:scenario])" => load_network(row[:network_path]) for row in eachrow(instances))
+    for (name, network) in networks
+        normalize_index!(network)
+    end
     graphs = Dict("$(row[:name])_$(row[:scenario])" => load_graph(row[:graph_path]) for row in eachrow(instances))    
     instances_dict = Dict()
     # Saving instances
     for (name, network) in networks
+        if !(name in decompositions_names)
+            continue
+        end
         # nodes
         if !has_gencost_index(network)
             set_gencost_index!(network)
@@ -50,7 +70,9 @@ function export_db_to_gnndata(db; out)
                                                                                         "added_edges" => added_edges,
                                                                                         "solving_time" => row[:solving_time],
                                                                                         "uuid" => row[:uuid],
-                                                                                        "all_edges" => all_edges))
+                                                                                        "all_edges" => all_edges,
+                                                                                        "type" => get_dec_type(row)
+                                                                                       ))
     end
     for (name, decomposition) in decompositions_dict
         open(joinpath(out, "$name.json"), "w") do io
