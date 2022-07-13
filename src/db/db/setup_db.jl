@@ -130,6 +130,20 @@ function create_combinations_table(db)
     SQLite.execute(db, createtable_query)
 end
 
+function create_duplicates_table(db)
+    createtable_query = """
+    CREATE TABLE IF NOT EXISTS duplicates(
+        uuid1 TEXT NOT NULL,
+        uuid2 TEXT NOT NULL,
+
+        PRIMARY KEY(uuid1, uuid2),
+        FOREIGN KEY(uuid1) REFERENCES decompositions(uuid),
+        FOREIGN KEY(uuid2) REFERENCES decompositions(uuid)
+    )
+    """
+    SQLite.execute(db, createtable_query)
+end
+
 function setup_db(name; delete_if_exists=false)
     db = SQLite.DB(name)
     if delete_if_exists
@@ -138,10 +152,12 @@ function setup_db(name; delete_if_exists=false)
         delete_table(db, "decompositions")
         delete_table(db, "merges")
         delete_table(db, "combinations")
+        delete_table(db, "duplicates")
     end
     create_instances_table(db)
     create_decompositions_table(db)
     create_merges_table(db)
     create_combinations_table(db)
+    create_duplicates_table(db)
     return db
 end
