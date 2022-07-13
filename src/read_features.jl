@@ -146,5 +146,6 @@ function get_clique_features(clique::Vector{Vector{Int}})
     clique_size = [length(c) for c in clique]
     features = Dict()
     features["clique_size_max"], features["clique_size_min"], features["clique_size_mean"], features["clique_size_median"], features["clique_size_var"] = get_population_stats(clique_size)
+    features["nb_clique"] = length(clique)
     return features
 end
