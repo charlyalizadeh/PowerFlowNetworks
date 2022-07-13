@@ -12,6 +12,7 @@ single_process_functions = Dict(
             "save_features" => save_features_instances!,
             "serialize" => serialize_instances!,
             "load_matctr" => load_matctr_instances!
+            #"explore" => explore_instances
         ),
         "decompositions" => Dict(
             "generate" => generate_decompositions!,
@@ -40,7 +41,8 @@ args_to_keep = Dict(
             "save_basic_features" => ["recompute"],
             "save_features" => ["min_nv", "max_nv", "recompute"],
             "serialize" => ["min_nv", "max_nv", "recompute", "networks_path", "graphs_path"],
-            "load_matctr" => ["min_nv", "max_nv", "out"]
+            "load_matctr" => ["min_nv", "max_nv", "out"],
+            "explore" => ["min_nv", "max_nv", "out"]
         ),
         "decompositions" => Dict(
             "generate" => ["min_nv", "max_nv", "extension_alg", "cliques_path", "cliquetrees_path", "graphs_path", "preprocess_path", "preprocess_key"],

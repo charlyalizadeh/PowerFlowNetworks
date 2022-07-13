@@ -7,9 +7,10 @@ general_settings_map = Dict(
         "instances" => Dict(
             "load_in_db" => ["db", "toml_config"],
             "save_basic_features" => ["db", "recompute", "mpi", "toml_config"],
-            "save_features" => ["db", "recompute", "mpi", "toml_config"],
+            "save_features" => ["db", "nbus_limit", "recompute", "mpi", "toml_config"],
             "serialize" => ["db", "nbus_limit", "recompute", "mpi", "toml_config"],
-            "load_matctr" => ["db", "toml_config"]
+            "load_matctr" => ["db", "toml_config"],
+            "explore" => ["db", "toml_config"]
         ),
         "decompositions" => Dict(
             "generate" => ["db", "nbus_limit", "mpi", "toml_config"],
@@ -18,7 +19,7 @@ general_settings_map = Dict(
             "interpolate" => ["db", "mpi", "toml_config"],
             "solve" => ["db", "nbus_limit", "recompute", "mpi"],
             "delete_duplicates" => ["db", "mpi"],
-            "export_to_gnndata" => ["db"]
+            "export_to_gnndata" => ["db", "nbus_limit"]
         ),
         "db" => Dict(
             "check_sanity" => ["db", "nbus_limit", "mpi", "toml_config"],
