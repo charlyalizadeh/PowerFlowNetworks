@@ -11,7 +11,7 @@ rcParams.update({'figure.autolayout': True})
 con = connect('./data/PowerFlowNetworks.sqlite')
 highlight = ["case89pegase"]
 instances = pd.read_sql('SELECT * FROM instances', con)
-decompositions = pd.read_sql('SELECT * FROM decompositions', con)
+decompositions = pd.read_sql('SELECT * FROM decompositions WHERE solving_time IS NOT NULL AND solving_time != "NaN"', con)
 features_dict = {
     "decompositions": ["nb_edge", "nb_vertex",
                        "degree_max", "degree_min", "degree_mean", "degree_median", "degree_var",
@@ -90,20 +90,23 @@ def plot_report(instances, decompositions):
     boxplot_pop(instances, "BR_B", highlight=highlight)
 
     # PCA
-    decompositions["class"] = decompositions["origin_name"].isin(highlight) + 0
-    instances["class"] = instances["name"].isin(highlight) + 0
+    decompositions["category"] = decompositions["origin_name"].isin(highlight) + 0
+    instances["category"] = instances["name"].isin(highlight) + 0
+    groups = decompositions[["solving_time", "origin_name"]].groupby("origin_name")
+    mean, std = groups.transform("mean"), groups.transform("std")
+    decompositions["solving_time_normalized"] = (decompositions[mean.columns] - mean) / std
     plot_pca(decompositions,
              features_dict["decompositions"],
-             ["class"],
              out_dir="reports/plots/",
-             suffix="_decompositions"
-             )
+             suffix="_decompositions",
+             hue=decompositions["solving_time_normalized"],
+             symbol=decompositions["category"])
     plot_pca(instances,
              features_dict["instances"],
-             ["class"],
              out_dir="reports/plots/",
-             suffix="_instances"
-             )
+             suffix="_instances",
+             hue=instances["category"],
+             symbol=instances["category"])
 
 
 

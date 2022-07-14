@@ -21,10 +21,16 @@ def scree_plot(pca, n=None, ax=None):
                         ax=ax)
 
 
-def ind_factor_map(X, y, c=(0, 1), ax=None, log_x=False, log_y=False):
+def ind_factor_map(X, hue, symbol, c=(0, 1), ax=None, log_x=False, log_y=False):
     ax = ax or plt.gca()
-    plot = sns.scatterplot(x=X[:, c[0]], y=X[:, c[1]], hue=y[:, 0], ax=ax,
-                           palette=sns.color_palette("hls", len(np.unique(y))))
+    nunique_hue = len(np.unique(hue))
+    palette = None
+    if nunique_hue > 2:
+        palette = sns.color_palette("flare", as_cmap=True)
+    else:
+        palette = sns.color_palette("hls", nunique_hue)
+    plot = sns.scatterplot(x=X[:, c[0]], y=X[:, c[1]], hue=hue, style=symbol, size=symbol.replace({0: 1, 1: 0}), ax=ax,
+                           palette=palette)
     if log_x:
         plt.xscale('log', base=10)
     if log_y:
@@ -61,11 +67,10 @@ def format_info_ax(pca, ax):
     return df.to_markdown()
 
 
-def plot_pca(df, X_cols, y_cols, out_dir, suffix=""):
+def plot_pca(df, X_cols, out_dir, hue=None, symbol=None, suffix=""):
     out_dir = Path(out_dir)
     X = df[X_cols]
     X = X.dropna(axis='columns').to_numpy()
-    y = df[y_cols].to_numpy()
     sc = StandardScaler()
     X = sc.fit_transform(X)
 
@@ -81,20 +86,21 @@ def plot_pca(df, X_cols, y_cols, out_dir, suffix=""):
     fig.savefig(out_dir.joinpath(f"scree_plot{suffix}.png"))
 
     fig_pca_1, ax_pca_1 = plt.subplots()
-    ind_factor_map(X_pca, y, ax=ax_pca_1, log_x=False, log_y=False)
+    ind_factor_map(X_pca, hue, symbol=symbol, ax=ax_pca_1, log_x=False, log_y=False)
     fig_pca_2, ax_pca_2 = plt.subplots()
-    ind_factor_map(X_pca[:, 1:], y, ax=ax_pca_2, log_x=False, log_y=False)
+    ind_factor_map(X_pca[:, 1:], hue, symbol=symbol, ax=ax_pca_2, log_x=False, log_y=False)
     fig_pca_1.savefig(out_dir.joinpath(f"pca_1{suffix}.png"))
     fig_pca_1.savefig(out_dir.joinpath(f"pca_2{suffix}.png"))
 
     df = pd.DataFrame({'Axis 1': X_pca[:, 0],
                        'Axis 2': X_pca[:, 1],
                        'Axis 3': X_pca[:, 2],
-                       'class': y[:, 0]})
+                       'category': symbol})
     fig_pca_3 = px.scatter_3d(df, x='Axis 1', y='Axis 2', z='Axis 3',
-                              color='class',
+                              color=hue,
                               color_continuous_scale=['red', 'orange', 'green'],
-                              size=[2] * len(df.index),
+                              symbol=symbol,
+                              size=[15] * (len(df.index) - 5) + [1] * 5,
                               log_x=False,
                               log_y=False,
                               log_z=False)
