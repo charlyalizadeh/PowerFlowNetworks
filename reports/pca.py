@@ -80,7 +80,24 @@ def plot_pca(df, X_cols, y_cols, out_dir, suffix=""):
     ax2.set_title('Scree plot (n_components=3)')
     fig.savefig(out_dir.joinpath(f"scree_plot{suffix}.png"))
 
-    fig_pca, ax_pca = plt.subplots()
-    ind_factor_map(X_pca, y, ax=ax_pca, log_x=False, log_y=False)
-    fig_pca.savefig(out_dir.joinpath(f"pca{suffix}.png"))
+    fig_pca_1, ax_pca_1 = plt.subplots()
+    ind_factor_map(X_pca, y, ax=ax_pca_1, log_x=False, log_y=False)
+    fig_pca_2, ax_pca_2 = plt.subplots()
+    ind_factor_map(X_pca[:, 1:], y, ax=ax_pca_2, log_x=False, log_y=False)
+    fig_pca_1.savefig(out_dir.joinpath(f"pca_1{suffix}.png"))
+    fig_pca_1.savefig(out_dir.joinpath(f"pca_2{suffix}.png"))
 
+    df = pd.DataFrame({'Axis 1': X_pca[:, 0],
+                       'Axis 2': X_pca[:, 1],
+                       'Axis 3': X_pca[:, 2],
+                       'class': y[:, 0]})
+    fig_pca_3 = px.scatter_3d(df, x='Axis 1', y='Axis 2', z='Axis 3',
+                              color='class',
+                              color_continuous_scale=['red', 'orange', 'green'],
+                              size=[2] * len(df.index),
+                              log_x=False,
+                              log_y=False,
+                              log_z=False)
+    fig_pca_3.update_traces(marker=dict(size=4, line=dict(width=2, color='DarkSlateGrey')),
+                            selector=dict(mode='markers'))
+    fig_pca_3.write_html(out_dir.joinpath(f"pca_3{suffix}.html"), )

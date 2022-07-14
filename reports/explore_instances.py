@@ -123,23 +123,35 @@ def make_report_instances(instances, decompositions):
 
     path_scree_instances = path_plot.joinpath("scree_plot_instances.png").resolve()
     path_scree_decompositions = path_plot.joinpath("scree_plot_decompositions.png").resolve()
-    path_pca_instances = path_plot.joinpath("pca_instances.png").resolve()
-    path_pca_decompositions = path_plot.joinpath("pca_decompositions.png").resolve()
+    path_pca_1_instances = path_plot.joinpath("pca_1_instances.png").resolve()
+    path_pca_1_decompositions = path_plot.joinpath("pca_1_decompositions.png").resolve()
+    path_pca_2_instances = path_plot.joinpath("pca_2_instances.png").resolve()
+    path_pca_2_decompositions = path_plot.joinpath("pca_2_decompositions.png").resolve()
+    path_pca_3_instances = path_plot.joinpath("pca_3_instances.html").resolve()
+    path_pca_3_decompositions = path_plot.joinpath("pca_3_decompositions.html").resolve()
     string += f"""
 
 # PCA {{.tabset}}
 
 ## Instances
 
-![]({path_pca_instances})
+![]({path_pca_1_instances})
+
+![]({path_pca_2_instances})
 
 ![]({path_scree_instances})
 
+[3D plot]({path_pca_3_instances})
+
 ## Decompositions
 
-![]({path_pca_decompositions})
+![]({path_pca_1_decompositions})
+
+![]({path_pca_2_decompositions})
 
 ![]({path_scree_decompositions})
+
+[3D plot]({path_pca_3_decompositions})
 """
 
 
