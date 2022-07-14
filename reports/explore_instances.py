@@ -1,109 +1,152 @@
+from pca import plot_pca
 from sqlite3 import connect
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import pathlib
 from pathlib import Path
 from matplotlib import rcParams
 rcParams.update({'figure.autolayout': True})
 
 
 con = connect('./data/PowerFlowNetworks.sqlite')
+highlight = ["case89pegase"]
+instances = pd.read_sql('SELECT * FROM instances', con)
+decompositions = pd.read_sql('SELECT * FROM decompositions', con)
+features_dict = {
+    "decompositions": ["nb_edge", "nb_vertex",
+                       "degree_max", "degree_min", "degree_mean", "degree_median", "degree_var",
+                       "global_clustering_coefficient", "density", "diameter",
+                       "clique_size_max", "clique_size_min", "clique_size_mean", "clique_size_median", "clique_size_var"],
+    "instances": ["nbus", "nbranch", "nbranch_unique", "ngen",
+                  "degree_max", "degree_min", "degree_mean", "degree_median", "degree_var",
+                  "global_clustering_coefficient", "density", "diameter",
+                  "PD_max", "PD_min", "PD_mean", "PD_median", "PD_var",
+                  "QD_max", "QD_min", "QD_mean", "QD_median", "QD_var",
+                  "GS_max", "GS_min", "GS_mean", "GS_median", "GS_var",
+                  "BS_max", "BS_min", "BS_mean", "BS_median", "BS_var",
+                  "VM_max", "VM_min", "VM_mean", "VM_median", "VM_var",
+                  "VA_max", "VA_min", "VA_mean", "VA_median", "VA_var",
+                  "VMAX_max", "VMAX_min", "VMAX_mean", "VMAX_median", "VMAX_var",
+                  "VMIN_max", "VMIN_min", "VMIN_mean", "VMIN_median", "VMIN_var",
+
+                  "PG_max", "PG_min", "PG_mean", "PG_median", "PG_var",
+                  "QG_max", "QG_min", "QG_mean", "QG_median", "QG_var",
+                  "QMAX_max", "QMAX_min", "QMAX_mean", "QMAX_median", "QMAX_var",
+                  "QMIN_max", "QMIN_min", "QMIN_mean", "QMIN_median", "QMIN_var",
+                  "PMAX_max", "PMAX_min", "PMAX_mean", "PMAX_median", "PMAX_var",
+                  "PMIN_max", "PMIN_min", "PMIN_mean", "PMIN_median", "PMIN_var",
+
+                  "BR_R_max", "BR_R_min", "BR_R_mean", "BR_R_median", "BR_R_var",
+                  "BR_X_max", "BR_X_min", "BR_X_mean", "BR_X_median", "BR_X_var",
+                  "BR_B_max", "BR_B_min", "BR_B_mean", "BR_B_median", "BR_B_var"
+        ]
+
+}
 
 
-def plot_boxplot(df, column, out, y_lim=None):
+def boxplot(df, column, out, y_lim=None, highlight=[]):
     fig, ax = plt.subplots()
     df.boxplot(column=column)
+    for h in highlight:
+        values = df.loc[df[df["name"] == h].index].iloc[0, :][column].tolist()
+        ax.scatter(np.arange(len(values)), values, color='r')
     ax.set_xticklabels(ax.get_xticklabels(), rotation=90)
     if y_lim is not None:
         ax.set_ylim(y_lim)
     fig.savefig(out)
 
 
-def plot_boxplot_pop(df, var):
-    plot_boxplot(df, [f"{var}_min", f"{var}_max", f"{var}_mean", f"{var}_median", f"{var}_var"], f"fig_{var}.png")
+def boxplot_pop(df, var, highlight=[]):
+    boxplot(df, [f"{var}_min", f"{var}_max", f"{var}_mean", f"{var}_median"], f"reports/plots/fig_{var}.png", highlight=highlight)
 
 
-def plot_report_instance(instance):
-    id = instance["id"]
-    decompositions = pd.read_sql(f'SELECT * FROM decompositions WHERE origin_id = {id} AND solving_time IS NOT NULL AND extension_alg NOT LIKE "interpolte:%"', con)
-    if len(decompositions.index) == 0:
-        return
-
-    # Features variations
-    plot_boxplot(decompositions, ["degree_min", "degree_max", "degree_mean", "degree_median", "degree_var", "global_clustering_coefficient", "density", "diameter", "radius", "nb_edge"], f"reports/plots/graph_{id}.png")
-    plot_boxplot(decompositions, ["nb_clique", "clique_size_max", "clique_size_min", "clique_size_mean", "clique_size_median", "clique_size_var"], f"reports/plots/clique_{id}.png")
-    plot_boxplot(decompositions, ["solving_time"], f"reports/plots/solve_{id}.png")
+def boxplot_column_by(df, column, by, suffix=""):
+    fig, ax = plt.subplots()
+    df.boxplot(column=column, by=by, ax=ax, rot=90)
+    fig.savefig(f"reports/plots/boxplot_{column[0]}{suffix}.png")
 
 
-def plot_report_instances(instances):
-    plot_boxplot(instances, ["nbus", "nbranch", "nbranch_unique", "ngen"], "reports/plots/fig_graph.png")
+def plot_report(instances, decompositions):
+    for f in features_dict["decompositions"]:
+        boxplot_column_by(decompositions, [f], by="origin_name", suffix="_decompositions")
+
+    boxplot_pop(instances, "PD", highlight=highlight)
+    boxplot_pop(instances, "QD", highlight=highlight)
+    boxplot_pop(instances, "GS", highlight=highlight)
+    boxplot_pop(instances, "BS", highlight=highlight)
+    boxplot_pop(instances, "VM", highlight=highlight)
+    boxplot_pop(instances, "VA", highlight=highlight)
+    boxplot_pop(instances, "VMAX", highlight=highlight)
+
+    boxplot_pop(instances, "PG", highlight=highlight)
+    boxplot_pop(instances, "QG", highlight=highlight)
+    boxplot_pop(instances, "QMAX", highlight=highlight)
+    boxplot_pop(instances, "QMIN", highlight=highlight)
+    boxplot_pop(instances, "PMAX", highlight=highlight)
+    boxplot_pop(instances, "PMIN", highlight=highlight)
+
+    boxplot_pop(instances, "BR_R", highlight=highlight)
+    boxplot_pop(instances, "BR_X", highlight=highlight)
+    boxplot_pop(instances, "BR_B", highlight=highlight)
+
+    # PCA
+    decompositions["class"] = decompositions["origin_name"].isin(highlight) + 0
+    instances["class"] = instances["name"].isin(highlight) + 0
+    plot_pca(decompositions,
+             features_dict["decompositions"],
+             ["class"],
+             out_dir="reports/plots/",
+             suffix="_decompositions"
+             )
+    plot_pca(instances,
+             features_dict["instances"],
+             ["class"],
+             out_dir="reports/plots/",
+             suffix="_instances"
+             )
 
 
-    plot_boxplot_pop(instances, "PD")
-    plot_boxplot_pop(instances, "QD")
-    plot_boxplot_pop(instances, "GS")
-    plot_boxplot_pop(instances, "BS")
-    plot_boxplot_pop(instances, "VM")
-    plot_boxplot_pop(instances, "VA")
-    plot_boxplot_pop(instances, "VMAX")
-
-    plot_boxplot_pop(instances, "PG")
-    plot_boxplot_pop(instances, "QG")
-    plot_boxplot_pop(instances, "QMAX")
-    plot_boxplot_pop(instances, "QMIN")
-    plot_boxplot_pop(instances, "PMAX")
-    plot_boxplot_pop(instances, "PMIN")
-
-    plot_boxplot_pop(instances, "BR_R")
-    plot_boxplot_pop(instances, "BR_X")
-    plot_boxplot_pop(instances, "BR_B")
-
-    instances.apply(plot_report_instance, axis=1)
 
 
+def make_report_instances(instances, decompositions):
+    path_plot = Path("reports/plots")
+    path_plot.mkdir(exist_ok=True)
 
-def make_report_instance(instance):
-    plot_path = Path("reports/plots").mkdir()
-    id = instance["id"]
-    decompositions = pd.read_sql(f'SELECT * FROM decompositions WHERE origin_id = {id} AND solving_time IS NOT NULL AND extension_alg NOT LIKE "interpolte:%"', con)
-    if len(decompositions.index) == 0:
-        return ""
-    graph_path = Path(f"reports/plots/graph_{id}.png").resolve()
-    clique_path = Path(f"reports/plots/clique_{id}.png").resolve()
-    solve_path = Path(f"reports/plots/solve_{id}.png").resolve()
-    string = f"""
-## {instance["name"]} {{.tabset}}
+    plot_report(instances, decompositions)
 
-### Graph
 
-![]({graph_path})
+    string = "# Per features\n\n"
+    string += "\n## Decompositions {.tabset}\n"
+    for f in features_dict["decompositions"]:
+        path = path_plot.joinpath(f"boxplot_{f}_decompositions.png").resolve()
+        string += f"\n### {f} \n![]({path})\n"
 
-### Clique
+    path_scree_instances = path_plot.joinpath("scree_plot_instances.png").resolve()
+    path_scree_decompositions = path_plot.joinpath("scree_plot_decompositions.png").resolve()
+    path_pca_instances = path_plot.joinpath("pca_instances.png").resolve()
+    path_pca_decompositions = path_plot.joinpath("pca_decompositions.png").resolve()
+    string += f"""
 
-![]({clique_path})
+# PCA {{.tabset}}
 
-### Solving time
+## Instances
 
-![]({solve_path})
+![]({path_pca_instances})
 
+![]({path_scree_instances})
+
+## Decompositions
+
+![]({path_pca_decompositions})
+
+![]({path_scree_decompositions})
 """
-    return string
 
 
-def make_report_instances(instances):
-    plot_report_instances(instances)
-    string = "# Features report per instance{.tabset}\n\n" + "\n\n".join(instances.apply(make_report_instance, axis=1))
-    global_features = ["graph",
-                       "PD", "QD", "GS", "BS", "VM", "VA", "VMAX", "PG", "QG", "QMAX", "QMIN", "PMAX", "PMIN",
-                       "BR_R", "BR_X", "BR_B"]
-    string += "\n\n# Features report {.tabset}\n\n"
-    for f in global_features:
-        path = Path(f"reports/plots/fig_{f}.png").resolve()
-        string += f"\n## {f} \n\n![]({path})\n"
+    # Write to rmarkdown file
     with open("reports/report_features.Rmd", "w") as io:
         io.write(string)
 
 
 
-instances = pd.read_sql('SELECT * FROM instances', con)
-make_report_instances(instances)
+make_report_instances(instances, decompositions)
