@@ -9,7 +9,8 @@ const process_functions = Dict(
     "delete_duplicates_decompositions" => delete_duplicates!,
     "export_instances" => export_instances!,
     "solve_decompositions" => solve_decompositions!,
-    "load_matctr_instances" => load_matctr_instances!
+    "load_matctr_instances" => load_matctr_instances!,
+    "check_is_cholesky_decompositions" => check_is_cholesky_decompositions!
 )
 const table_to_process = Dict(
     "save_basic_features_instances" => "instances",
@@ -22,7 +23,8 @@ const table_to_process = Dict(
     "delete_duplicates_decompositions" => "instances",
     "export_instances" => "instances",
     "solve_decompositions" => "decompositions",
-    "load_matctr_instances" => "instances"
+    "load_matctr_instances" => "instances",
+    "check_is_cholesky_decompositions" => "decompositions"
 )
 
 function mpi_init()
