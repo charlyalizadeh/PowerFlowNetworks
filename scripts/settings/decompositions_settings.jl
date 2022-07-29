@@ -1,4 +1,4 @@
-decompositions_settings = Dict(setting_name => ArgParseSettings() for setting_name in ["generate", "merge", "combine", "interpolate", "solve", "delete_duplicates", "export_to_gnndata"])
+decompositions_settings = Dict(setting_name => ArgParseSettings() for setting_name in ["generate", "merge", "combine", "interpolate", "solve", "delete_duplicates", "export_to_gnndata", "check_is_cholesky"])
 for key in keys(decompositions_settings)
     decompositions_settings[key].error_on_conflict = false
 end
@@ -88,4 +88,6 @@ end
     "--out"
         help = "Directory where to the gnndata."
         default = "data/gnndata"
+end
+@add_arg_table decompositions_settings["check_is_cholesky"] begin
 end

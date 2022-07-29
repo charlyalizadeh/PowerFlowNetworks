@@ -21,7 +21,8 @@ single_process_functions = Dict(
             "interpolate" => interpolate_decompositions!,
             "solve" => solve_decompositions!,
             "delete_duplicates" => delete_duplicates!,
-            "export_to_gnndata" => export_db_to_gnndata
+            "export_to_gnndata" => export_db_to_gnndata,
+            "check_is_cholesky" => check_is_cholesky_decompositions!
         ),
         "db" => Dict(
             "check_sanity" => check_sanity,
@@ -51,7 +52,8 @@ args_to_keep = Dict(
             "interpolate" => ["how", "nb_per_interpolation"],
             "solve" => ["min_nv", "max_nv", "recompute", "cholesky"],
             "delete_duplicates" => [],
-            "export_to_gnndata" => ["out"]
+            "export_to_gnndata" => ["out"],
+            "check_is_cholesky" => [],
         ),
         "db" => Dict(
             "check_sanity" => ["min_nv", "max_nv", "table", "check"],

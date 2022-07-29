@@ -42,6 +42,8 @@ function create_instances_table(db)
         BR_X_max REAL, BR_X_min REAL, BR_X_mean REAL, BR_X_median REAL, BR_X_var REAL,
         BR_B_max REAL, BR_B_min REAL, BR_B_mean REAL, BR_B_median REAL, BR_B_var REAL,
 
+        cholesky_solving_time REAL,
+
         UNIQUE(name, scenario),
         PRIMARY KEY(id)
     )
@@ -84,6 +86,8 @@ function create_decompositions_table(db)
         solve_log_path TEXT,
         objective REAL, nb_iter INTEGER, m REAL,
         solving_time REAL,
+
+        is_cholesky INTEGER NOT NULL,
 
 
         PRIMARY KEY(id),

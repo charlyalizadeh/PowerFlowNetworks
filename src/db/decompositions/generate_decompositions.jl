@@ -20,6 +20,9 @@ function generate_decomposition!(db::SQLite.DB, id::Int, name::AbstractString, s
     cliquetree, nb_lc = get_cliquetree_array(clique)
     merge!(features, get_clique_features(clique))
 
+    # Check if the decomposition is the "cholesky decomposition" (i.e. no edges added in preprocessing + extension algorithm = cholesky)
+    features["is_cholesky"] = (options[:nb_edges_to_add] == 0 && extension_alg == "cholesky") ? 1 : 0
+
     # Save cliques and cliquetree
     uuid = uuid1(rng)
     clique_path = joinpath(cliques_path, "$(name)_$(scenario)_$(uuid)_clique.csv")

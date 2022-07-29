@@ -19,7 +19,8 @@ general_settings_map = Dict(
             "interpolate" => ["db", "mpi", "toml_config"],
             "solve" => ["db", "nbus_limit", "recompute", "mpi"],
             "delete_duplicates" => ["db", "mpi"],
-            "export_to_gnndata" => ["db", "nbus_limit"]
+            "export_to_gnndata" => ["db", "nbus_limit"],
+            "check_is_cholesky" => ["db"]
         ),
         "db" => Dict(
             "check_sanity" => ["db", "nbus_limit", "mpi", "toml_config"],
