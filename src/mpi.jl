@@ -10,7 +10,8 @@ const process_functions = Dict(
     "export_instances" => export_instances!,
     "solve_decompositions" => solve_decompositions!,
     "load_matctr_instances" => load_matctr_instances!,
-    "check_is_cholesky_decompositions" => check_is_cholesky_decompositions!
+    "check_is_cholesky_decompositions" => check_is_cholesky_decompositions!,
+    "set_treshold_solving_time" => set_treshold_solving_time_decompositions!
 )
 const table_to_process = Dict(
     "save_basic_features_instances" => "instances",
@@ -24,7 +25,8 @@ const table_to_process = Dict(
     "export_instances" => "instances",
     "solve_decompositions" => "decompositions",
     "load_matctr_instances" => "instances",
-    "check_is_cholesky_decompositions" => "decompositions"
+    "check_is_cholesky_decompositions" => "decompositions",
+    "set_treshold_solving_time" => "decompositions"
 )
 
 function mpi_init()

@@ -16,6 +16,8 @@ import JSON
 import TOML
 using MPI
 using Polynomials: Polynomial, fit, coeffs
+#using Plots
+#using StatsPlots
 
 
 # Solve module
@@ -110,9 +112,10 @@ export load_in_db_instances!
 export save_features_instances!, save_basic_features_instances!, save_single_features_instances!
 export serialize_instances!,  delete_duplicates! 
 export export_instances!, load_matctr_instances!
+#export explore_instances
 ## decompositions
 export generate_decompositions!, merge_decompositions!, combine_decompositions!, interpolate_decompositions!,
-       export_db_to_gnndata, solve_decompositions!
+       export_db_to_gnndata, solve_decompositions!, check_is_cholesky_decompositions!, set_treshold_solving_time_decompositions!
 
 # mpi
 export execute_process_mpi
