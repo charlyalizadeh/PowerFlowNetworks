@@ -3,7 +3,14 @@ function solve_decomposition!(db::SQLite.DB, id, origin_name, origin_scenario, c
     cliques = read_clique(clique_path)
     cliquetree = read_cliquetree(cliquetree_path)
     instance_name = "$(origin_name)_$(origin_scenario)"
-    solving_time, nb_iter, solve_log_path, objective, m, nb_lc = solve_sdp(instance_name, cliques, cliquetree, ctr_path, mat_path)
+    solving_time, nb_iter, solve_log_path, objective, m, nb_lc = "'NaN'", "'NaN'", "", "'NaN'", "'NaN'", "'NaN'"
+    try
+        solving_time, nb_iter, solve_log_path, objective, m, nb_lc = solve_sdp(instance_name, cliques, cliquetree, ctr_path, mat_path)
+    catch e
+        println("($origin_name, $origin_scenario, $id) could not be solved.")
+        flush(stderr)
+        flush(stdout)
+    end
     query = """
     UPDATE decompositions SET solving_time=$solving_time, nb_iter=$nb_iter, solve_log_path='$solve_log_path', objective=$objective, m=$m, nb_lc=$nb_lc
     WHERE id = $id

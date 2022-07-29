@@ -73,7 +73,7 @@ function combine_decompositions!(db::SQLite.DB; how::AbstractString, extension_a
         query *= " AND d1.origin_id IN ($(join(subset, ',')))"
     end
     for e in exclude
-        query *= " AND d1.extension_alg <> '$e' AND d2.extension_alg <> '$e'"
+        query *= " AND d1.extension_alg NOT LIKE '$e%' AND d2.extension_alg NOT LIKE '$e%'"
     end
     cholesky_times = get_cholesky_times(db)
     results = DBInterface.execute(db, query) |> DataFrame

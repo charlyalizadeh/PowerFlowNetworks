@@ -36,6 +36,7 @@ function assign_indexes(db::SQLite.DB, table::String)
     size = MPI.Comm_size(MPI.COMM_WORLD)
     nb_process = size - 1
     ids = get_table_ids(db, table)
+    println("---- $(Dates.now()) ----")
     println("Number of ids: $(length(ids))")
     if isempty(ids)
         println("Nothing to process.")
@@ -69,6 +70,8 @@ function assign_indexes(db::SQLite.DB, table::String)
             MPI.send(chunk, i, 0, MPI.COMM_WORLD)
         end
     end
+    flush(stderr)
+    flush(stdout)
 end
 
 function get_query_part(query)
@@ -85,6 +88,8 @@ end
 function process_query(db::SQLite.DB, query, rank)
     query = String(query)
     println("[$rank] Recieved query: $query")
+    flush(stderr)
+    flush(stdout)
     if query == "over"
         println("Process $rank over.")
         return true
@@ -104,7 +109,12 @@ function process_query(db::SQLite.DB, query, rank)
             results_str = df_to_str(results)
             MPI.send([c for c in results_str], rank, 0, MPI.COMM_WORLD)
         else
-            DBInterface.execute(db, query_parts[1])
+            try
+                DBInterface.execute(db, query_parts[1])
+            catch e
+                println(query_parts)
+                rethrow()
+            end
         end
     end
     return false

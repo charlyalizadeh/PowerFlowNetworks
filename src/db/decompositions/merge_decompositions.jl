@@ -59,7 +59,7 @@ function merge_decompositions!(db::SQLite.DB;
                                min_nv=typemin(Int), max_nv=typemax(Int), subset=nothing,
                                rng=MersenneTwister(42), kwargs...)
     merge_kwargs = TOML.parsefile(kwargs_path)[kwargs_key]
-    query = "SELECT id, origin_id, origin_name, origin_scenario, clique_path, cliquetree_path, graph_path, nb_added_edge_dec FROM decompositions WHERE nb_vertex >= $min_nv AND nb_vertex <= $max_nv AND extension_alg != 'merge'"
+    query = "SELECT id, origin_id, origin_name, origin_scenario, clique_path, cliquetree_path, graph_path, nb_added_edge_dec FROM decompositions WHERE nb_vertex >= $min_nv AND nb_vertex <= $max_nv AND extension_alg NOT LIKE 'merge%' AND extension_alg NOT LIKE 'combine%' AND extension_alg NOT LIKE 'interpolation%'"
     if !isnothing(subset)
         query *= " AND id IN ($(join(subset, ',')))"
     end
