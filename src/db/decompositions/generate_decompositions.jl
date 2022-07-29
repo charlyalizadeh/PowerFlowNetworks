@@ -8,6 +8,7 @@ function generate_decomposition!(db::SQLite.DB, id::Int, name::AbstractString, s
 
     # Preprocessing
     option = deepcopy(option)
+    nb_edges_to_add = option[:nb_edges_to_add]
     option[:nb_edges_to_add] != 0 && add_edges!(g, pop!(option, :nb_edges_to_add), pop!(option, :how); option...)
 
     # Chordal extension
@@ -21,7 +22,7 @@ function generate_decomposition!(db::SQLite.DB, id::Int, name::AbstractString, s
     merge!(features, get_clique_features(clique))
 
     # Check if the decomposition is the "cholesky decomposition" (i.e. no edges added in preprocessing + extension algorithm = cholesky)
-    features["is_cholesky"] = (options[:nb_edges_to_add] == 0 && extension_alg == "cholesky") ? 1 : 0
+    features["is_cholesky"] = (nb_edges_to_add == 0 && extension_alg == "cholesky") ? 1 : 0
 
     # Save cliques and cliquetree
     uuid = uuid1(rng)

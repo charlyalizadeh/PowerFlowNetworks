@@ -1,4 +1,4 @@
-function solve_decomposition!(db::SQLite.DB, id, origin_name, origin_scenario, clique_path, cliquetree_path, mat_path, ctr_path)
+function solve_decomposition!(db::SQLite.DB, id, origin_name, origin_scenario, clique_path, cliquetree_path, is_cholesky, mat_path, ctr_path)
     println("Solving ($origin_name, $origin_scenario, $id)")
     cliques = read_clique(clique_path)
     cliquetree = read_cliquetree(cliquetree_path)
@@ -16,20 +16,24 @@ function solve_decomposition!(db::SQLite.DB, id, origin_name, origin_scenario, c
     WHERE id = $id
     """
     execute_query(db, query)
+    if is_cholesky == 1
+        query = "UPDATE instances SET cholesky_solving_time=$solving_time WHERE name='$origin_name' AND scenario=$origin_scenario"
+        execute_query(db, query)
+    end
 end
 
-function solve_decomposition_dfrow!(db::SQLite.DB, id, origin_id, origin_name, origin_scenario, clique_path, cliquetree_path, mat_paths, ctr_paths)
+function solve_decomposition_dfrow!(db::SQLite.DB, id, origin_id, origin_name, origin_scenario, clique_path, cliquetree_path, is_cholesky, mat_paths, ctr_paths)
     if !haskey(mat_paths, origin_id) || !haskey(ctr_paths, origin_id) || ismissing(ctr_paths[origin_id]) || ismissing(mat_paths[origin_id])
         println("No matctr files registered in the database for ($origin_name, $origin_scenario).")
     else
-        solve_decomposition!(db, id, origin_name, origin_scenario, clique_path, cliquetree_path, mat_paths[origin_id], ctr_paths[origin_id])
+        solve_decomposition!(db, id, origin_name, origin_scenario, clique_path, cliquetree_path, is_cholesky, mat_paths[origin_id], ctr_paths[origin_id])
     end
 end
 
 function solve_decompositions!(db::SQLite.DB; subset=nothing, recompute=false, cholesky=false, kwargs...)
     println("Solving decompositions")
     println("subset\n$subset\nend subset")
-    query = "SELECT id, origin_id, origin_name, origin_scenario, clique_path, cliquetree_path FROM decompositions"
+    query = "SELECT id, origin_id, origin_name, origin_scenario, clique_path, cliquetree_path, is_cholesky FROM decompositions"
     if !recompute
         query *= " WHERE solving_time IS NULL"
     end
@@ -54,6 +58,6 @@ function solve_decompositions!(db::SQLite.DB; subset=nothing, recompute=false, c
     mat_paths = Dict(Pair.(matctr_paths[!, :id], matctr_paths[!, :mat_path]))
     ctr_paths = Dict(Pair.(matctr_paths[!, :id], matctr_paths[!, :ctr_path]))
     solve_decomposition_func!(row) = solve_decomposition_dfrow!(db, row[:id], row[:origin_id], row[:origin_name], row[:origin_scenario],
-                                                                row[:clique_path], row[:cliquetree_path], mat_paths, ctr_paths)
-    solve_decomposition_func!.(eachrow(results[!, [:id, :origin_id, :origin_name, :origin_scenario, :clique_path, :cliquetree_path]]))
+                                                                row[:clique_path], row[:cliquetree_path], row[:is_cholesky], mat_paths, ctr_paths)
+    solve_decomposition_func!.(eachrow(results[!, [:id, :origin_id, :origin_name, :origin_scenario, :clique_path, :cliquetree_path, :is_cholesky]]))
 end
