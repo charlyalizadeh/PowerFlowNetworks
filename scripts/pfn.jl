@@ -22,7 +22,8 @@ single_process_functions = Dict(
             "solve" => solve_decompositions!,
             "delete_duplicates" => delete_duplicates!,
             "export_to_gnndata" => export_db_to_gnndata,
-            "check_is_cholesky" => check_is_cholesky_decompositions!
+            "check_is_cholesky" => check_is_cholesky_decompositions!,
+            "set_treshold_solving_time" => set_treshold_solving_time_decompositions!
         ),
         "db" => Dict(
             "check_sanity" => check_sanity,
@@ -54,6 +55,7 @@ args_to_keep = Dict(
             "delete_duplicates" => [],
             "export_to_gnndata" => ["out"],
             "check_is_cholesky" => [],
+            "set_treshold_solving_time" => ["treshold"]
         ),
         "db" => Dict(
             "check_sanity" => ["min_nv", "max_nv", "table", "check"],
